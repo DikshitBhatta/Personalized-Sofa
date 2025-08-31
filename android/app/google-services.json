@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "557793047145",
+    "project_id": "personalized-sofa",
+    "storage_bucket": "personalized-sofa.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:557793047145:android:068b3c50a9e9412887e8f8",
+        "android_client_info": {
+          "package_name": "com.yumminshin.personalizedsofa"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDhLuxtP_eeSoYTabazMyq3nCOILzw5rts"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -12,7 +12,10 @@ dependencies:
   flutter:
     sdk: flutter
   get: ^4.6.6
-  supabase_flutter: ^2.3.2
+  firebase_core: ^2.30.0
+  firebase_auth: ^4.19.0
+  cloud_firestore: ^4.17.0
+  firebase_storage: ^11.7.0
   flutter_svg: ^2.0.9
   cached_network_image: ^3.3.1
   lottie: ^3.0.0

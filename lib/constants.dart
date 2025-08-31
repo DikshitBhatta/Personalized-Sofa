@@ -19,7 +19,6 @@ const kSeaGreen = Color(0xFF2AA952);
 const kCrayolaGreen = Color(0xFF27AE60);
 const kFireOpal = Color(0xFFEB5757);
 
-const String supabaseUrl = "https://wzicmnwevvqgzttnmvou.supabase.co";
 const kNunitoSans10Grey =
     TextStyle(fontFamily: "NunitoSans", fontSize: 10, color: kGrey);
 const kNunitoSans12Grey =

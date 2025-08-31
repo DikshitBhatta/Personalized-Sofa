@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:timberr/models/product.dart';
 
 class CartItem extends Product {
-  int cartId;
+  String cartId;
   int quantity;
   late Color color;
   CartItem(
