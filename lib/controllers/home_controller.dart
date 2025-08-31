@@ -1,9 +1,9 @@
 import 'package:get/get.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:timberr/models/product.dart';
 
 class HomeController extends GetxController {
-  final _supabaseInstance = Supabase.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   var selectedCategory = 0.obs;
   var productsList = <Product>[].obs;
 
@@ -14,15 +14,13 @@ class HomeController extends GetxController {
   }
 
   Future<void> getProducts(int categoryId) async {
-    final response = (categoryId == 0)
-        ? await _supabaseInstance.client.from('Products').select()
-        : await _supabaseInstance.client
-            .from('Products')
-            .select()
-            .eq('categoryId', categoryId);
-    List responseList = response;
-    productsList.value = responseList
-        .map((productResponse) => Product.fromJson(productResponse))
+    Query query = _firestore.collection('Products');
+    if (categoryId != 0) {
+      query = query.where('categoryId', isEqualTo: categoryId);
+    }
+    final snapshot = await query.get();
+    productsList.value = snapshot.docs
+        .map((doc) => Product.fromJson(doc.data() as Map<String, dynamic>))
         .toList();
   }
 }

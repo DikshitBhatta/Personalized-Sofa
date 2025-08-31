@@ -69,14 +69,14 @@ class PaymentMethodsScreen extends StatelessWidget {
                   PaymentCardView(
                     cardHolderName: _cardDetailsController.cardDetailList
                         .elementAt(index)
-                        .name,
+                        .cardHolderName,
                     lastFourDigits: _cardDetailsController.cardDetailList
                         .elementAt(index)
                         .cardNumber
                         .toString()
                         .substring(12),
                     expiryDateString:
-                        "${_cardDetailsController.cardDetailList.elementAt(index).month}/${_cardDetailsController.cardDetailList.elementAt(index).year}",
+                        _cardDetailsController.cardDetailList.elementAt(index).expiryDate,
                     isMasterCard: index % 2 == 0,
                     isSelected:
                         _cardDetailsController.selectedIndex.value == index,

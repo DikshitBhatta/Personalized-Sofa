@@ -1,31 +1,30 @@
 import 'package:get/get.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:timberr/models/product.dart';
 
 class FavoritesController extends GetxController {
   var favoritesList = <Product>[].obs;
-  final _supabaseClient = Supabase.instance.client;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Future<void> fetchFavorites() async {
-    final response = await _supabaseClient
-        .from("Users")
-        .select()
-        .eq("Uid", _supabaseClient.auth.currentUser!.id);
-    List responseList = response[0]['favoritesList'];
-    for (int i = 0; i < responseList.length; i++) {
-      final productResponse = await _supabaseClient
-          .from('Products')
-          .select()
-          .eq("product_id", responseList[i]);
-      favoritesList.add(Product.fromJson(productResponse[0]));
+    final doc = await _firestore.collection("Users").doc(_auth.currentUser!.uid).get();
+    if (doc.exists) {
+      List favoritesIds = doc.data()!['favoritesList'] ?? [];
+      for (String productId in favoritesIds) {
+        final productDoc = await _firestore.collection('Products').doc(productId).get();
+        if (productDoc.exists) {
+          favoritesList.add(Product.fromJson(productDoc.data()!));
+        }
+      }
     }
   }
 
   Future<void> updateDatabase() async {
-    await _supabaseClient.from('Users').update({
-      'favoritesList':
-          favoritesList.map((favoriteItem) => favoriteItem.productId).toList()
-    }).eq("Uid", _supabaseClient.auth.currentUser!.id);
+    await _firestore.collection('Users').doc(_auth.currentUser!.uid).update({
+      'favoritesList': favoritesList.map((favoriteItem) => favoriteItem.productId).toList()
+    });
   }
 
   Future<void> addProduct(Product product) async {

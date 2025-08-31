@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:timberr/controllers/card_details_controller.dart';
 import 'package:timberr/models/card_detail.dart';
 
@@ -8,34 +9,35 @@ class AddPaymentController extends GetxController {
   var name = "".obs;
   var dateString = "".obs;
   var lastFourDigits = "".obs;
-  final _supabaseClient = Supabase.instance.client;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final CardDetailsController _cardDetailsController = Get.find();
 
   Future<void> addCardDetail() async {
-    final insertData = await _supabaseClient.from("Card_Details").insert({
+    final docRef = _firestore.collection("Card_Details").doc();
+    await docRef.set({
+      "id": docRef.id,
       "cardholder_name": name.value,
       "card_number": cardNumber,
       "month": month,
       "year": year,
-      "user_id": _supabaseClient.auth.currentUser!.id
-    }).select();
+      "user_id": _auth.currentUser!.uid
+    });
+
     if (_cardDetailsController.cardDetailList.isEmpty) {
       _cardDetailsController.selectedIndex.value = 0;
-      //set default user Card Id in the database
-      await _supabaseClient
-          .from("Users")
-          .update({'default_card_detail_id': insertData[0]['id']}).eq(
-        "Uid",
-        _supabaseClient.auth.currentUser!.id,
-      );
+      await _firestore.collection("Users").doc(_auth.currentUser!.uid).update({
+        'default_card_detail_id': docRef.id
+      });
     }
+
     _cardDetailsController.cardDetailList.add(
       CardDetail(
-        id: insertData[0]['id'],
-        name: name.value,
-        cardNumber: cardNumber,
-        month: month,
-        year: year,
+        id: docRef.id,
+        cardHolderName: name.value,
+        cardNumber: cardNumber.toString(),
+        expiryDate: '$month/$year',
+        cvvCode: cvv.toString(),
       ),
     );
     Get.back();

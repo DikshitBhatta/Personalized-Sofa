@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:timberr/models/cart_item.dart';
 import 'package:timberr/models/product.dart';
 import 'package:timberr/screens/cart/cart_screen.dart';
@@ -9,27 +10,30 @@ class CartController extends GetxController {
   List cartIdList = [];
   var cartList = <CartItem>{}.obs;
   var total = 0.obs;
-  final _supabaseClient = Supabase.instance.client;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Future<void> fetchCartItems() async {
-    final response = await _supabaseClient
-        .from('Users')
-        .select()
-        .eq("Uid", _supabaseClient.auth.currentUser!.id);
-    cartIdList = response[0]['cartList'];
-    for (int i = 0; i < cartIdList.length; i++) {
-      final cartResponse = await _supabaseClient
-          .from('Cart_Items')
-          .select()
-          .eq("cart_id", cartIdList[i]);
-      final productResponse = await _supabaseClient
-          .from('Products')
-          .select()
-          .eq("product_id", cartResponse[0]['product_id']);
-      cartList.add(CartItem(cartIdList[i], cartResponse[0]['quantity'],
-          cartResponse[0]['color'], productResponse[0]));
-      total.value = total.value +
-          (cartList.elementAt(i).quantity * cartList.elementAt(i).price);
+    final doc = await _firestore.collection('Users').doc(_auth.currentUser!.uid).get();
+    if (doc.exists) {
+      cartIdList = doc.data()!['cartList'] ?? [];
+      for (int i = 0; i < cartIdList.length; i++) {
+        final cartDoc = await _firestore.collection('Cart_Items').doc(cartIdList[i]).get();
+        if (cartDoc.exists) {
+          final cartData = cartDoc.data()!;
+          final productDoc = await _firestore.collection('Products').doc(cartData['product_id']).get();
+          if (productDoc.exists) {
+            final product = Product.fromJson(productDoc.data()!);
+            cartList.add(CartItem(
+              cartData['cart_id'],
+              cartData['quantity'],
+              cartData['color'],
+              product.toJson(),
+            ));
+            total.value = total.value + ((cartData['quantity'] as int) * product.price).toInt();
+          }
+        }
+      }
     }
   }
 
@@ -51,33 +55,32 @@ class CartController extends GetxController {
       cartList.elementAt(index).addQuantity(quantity);
       total.value = total.value + (quantity * cartList.elementAt(index).price);
       //update quantity in database
-      await _supabaseClient
-          .from('Cart_Items')
-          .update({'quantity': cartList.elementAt(index).quantity}).eq(
-              "cart_id", cartList.elementAt(index).cartId);
+      await _firestore
+          .collection('Cart_Items')
+          .doc(cartList.elementAt(index).cartId.toString())
+          .update({'quantity': cartList.elementAt(index).quantity});
     } else {
       //product not there in cart
       //add item to cart_items database
-      final insertData = await _supabaseClient.from("Cart_Items").insert([
-        {
-          'product_id': product.productId,
-          'quantity': quantity,
-          'color': colorToString(color),
-        }
-      ]).select();
+      final docRef = _firestore.collection("Cart_Items").doc();
+      await docRef.set({
+        'product_id': product.productId,
+        'quantity': quantity,
+        'color': colorToString(color),
+        'cart_id': docRef.id,
+      });
       cartList.add(
         CartItem(
-          insertData[0]['cart_id'],
+          docRef.id,
           quantity,
-          insertData[0]['color'],
+          colorToString(color),
           product.toJson(),
         ),
       );
       total.value = total.value + (quantity * product.price);
       //set cart_id in user cartlist
-      cartIdList.add(insertData[0]['cart_id']);
-      await _supabaseClient.from('Users').update({'cartList': cartIdList}).eq(
-          "Uid", _supabaseClient.auth.currentUser!.id);
+      cartIdList.add(docRef.id);
+      await _firestore.collection('Users').doc(_auth.currentUser!.uid).update({'cartList': cartIdList});
     }
     if (showSnackbar) {
       Get.snackbar(
@@ -100,22 +103,20 @@ class CartController extends GetxController {
     cartIdList.remove(item.cartId);
     total.value = total.value - (item.quantity * item.price);
     //remove cart_id from user cart list
-    await _supabaseClient.from('Users').update({
+    await _firestore.collection('Users').doc(_auth.currentUser!.uid).update({
       'cartList': cartIdList,
-    }).eq("Uid", _supabaseClient.auth.currentUser!.id);
+    });
     //remove item from cart_items database
-    await _supabaseClient
-        .from('Cart_Items')
-        .delete()
-        .eq("cart_id", item.cartId);
+    await _firestore.collection('Cart_Items').doc(item.cartId.toString()).delete();
   }
 
   Future incrementQuantity(CartItem item) async {
     item.addQuantity(1);
     total.value = total.value + item.price;
-    await _supabaseClient
-        .from('Cart_Items')
-        .update({'quantity': item.quantity}).eq("cart_id", item.cartId);
+    await _firestore
+        .collection('Cart_Items')
+        .doc(item.cartId.toString())
+        .update({'quantity': item.quantity});
     update();
   }
 
@@ -124,9 +125,10 @@ class CartController extends GetxController {
       await removeFromCart(item);
     } else {
       item.removeQuantity(1);
-      await _supabaseClient
-          .from('Cart_Items')
-          .update({'quantity': item.quantity}).eq("cart_id", item.cartId);
+      await _firestore
+          .collection('Cart_Items')
+          .doc(item.cartId.toString())
+          .update({'quantity': item.quantity});
       total.value = total.value - item.price;
       update();
     }
@@ -135,16 +137,13 @@ class CartController extends GetxController {
   Future<void> removeAllFromCart() async {
     cartList.clear();
     //delete each cart entry from the database
-    for (int i = 0; i < cartIdList.length; i++) {
-      await _supabaseClient
-          .from('Cart_Items')
-          .delete()
-          .eq("cart_id", cartIdList.elementAt(i));
+    for (String cartId in cartIdList) {
+      await _firestore.collection('Cart_Items').doc(cartId).delete();
     }
     cartIdList.clear();
     //remove all the elements from the user cart
-    await _supabaseClient.from('Users').update({
+    await _firestore.collection('Users').doc(_auth.currentUser!.uid).update({
       'cartList': [],
-    }).eq("Uid", _supabaseClient.auth.currentUser!.id);
+    });
   }
 }
