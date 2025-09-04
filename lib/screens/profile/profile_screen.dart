@@ -11,7 +11,7 @@ import 'package:timberr/screens/profile/orders_screen.dart';
 import 'package:timberr/screens/profile/payment_methods_screen.dart';
 import 'package:timberr/screens/profile/settings_screen.dart';
 import 'package:timberr/screens/profile/shipping_address_screen.dart';
-import 'package:timberr/widgets/tabbed/bottom_navbar.dart';
+import 'package:timberr/widgets/tabbed/curved_bottom_navbar.dart';
 import 'package:timberr/widgets/tiles/profile_tile.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -69,7 +69,9 @@ class ProfileScreen extends StatelessWidget {
       canPop: false,
       onPopInvoked: (_) => kOnExitConfirmation(),
       child: Scaffold(
+        backgroundColor: Colors.grey.shade50,
         appBar: AppBar(
+          backgroundColor: Colors.grey.shade50,
           leading: IconButton(
             onPressed: () {
               _userController.uploadProfilePicture();
@@ -95,7 +97,7 @@ class ProfileScreen extends StatelessWidget {
             ),
           ],
         ),
-        bottomNavigationBar: const BottomNavBar(selectedPos: 3),
+        bottomNavigationBar: const CurvedBottomNavBar(selectedPos: 3),
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(

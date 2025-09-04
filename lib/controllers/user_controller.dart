@@ -13,7 +13,7 @@ class UserController extends GetxController {
   UserData userData = UserData();
 
   Future<void> fetchUserData() async {
-    final doc = await _firestore.collection("Users").doc(_auth.currentUser!.uid).get();
+    final doc = await _firestore.collection("users").doc(_auth.currentUser!.uid).get();
     if (doc.exists) {
       userData = UserData.fromJson(doc.data()!);
       update();
@@ -42,7 +42,7 @@ class UserController extends GetxController {
     //   final ref = _storage.ref().child('profile-pics/$filePath');
     //   await ref.putFile(File(image.path));
     //   final downloadUrl = await ref.getDownloadURL();
-    //   await _firestore.collection("Users").doc(_auth.currentUser!.uid).update({
+    //   await _firestore.collection("users").doc(_auth.currentUser!.uid).update({
     //     'profile_picture_url': downloadUrl,
     //   });
     //   userData.profilePictureUrl = downloadUrl;
@@ -53,7 +53,7 @@ class UserController extends GetxController {
   Future<void> setSalesNotification(bool val) async {
     userData.salesNotification = val;
     update();
-    await _firestore.collection("Users").doc(_auth.currentUser!.uid).update({
+    await _firestore.collection("users").doc(_auth.currentUser!.uid).update({
       'sales_notification': val,
     });
   }
@@ -61,7 +61,7 @@ class UserController extends GetxController {
   Future<void> setDeliveryStatusNotification(bool val) async {
     userData.deliveryStatusNotification = val;
     update();
-    await _firestore.collection("Users").doc(_auth.currentUser!.uid).update({
+    await _firestore.collection("users").doc(_auth.currentUser!.uid).update({
       'delivery_status_notification': val,
     });
   }
@@ -69,7 +69,7 @@ class UserController extends GetxController {
   Future<void> setNewArrivalsNotification(bool val) async {
     userData.newArrivalsNotification = val;
     update();
-    await _firestore.collection("Users").doc(_auth.currentUser!.uid).update({
+    await _firestore.collection("users").doc(_auth.currentUser!.uid).update({
       'new_arrivals_notification': val,
     });
   }
@@ -77,8 +77,8 @@ class UserController extends GetxController {
   Future<void> setName(String name) async {
     userData.name = name;
     update();
-    await _firestore.collection("Users").doc(_auth.currentUser!.uid).update({
-      'Name': name,
+    await _firestore.collection("users").doc(_auth.currentUser!.uid).update({
+      'name': name,
     });
     Get.back();
   }

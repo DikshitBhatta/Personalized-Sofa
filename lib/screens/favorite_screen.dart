@@ -6,7 +6,7 @@ import 'package:timberr/controllers/cart_controller.dart';
 import 'package:timberr/controllers/favorites_controller.dart';
 import 'package:timberr/screens/cart/cart_screen.dart';
 import 'package:timberr/screens/search_delegate/favorite_search_delegate.dart';
-import 'package:timberr/widgets/tabbed/bottom_navbar.dart';
+import 'package:timberr/widgets/tabbed/curved_bottom_navbar.dart';
 import 'package:timberr/widgets/tiles/favorite_list_tile.dart';
 
 class FavoriteScreen extends StatelessWidget {
@@ -47,7 +47,9 @@ class FavoriteScreen extends StatelessWidget {
       canPop: false,
       onPopInvoked: (_) => kOnExitConfirmation(),
       child: Scaffold(
+        backgroundColor: Colors.grey.shade50,
         appBar: AppBar(
+          backgroundColor: Colors.grey.shade50,
           leading: IconButton(
             onPressed: () {
               showSearch(context: context, delegate: FavoriteSearchDelegate());
@@ -66,7 +68,7 @@ class FavoriteScreen extends StatelessWidget {
             )
           ],
         ),
-        bottomNavigationBar: const BottomNavBar(selectedPos: 1),
+        bottomNavigationBar: const CurvedBottomNavBar(selectedPos: 1),
         body: Obx(() {
           if (_favoritesController.favoritesList.isEmpty) {
             return const Center(

@@ -14,7 +14,7 @@ class AddPaymentController extends GetxController {
   final CardDetailsController _cardDetailsController = Get.find();
 
   Future<void> addCardDetail() async {
-    final docRef = _firestore.collection("Card_Details").doc();
+    final docRef = _firestore.collection("card_details").doc();
     await docRef.set({
       "id": docRef.id,
       "cardholder_name": name.value,
@@ -26,7 +26,7 @@ class AddPaymentController extends GetxController {
 
     if (_cardDetailsController.cardDetailList.isEmpty) {
       _cardDetailsController.selectedIndex.value = 0;
-      await _firestore.collection("Users").doc(_auth.currentUser!.uid).update({
+      await _firestore.collection("users").doc(_auth.currentUser!.uid).update({
         'default_card_detail_id': docRef.id
       });
     }

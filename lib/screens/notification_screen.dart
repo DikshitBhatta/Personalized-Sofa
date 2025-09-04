@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:timberr/constants.dart';
-import 'package:timberr/widgets/tabbed/bottom_navbar.dart';
+import 'package:timberr/widgets/tabbed/curved_bottom_navbar.dart';
 import 'package:timberr/widgets/tiles/notification_tile.dart';
 
 class NotificationScreen extends StatelessWidget {
@@ -12,14 +12,16 @@ class NotificationScreen extends StatelessWidget {
       canPop: false,
       onPopInvoked: (_) => kOnExitConfirmation(),
       child: Scaffold(
+        backgroundColor: Colors.grey.shade50,
         appBar: AppBar(
+          backgroundColor: Colors.grey.shade50,
           title: const Text(
             "NOTIFICATION",
             style: kMerriweatherBold16,
           ),
           centerTitle: true,
         ),
-        bottomNavigationBar: const BottomNavBar(selectedPos: 2),
+        bottomNavigationBar: const CurvedBottomNavBar(selectedPos: 2),
         body: ListView.separated(
           itemCount: 10,
           physics: const BouncingScrollPhysics(),

@@ -14,14 +14,14 @@ class CartController extends GetxController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Future<void> fetchCartItems() async {
-    final doc = await _firestore.collection('Users').doc(_auth.currentUser!.uid).get();
+    final doc = await _firestore.collection('users').doc(_auth.currentUser!.uid).get();
     if (doc.exists) {
       cartIdList = doc.data()!['cartList'] ?? [];
       for (int i = 0; i < cartIdList.length; i++) {
-        final cartDoc = await _firestore.collection('Cart_Items').doc(cartIdList[i]).get();
+        final cartDoc = await _firestore.collection('cart_items').doc(cartIdList[i]).get();
         if (cartDoc.exists) {
           final cartData = cartDoc.data()!;
-          final productDoc = await _firestore.collection('Products').doc(cartData['product_id']).get();
+          final productDoc = await _firestore.collection('products').doc(cartData['product_id']).get();
           if (productDoc.exists) {
             final product = Product.fromJson(productDoc.data()!);
             cartList.add(CartItem(
@@ -56,13 +56,13 @@ class CartController extends GetxController {
       total.value = total.value + (quantity * cartList.elementAt(index).price);
       //update quantity in database
       await _firestore
-          .collection('Cart_Items')
+          .collection('cart_items')
           .doc(cartList.elementAt(index).cartId.toString())
           .update({'quantity': cartList.elementAt(index).quantity});
     } else {
       //product not there in cart
       //add item to cart_items database
-      final docRef = _firestore.collection("Cart_Items").doc();
+      final docRef = _firestore.collection("cart_items").doc();
       await docRef.set({
         'product_id': product.productId,
         'quantity': quantity,
@@ -107,14 +107,14 @@ class CartController extends GetxController {
       'cartList': cartIdList,
     });
     //remove item from cart_items database
-    await _firestore.collection('Cart_Items').doc(item.cartId.toString()).delete();
+    await _firestore.collection('cart_items').doc(item.cartId.toString()).delete();
   }
 
   Future incrementQuantity(CartItem item) async {
     item.addQuantity(1);
     total.value = total.value + item.price;
     await _firestore
-        .collection('Cart_Items')
+        .collection('cart_items')
         .doc(item.cartId.toString())
         .update({'quantity': item.quantity});
     update();
@@ -126,7 +126,7 @@ class CartController extends GetxController {
     } else {
       item.removeQuantity(1);
       await _firestore
-          .collection('Cart_Items')
+          .collection('cart_items')
           .doc(item.cartId.toString())
           .update({'quantity': item.quantity});
       total.value = total.value - item.price;
@@ -138,7 +138,7 @@ class CartController extends GetxController {
     cartList.clear();
     //delete each cart entry from the database
     for (String cartId in cartIdList) {
-      await _firestore.collection('Cart_Items').doc(cartId).delete();
+      await _firestore.collection('cart_items').doc(cartId).delete();
     }
     cartIdList.clear();
     //remove all the elements from the user cart
