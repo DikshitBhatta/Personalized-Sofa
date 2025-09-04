@@ -6,7 +6,6 @@ import 'package:timberr/controllers/cart_controller.dart';
 import 'package:timberr/controllers/favorites_controller.dart';
 import 'package:timberr/screens/cart/cart_screen.dart';
 import 'package:timberr/screens/search_delegate/favorite_search_delegate.dart';
-import 'package:timberr/widgets/tabbed/curved_bottom_navbar.dart';
 import 'package:timberr/widgets/tiles/favorite_list_tile.dart';
 
 class FavoriteScreen extends StatelessWidget {
@@ -68,7 +67,6 @@ class FavoriteScreen extends StatelessWidget {
             )
           ],
         ),
-        bottomNavigationBar: const CurvedBottomNavBar(selectedPos: 1),
         body: Obx(() {
           if (_favoritesController.favoritesList.isEmpty) {
             return const Center(

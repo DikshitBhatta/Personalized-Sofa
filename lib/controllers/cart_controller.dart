@@ -21,7 +21,7 @@ class CartController extends GetxController {
         final cartDoc = await _firestore.collection('cart_items').doc(cartIdList[i]).get();
         if (cartDoc.exists) {
           final cartData = cartDoc.data()!;
-          final productDoc = await _firestore.collection('products').doc(cartData['product_id']).get();
+          final productDoc = await _firestore.collection('Products').doc(cartData['product_id']).get();
           if (productDoc.exists) {
             final product = Product.fromJson(productDoc.data()!);
             cartList.add(CartItem(
@@ -80,7 +80,7 @@ class CartController extends GetxController {
       total.value = total.value + (quantity * product.price);
       //set cart_id in user cartlist
       cartIdList.add(docRef.id);
-      await _firestore.collection('Users').doc(_auth.currentUser!.uid).update({'cartList': cartIdList});
+      await _firestore.collection('users').doc(_auth.currentUser!.uid).update({'cartList': cartIdList});
     }
     if (showSnackbar) {
       Get.snackbar(
@@ -103,7 +103,7 @@ class CartController extends GetxController {
     cartIdList.remove(item.cartId);
     total.value = total.value - (item.quantity * item.price);
     //remove cart_id from user cart list
-    await _firestore.collection('Users').doc(_auth.currentUser!.uid).update({
+    await _firestore.collection('users').doc(_auth.currentUser!.uid).update({
       'cartList': cartIdList,
     });
     //remove item from cart_items database
@@ -142,7 +142,7 @@ class CartController extends GetxController {
     }
     cartIdList.clear();
     //remove all the elements from the user cart
-    await _firestore.collection('Users').doc(_auth.currentUser!.uid).update({
+    await _firestore.collection('users').doc(_auth.currentUser!.uid).update({
       'cartList': [],
     });
   }

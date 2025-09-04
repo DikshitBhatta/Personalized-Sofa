@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:get/get.dart';
+import 'package:timberr/models/personalization_data.dart';
+import 'package:timberr/screens/personalization/personalization_launch.dart';
 
 class ImageSliderWidget extends StatefulWidget {
   const ImageSliderWidget({super.key});
@@ -19,21 +22,23 @@ class _ImageSliderWidgetState extends State<ImageSliderWidget> {
       imagePath: 'assets/slider/sofa.jpg',
       title: 'Luxury Sofas',
       subtitle: 'Comfort meets style',
-      buttonText: 'Shop Now',
+      buttonText: 'Customize',
       gradientColors: [
         Color(0xFF6366F1),
         Color(0xFF8B5CF6),
       ],
+      audienceType: AudienceType.adult,
     ),
     SliderItem(
       imagePath: 'assets/slider/kid_section.jpg',
-      title: 'Kids Collection',
+      title: 'Kids Comfort',
       subtitle: 'Fun & colorful designs',
       buttonText: 'Explore',
       gradientColors: [
         Color(0xFFEC4899),
         Color(0xFFEF4444),
       ],
+      audienceType: AudienceType.child,
     ),
     SliderItem(
       imagePath: 'assets/slider/pet_section.jpg',
@@ -44,6 +49,7 @@ class _ImageSliderWidgetState extends State<ImageSliderWidget> {
         Color(0xFF10B981),
         Color(0xFF059669),
       ],
+      audienceType: AudienceType.pet,
     ),
   ];
 
@@ -231,29 +237,35 @@ class _ImageSliderWidgetState extends State<ImageSliderWidget> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 10,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(25),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          spreadRadius: 0,
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
+                  GestureDetector(
+                    onTap: () {
+                      // Navigate to personalization with pre-selected audience
+                      Get.to(() => PersonalizationLaunchScreen(preSelectedAudience: item.audienceType));
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(25),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            spreadRadius: 0,
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        item.buttonText,
+                        style: TextStyle(
+                          color: item.gradientColors[0],
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
                         ),
-                      ],
-                    ),
-                    child: Text(
-                      item.buttonText,
-                      style: TextStyle(
-                        color: item.gradientColors[0],
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
@@ -273,6 +285,7 @@ class SliderItem {
   final String subtitle;
   final String buttonText;
   final List<Color> gradientColors;
+  final AudienceType audienceType;
 
   SliderItem({
     required this.imagePath,
@@ -280,5 +293,6 @@ class SliderItem {
     required this.subtitle,
     required this.buttonText,
     required this.gradientColors,
+    required this.audienceType,
   });
 }

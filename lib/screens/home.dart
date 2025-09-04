@@ -70,9 +70,9 @@ class Home extends StatelessWidget {
                   ),
                 )
               ],
-              bottom: PreferredSize(
-                  preferredSize: const Size(double.infinity, 65),
-                  child: CategoryTabBar()),
+              // bottom: PreferredSize(
+              //     preferredSize: const Size(double.infinity, 65),
+              //     child: CategoryTabBar()),
               floating: true,
               snap: true,
             ),
@@ -102,7 +102,7 @@ class Home extends StatelessWidget {
             SliverToBoxAdapter(
               child: RenovateInteriorSection(),
             ),
-            
+              
             // Image Slider Section
             SliverToBoxAdapter(
               key: const ValueKey('image_slider_section'),

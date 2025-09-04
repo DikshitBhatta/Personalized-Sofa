@@ -6,6 +6,7 @@ class HomeController extends GetxController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   var selectedCategory = 0.obs;
   var productsList = <Product>[].obs;
+  var isLoading = false.obs;
 
   Future<void> changeCategory(int categoryId) async {
     if (selectedCategory.value == categoryId) return;
@@ -14,13 +15,25 @@ class HomeController extends GetxController {
   }
 
   Future<void> getProducts(int categoryId) async {
-    Query query = _firestore.collection('Products');
-    if (categoryId != 0) {
-      query = query.where('categoryId', isEqualTo: categoryId);
+    try {
+      isLoading.value = true;
+      Query query = _firestore.collection('Products');
+      if (categoryId != 0) {
+        query = query.where('categoryId', isEqualTo: categoryId);
+      }
+      final snapshot = await query.get();
+      productsList.value = snapshot.docs
+          .map((doc) => Product.fromJson(doc.data() as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      print('Error fetching products: $e');
+      // Keep existing products if fetch fails
+      if (productsList.isEmpty) {
+        productsList.value = [];
+      }
+      rethrow; // Re-throw to let caller handle if needed
+    } finally {
+      isLoading.value = false;
     }
-    final snapshot = await query.get();
-    productsList.value = snapshot.docs
-        .map((doc) => Product.fromJson(doc.data() as Map<String, dynamic>))
-        .toList();
   }
 }
