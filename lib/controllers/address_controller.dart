@@ -14,13 +14,13 @@ class AddressController extends GetxController {
   int pincode = 0;
 
   Future<void> fetchAddresses() async {
-    final snapshot = await _firestore.collection("Addresses").where('user_id', isEqualTo: _auth.currentUser!.uid).get();
+    final snapshot = await _firestore.collection("addresses").where('user_id', isEqualTo: _auth.currentUser!.uid).get();
     addressList = snapshot.docs.map((doc) => Address.fromJson(doc.data())).toList();
     update();
   }
 
   Future<void> getDefaultShippingAddress() async {
-    final doc = await _firestore.collection("Users").doc(_auth.currentUser!.uid).get();
+    final doc = await _firestore.collection("users").doc(_auth.currentUser!.uid).get();
     if (doc.exists) {
       String? defaultShippingId = doc.data()!['default_shipping_id'];
       await fetchAddresses();
@@ -42,13 +42,13 @@ class AddressController extends GetxController {
     }
     selectedIndex = index;
     update();
-    await _firestore.collection("Users").doc(_auth.currentUser!.uid).update({
+    await _firestore.collection("users").doc(_auth.currentUser!.uid).update({
       'default_shipping_id': addressList.elementAt(index).id
     });
   }
 
   Future<void> uploadAddress() async {
-    final docRef = _firestore.collection("Addresses").doc();
+    final docRef = _firestore.collection("addresses").doc();
     await docRef.set({
       'id': docRef.id,
       'full_name': name,
@@ -62,7 +62,7 @@ class AddressController extends GetxController {
 
     if (addressList.isEmpty) {
       selectedIndex = 0;
-      await _firestore.collection("Users").doc(_auth.currentUser!.uid).update({
+      await _firestore.collection("users").doc(_auth.currentUser!.uid).update({
         'default_shipping_id': docRef.id
       });
     }
@@ -91,7 +91,7 @@ class AddressController extends GetxController {
       district: district,
     );
 
-    await _firestore.collection("Addresses").doc(addressId).update(newAddress.toJson());
+    await _firestore.collection("addresses").doc(addressId).update(newAddress.toJson());
     addressList[index] = newAddress;
     update();
     Get.back();
@@ -108,7 +108,7 @@ class AddressController extends GetxController {
       }
     }
 
-    await _firestore.collection("Addresses").doc(addressList.elementAt(index).id).delete();
+    await _firestore.collection("addresses").doc(addressList.elementAt(index).id).delete();
     addressList.removeAt(index);
     update();
   }

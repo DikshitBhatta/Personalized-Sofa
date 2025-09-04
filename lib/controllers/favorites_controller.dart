@@ -9,7 +9,7 @@ class FavoritesController extends GetxController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Future<void> fetchFavorites() async {
-    final doc = await _firestore.collection("Users").doc(_auth.currentUser!.uid).get();
+    final doc = await _firestore.collection("users").doc(_auth.currentUser!.uid).get();
     if (doc.exists) {
       List favoritesIds = doc.data()!['favoritesList'] ?? [];
       for (String productId in favoritesIds) {

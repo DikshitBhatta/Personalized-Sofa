@@ -21,12 +21,12 @@ class CardDetailsController extends GetxController {
   }
 
   Future<void> fetchCardDetails() async {
-    final snapshot = await _firestore.collection("Card_Details").where('user_id', isEqualTo: _auth.currentUser!.uid).get();
+    final snapshot = await _firestore.collection("card_details").where('user_id', isEqualTo: _auth.currentUser!.uid).get();
     cardDetailList.value = snapshot.docs.map((doc) => CardDetail.fromJson(doc.data())).toList();
   }
 
   Future<void> getDefaultCardDetail() async {
-    final doc = await _firestore.collection("Users").doc(_auth.currentUser!.uid).get();
+    final doc = await _firestore.collection("users").doc(_auth.currentUser!.uid).get();
     if (doc.exists) {
       String? defaultCardId = doc.data()!['default_card_detail_id'];
       await fetchCardDetails();
@@ -46,7 +46,7 @@ class CardDetailsController extends GetxController {
       return;
     }
     selectedIndex.value = index;
-    await _firestore.collection("Users").doc(_auth.currentUser!.uid).update({
+    await _firestore.collection("users").doc(_auth.currentUser!.uid).update({
       'default_card_detail_id': cardDetailList.elementAt(index).id
     });
   }

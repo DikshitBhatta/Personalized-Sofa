@@ -5,9 +5,11 @@ import 'package:timberr/constants.dart';
 import 'package:timberr/controllers/home_controller.dart';
 import 'package:timberr/screens/cart/cart_screen.dart';
 import 'package:timberr/screens/search_delegate/product_search_delegate.dart';
-import 'package:timberr/widgets/tabbed/bottom_navbar.dart';
 import 'package:timberr/widgets/tabbed/category_tab_bar.dart';
+import 'package:timberr/widgets/tabbed/curved_bottom_navbar.dart';
 import 'package:timberr/widgets/tiles/product_grid_tile.dart';
+import 'package:timberr/widgets/sections/renovate_interior_section.dart';
+import 'package:timberr/widgets/sections/image_slider_widget.dart';
 
 class Home extends StatelessWidget {
   Home({super.key});
@@ -25,7 +27,8 @@ class Home extends StatelessWidget {
       canPop: false,
       onPopInvoked: (_) => kOnExitConfirmation(),
       child: Scaffold(
-        bottomNavigationBar: const BottomNavBar(
+        backgroundColor: Colors.grey.shade50,
+        bottomNavigationBar: const CurvedBottomNavBar(
           selectedPos: 0,
         ),
         body: CustomScrollView(
@@ -93,6 +96,22 @@ class Home extends StatelessWidget {
                   ),
                 );
               }),
+            ),
+            
+            // Renovate Interior Section
+            SliverToBoxAdapter(
+              child: RenovateInteriorSection(),
+            ),
+            
+            // Image Slider Section
+            SliverToBoxAdapter(
+              key: const ValueKey('image_slider_section'),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: ImageSliderWidget(
+                  key: const ValueKey('home_image_slider'),
+                ),
+              ),
             ),
           ],
         ),
