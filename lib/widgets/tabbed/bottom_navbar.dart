@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:timberr/screens/favorite_screen.dart';
 import 'package:timberr/screens/home.dart';
 import 'package:timberr/screens/notification_screen.dart';
 import 'package:timberr/screens/profile/profile_screen.dart';
+import 'package:timberr/screens/profile/orders_screen.dart';
 
 class BottomNavBar extends StatelessWidget {
   final int selectedPos;
@@ -25,14 +25,14 @@ class BottomNavBar extends StatelessWidget {
             Get.off(() => Home(), transition: Transition.fadeIn);
             break;
           case 1:
-            Get.off(() => FavoriteScreen(), transition: Transition.fadeIn);
+            Get.to(() => const OrdersScreen(), transition: Transition.fadeIn);
             break;
           case 2:
-            Get.off(() => const NotificationScreen(),
+            Get.to(() => const NotificationScreen(),
                 transition: Transition.fadeIn);
             break;
           case 3:
-            Get.off(() => ProfileScreen(), transition: Transition.fadeIn);
+            Get.to(() => ProfileScreen(), transition: Transition.fadeIn);
             break;
         }
       },
@@ -45,12 +45,12 @@ class BottomNavBar extends StatelessWidget {
           activeIcon: SvgPicture.asset("assets/icons/home_selected_icon.svg"),
         ),
         BottomNavigationBarItem(
-          label: "favorite",
+          label: "orders",
           icon: SvgPicture.asset(
-            'assets/icons/favorite_icon.svg',
+            'assets/icons/shopping_bag_icon.svg',
           ),
           activeIcon:
-              SvgPicture.asset('assets/icons/favorite_selected_icon.svg'),
+              SvgPicture.asset('assets/icons/shopping_bag_icon_black.svg'),
         ),
         BottomNavigationBarItem(
           label: "notification",

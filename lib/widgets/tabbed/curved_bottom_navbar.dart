@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:timberr/screens/favorite_screen.dart';
 import 'package:timberr/screens/home.dart';
 import 'package:timberr/screens/notification_screen.dart';
 import 'package:timberr/screens/profile/profile_screen.dart';
-import 'package:timberr/screens/cart/cart_screen.dart';
+import 'package:timberr/screens/profile/orders_screen.dart';
+import 'package:timberr/screens/personalization/personalization_launch.dart';
 
 class CurvedDockItem {
   final dynamic icon; // Can be IconData or String (SVG path)
@@ -330,11 +330,11 @@ class CurvedBottomNavBar extends StatelessWidget {
               active: selectedPos == 0,
             ),
             CurvedDockItem(
-              icon: 'assets/icons/favorite_icon.svg',
-              activeIcon: 'assets/icons/favorite_selected_icon.svg',
+              icon: 'assets/icons/shopping_bag_icon.svg',
+              activeIcon: 'assets/icons/shopping_bag_icon_black.svg',
               onTap: () {
                 if (selectedPos != 1) {
-                  Get.off(() => FavoriteScreen(), transition: Transition.fadeIn);
+                  Get.to(() => const OrdersScreen(), transition: Transition.fadeIn);
                 }
               },
               active: selectedPos == 1,
@@ -346,7 +346,7 @@ class CurvedBottomNavBar extends StatelessWidget {
               activeIcon: 'assets/icons/notification_selected_icon.svg',
               onTap: () {
                 if (selectedPos != 2) {
-                  Get.off(() => const NotificationScreen(), transition: Transition.fadeIn);
+                  Get.to(() => const NotificationScreen(), transition: Transition.fadeIn);
                 }
               },
               active: selectedPos == 2,
@@ -356,7 +356,7 @@ class CurvedBottomNavBar extends StatelessWidget {
               activeIcon: 'assets/icons/person_selected_icon.svg',
               onTap: () {
                 if (selectedPos != 3) {
-                  Get.off(() => ProfileScreen(), transition: Transition.fadeIn);
+                  Get.to(() => ProfileScreen(), transition: Transition.fadeIn);
                 }
               },
               active: selectedPos == 3,
@@ -395,9 +395,9 @@ class CurvedBottomNavBar extends StatelessWidget {
             ),
             child: FloatingActionButton(
               onPressed: () {
-                // Navigate to cart screen
+                // Launch personalization flow
                 Get.to(
-                  () => CartScreen(),
+                  () => const PersonalizationLaunchScreen(),
                   transition: Transition.fade,
                 );
               },

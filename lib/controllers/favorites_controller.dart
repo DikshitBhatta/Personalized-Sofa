@@ -22,7 +22,7 @@ class FavoritesController extends GetxController {
   }
 
   Future<void> updateDatabase() async {
-    await _firestore.collection('Users').doc(_auth.currentUser!.uid).update({
+    await _firestore.collection('users').doc(_auth.currentUser!.uid).update({
       'favoritesList': favoritesList.map((favoriteItem) => favoriteItem.productId).toList()
     });
   }
