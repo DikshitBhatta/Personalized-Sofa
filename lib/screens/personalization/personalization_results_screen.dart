@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:timberr/constants.dart';
 import 'package:timberr/controllers/personalization_controller.dart';
 import 'package:timberr/controllers/home_controller.dart';
 import 'package:timberr/models/product.dart';
+import 'package:timberr/models/personalization_data.dart' as pdata;
 import 'package:timberr/widgets/tiles/product_grid_tile.dart';
 import 'package:timberr/widgets/animation/fade_in_widget.dart';
+import 'package:timberr/widgets/glb_viewer.dart';
 import 'package:timberr/screens/home.dart';
 
 class PersonalizationResultsScreen extends StatefulWidget {
@@ -60,6 +61,111 @@ class _PersonalizationResultsScreenState extends State<PersonalizationResultsScr
       _recommendedProducts = recommended;
       _isLoading = false;
     });
+  }
+
+  Widget _buildPersonalizationSummary() {
+    final personalizationData = _personalizationController.personalizationData;
+    
+    return Column(
+      children: [
+        if (personalizationData.styleMaterial?.materialType != null) ...[
+          Row(
+            children: [
+              const Icon(Icons.texture, size: 20, color: kTinGrey),
+              const SizedBox(width: 12),
+              Text(
+                "Material: ${_getMaterialName(personalizationData.styleMaterial!.materialType!)}",
+                style: kNunitoSans14.copyWith(color: kOffBlack),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+        ],
+        
+        if (personalizationData.personalizationDetails?.colorHex != null) ...[
+          Row(
+            children: [
+              const Icon(Icons.palette, size: 20, color: kTinGrey),
+              const SizedBox(width: 12),
+              Text(
+                "Custom Color Selected",
+                style: kNunitoSans14.copyWith(color: kOffBlack),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                width: 16,
+                height: 16,
+                decoration: BoxDecoration(
+                  color: Color(int.parse(personalizationData.personalizationDetails!.colorHex!.replaceFirst('#', ''), radix: 16) + 0xFF000000),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: kGrey.withOpacity(0.3)),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+        ],
+        
+        if (personalizationData.healthErgonomics?.sittingHabit != null) ...[
+          Row(
+            children: [
+              const Icon(Icons.weekend, size: 20, color: kTinGrey),
+              const SizedBox(width: 12),
+              Text(
+                "Sitting Style: ${_getSittingHabitName(personalizationData.healthErgonomics!.sittingHabit!)}",
+                style: kNunitoSans14.copyWith(color: kOffBlack),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+        ],
+        
+        Row(
+          children: [
+            const Icon(Icons.star, size: 20, color: kTinGrey),
+            const SizedBox(width: 12),
+            Text(
+              "Personalized just for you!",
+              style: kNunitoSans14.copyWith(color: kSeaGreen, fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  String _getMaterialName(pdata.MaterialType material) {
+    switch (material) {
+      case pdata.MaterialType.fullGrain:
+        return "Full Grain Leather";
+      case pdata.MaterialType.semiAniline:
+        return "Semi-Aniline Leather";
+      case pdata.MaterialType.nubuck:
+        return "Nubuck Leather";
+      case pdata.MaterialType.pu:
+        return "PU Leather";
+      case pdata.MaterialType.cotton:
+        return "Cotton Fabric";
+      case pdata.MaterialType.linen:
+        return "Linen Fabric";
+      case pdata.MaterialType.velvet:
+        return "Luxury Velvet";
+      case pdata.MaterialType.alcantara:
+        return "Alcantara";
+      case pdata.MaterialType.ecoFabric:
+        return "Eco-Friendly Fabric";
+    }
+  }
+
+  String _getSittingHabitName(pdata.SittingHabit habit) {
+    switch (habit) {
+      case pdata.SittingHabit.lounge:
+        return "Lounging Style";
+      case pdata.SittingHabit.balanced:
+        return "Balanced Posture";
+      case pdata.SittingHabit.upright:
+        return "Upright Posture";
+    }
   }
 
   @override
@@ -172,20 +278,57 @@ class _PersonalizationResultsScreenState extends State<PersonalizationResultsScr
                     Center(
                       child: Column(
                         children: [
-                          const SizedBox(height: 40),
-                          SvgPicture.asset(
-                            'assets/order_success.svg',
-                            height: 100,
-                            width: 100,
-                          ),
                           const SizedBox(height: 20),
-                          Text(
-                            "No products found",
-                            style: kNunitoSans16.copyWith(color: kGrey),
-                          ),
-                          Text(
-                            "Try browsing our catalog",
-                            style: kNunitoSans14.copyWith(color: kGrey),
+                          // 3D Model Viewer
+                          FadeInWidget(
+                            child: Column(
+                              children: [
+                                Text(
+                                  "Personalized Sofa Preview",
+                                  style: kNunitoSansSemiBold18.copyWith(color: kOffBlack),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  "Based on your preferences",
+                                  style: kNunitoSans14.copyWith(color: kGrey),
+                                ),
+                                const SizedBox(height: 20),
+                                GlbViewer(
+                                  assetPath: 'assets/3dmodel/sofamodel.glb',
+                                  height: 300,
+                                  width: double.infinity,
+                                ),
+                                const SizedBox(height: 20),
+                                Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: kLynxWhite,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: kGrey.withOpacity(0.2)),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.palette_outlined,
+                                            color: kOffBlack,
+                                            size: 20,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            "Your Personalization",
+                                            style: kNunitoSansSemiBold16.copyWith(color: kOffBlack, fontSize: 14),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 12),
+                                      _buildPersonalizationSummary(),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -270,129 +413,5 @@ class _PersonalizationResultsScreenState extends State<PersonalizationResultsScr
               ),
             ),
     );
-  }
-
-  Widget _buildPersonalizationSummary() {
-    final details = _personalizationController.personalizationData.personalizationDetails!;
-    
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: kChristmasSilver),
-      ),
-      child: Column(
-        children: [
-          if (details.colorHex != null) ...[
-            Row(
-              children: [
-                Container(
-                  width: 20,
-                  height: 20,
-                  decoration: BoxDecoration(
-                    color: Color(int.parse(details.colorHex!.substring(1), radix: 16) + 0xFF000000),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: kChristmasSilver),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  "Color: ${details.colorHex!.toUpperCase()}",
-                  style: kNunitoSans14.copyWith(color: kOffBlack),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-          ],
-          
-          if (details.stitchingType != null) ...[
-            Row(
-              children: [
-                const Icon(Icons.architecture, size: 20, color: kTinGrey),
-                const SizedBox(width: 12),
-                Text(
-                  "Stitching: ${_getStitchingName(details.stitchingType!)}",
-                  style: kNunitoSans14.copyWith(color: kOffBlack),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-          ],
-          
-          if (details.legType != null) ...[
-            Row(
-              children: [
-                const Icon(Icons.chair_alt, size: 20, color: kTinGrey),
-                const SizedBox(width: 12),
-                Text(
-                  "Legs: ${_getLegName(details.legType!)}",
-                  style: kNunitoSans14.copyWith(color: kOffBlack),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-          ],
-          
-          if (details.finishType != null)
-            Row(
-              children: [
-                const Icon(Icons.brush, size: 20, color: kTinGrey),
-                const SizedBox(width: 12),
-                Text(
-                  "Finish: ${_getFinishName(details.finishType!)}",
-                  style: kNunitoSans14.copyWith(color: kOffBlack),
-                ),
-              ],
-            ),
-        ],
-      ),
-    );
-  }
-
-  String _getStitchingName(dynamic stitching) {
-    final stitchingStr = stitching.toString().split('.').last;
-    switch (stitchingStr) {
-      case 'double':
-        return "Double Stitching";
-      case 'contrast':
-        return "Contrast Stitching";
-      case 'hand':
-        return "Hand Stitching";
-      default:
-        return stitchingStr;
-    }
-  }
-
-  String _getLegName(dynamic leg) {
-    final legStr = leg.toString().split('.').last;
-    switch (legStr) {
-      case 'walnut':
-        return "Walnut Wood";
-      case 'oak':
-        return "Oak Wood";
-      case 'ash':
-        return "Ash Wood";
-      case 'steel':
-        return "Steel";
-      case 'bronze':
-        return "Bronze";
-      default:
-        return legStr;
-    }
-  }
-
-  String _getFinishName(dynamic finish) {
-    final finishStr = finish.toString().split('.').last;
-    switch (finishStr) {
-      case 'matte':
-        return "Matte Finish";
-      case 'gloss':
-        return "Gloss Finish";
-      case 'oil':
-        return "Oil Finish";
-      default:
-        return finishStr;
-    }
   }
 }
