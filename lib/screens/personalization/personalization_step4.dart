@@ -461,14 +461,14 @@ class _PersonalizationStep4ScreenState extends State<PersonalizationStep4Screen>
               const SizedBox(height: 24),
               
               Text(
-                "Design Complete!",
+                "Your Personalization Design Has Been Reserved!",
                 style: kNunitoSansBold20.copyWith(color: kOffBlack),
               ),
               
               const SizedBox(height: 12),
               
               Text(
-                "Your personalized sofa design has been saved. Our team will review it and get back to you with a quote.",
+                "Our team will review it and get back to you with a quote.",
                 textAlign: TextAlign.center,
                 style: kNunitoSans14.copyWith(color: kGrey),
               ),

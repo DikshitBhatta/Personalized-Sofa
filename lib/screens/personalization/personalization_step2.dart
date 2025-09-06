@@ -17,22 +17,23 @@ class PersonalizationStep2Screen extends StatefulWidget {
 class _PersonalizationStep2ScreenState extends State<PersonalizationStep2Screen> {
   final PersonalizationController _controller = Get.find<PersonalizationController>();
   
-  // Form state variables
-  double _heightCm = 170.0;
-  double _weightKg = 70.0;
-  int _sittingHabitIndex = 1; // Balanced by default
-  bool _hasBackPain = false;
+  // Adult usage style variables
+  int _usagePatternIndex = 0; // Lounging by default
+  int _firmnessPreferenceIndex = 1; // Balanced by default
+  int _sofaCapacityIndex = 1; // Three by default
+  int _seatSupportIndex = 2; // Standard by default
   
-  // Child specific
-  int _ageYears = 8;
-  bool _growthConsideration = true;
+  // Child usage style variables
+  int _childUsageTypeIndex = 0; // Reading & Quiet Time by default
+  int _familyPriorityIndex = 2; // Standard Comfort by default
+  int _numberOfChildren = 1;
+  bool _growthAdaptable = true;
   
-  // Pet specific
-  String _species = "";
-  bool _clawingBehavior = false;
-  bool _allergySensitive = false;
-  
-  final TextEditingController _speciesController = TextEditingController();
+  // Pet usage style variables
+  int _petRelaxLocationIndex = 1; // On the sofa cushions by default
+  int _wearLevelIndex = 1; // Moderate by default
+  int _allergySensitivityIndex = 1; // Medium by default
+  int _petFriendlyFeatureIndex = 2; // Standard durability by default
 
   @override
   void initState() {
@@ -41,56 +42,63 @@ class _PersonalizationStep2ScreenState extends State<PersonalizationStep2Screen>
   }
 
   void _loadExistingData() {
-    final healthData = _controller.personalizationData.healthErgonomics;
-    if (healthData != null) {
-      _heightCm = healthData.heightCm ?? 170.0;
-      _weightKg = healthData.weightKg ?? 70.0;
-      _sittingHabitIndex = healthData.sittingHabit?.index ?? 1;
-      _hasBackPain = healthData.hasBackPain ?? false;
-      _ageYears = healthData.ageYears ?? 8;
-      _growthConsideration = healthData.growthConsideration ?? true;
-      _species = healthData.species ?? "";
-      _speciesController.text = _species;
-      _clawingBehavior = healthData.clawingBehavior ?? false;
-      _allergySensitive = healthData.allergySensitive ?? false;
+    final usageData = _controller.personalizationData.usageStyle;
+    if (usageData != null) {
+      // Adult data
+      _usagePatternIndex = usageData.usagePattern?.index ?? 0;
+      _firmnessPreferenceIndex = usageData.firmnessPreference?.index ?? 1;
+      _sofaCapacityIndex = usageData.sofaCapacity?.index ?? 1;
+      _seatSupportIndex = usageData.seatSupport?.index ?? 2;
+      
+      // Child data
+      _childUsageTypeIndex = usageData.childUsageType?.index ?? 0;
+      _familyPriorityIndex = usageData.familyPriority?.index ?? 2;
+      _numberOfChildren = usageData.numberOfChildren ?? 1;
+      _growthAdaptable = usageData.growthAdaptable ?? true;
+      
+      // Pet data
+      _petRelaxLocationIndex = usageData.petRelaxLocation?.index ?? 1;
+      _wearLevelIndex = usageData.wearLevel?.index ?? 1;
+      _allergySensitivityIndex = usageData.allergySensitivity?.index ?? 1;
+      _petFriendlyFeatureIndex = usageData.petFriendlyFeature?.index ?? 2;
     }
   }
 
-  void _saveHealthData() {
+  void _saveUsageStyleData() {
     final audienceType = _controller.personalizationData.audienceType;
     
-    HealthErgonomicsData healthData;
+    UsageStyleData usageData;
     
     switch (audienceType) {
       case AudienceType.adult:
-        healthData = HealthErgonomicsData(
-          heightCm: _heightCm,
-          weightKg: _weightKg,
-          sittingHabit: SittingHabit.values[_sittingHabitIndex],
-          hasBackPain: _hasBackPain,
+        usageData = UsageStyleData(
+          usagePattern: UsagePattern.values[_usagePatternIndex],
+          firmnessPreference: FirmnessPreference.values[_firmnessPreferenceIndex],
+          sofaCapacity: SofaCapacity.values[_sofaCapacityIndex],
+          seatSupport: SeatSupport.values[_seatSupportIndex],
         );
         break;
       case AudienceType.child:
-        healthData = HealthErgonomicsData(
-          ageYears: _ageYears,
-          heightCm: _heightCm,
-          weightKg: _weightKg,
-          growthConsideration: _growthConsideration,
+        usageData = UsageStyleData(
+          childUsageType: ChildUsageType.values[_childUsageTypeIndex],
+          familyPriority: FamilyPriority.values[_familyPriorityIndex],
+          numberOfChildren: _numberOfChildren,
+          growthAdaptable: _growthAdaptable,
         );
         break;
       case AudienceType.pet:
-        healthData = HealthErgonomicsData(
-          species: _species,
-          weightKg: _weightKg,
-          clawingBehavior: _clawingBehavior,
-          allergySensitive: _allergySensitive,
+        usageData = UsageStyleData(
+          petRelaxLocation: PetRelaxLocation.values[_petRelaxLocationIndex],
+          wearLevel: WearLevel.values[_wearLevelIndex],
+          allergySensitivity: AllergySensitivity.values[_allergySensitivityIndex],
+          petFriendlyFeature: PetFriendlyFeature.values[_petFriendlyFeatureIndex],
         );
         break;
       default:
         return;
     }
     
-    _controller.setHealthErgonomics(healthData);
+    _controller.setUsageStyle(usageData);
   }
 
   @override
@@ -207,7 +215,7 @@ class _PersonalizationStep2ScreenState extends State<PersonalizationStep2Screen>
                         ),
                         child: TextButton(
                           onPressed: () {
-                            _saveHealthData();
+                            _saveUsageStyleData();
                             if (controller.canProceedToNext()) {
                               controller.nextStep();
                               Get.to(() => PersonalizationStep3Screen());
@@ -238,154 +246,287 @@ class _PersonalizationStep2ScreenState extends State<PersonalizationStep2Screen>
 
   List<Widget> _buildAdultForm() {
     return [
-      PersonalizationSlider(
-        label: "Height",
-        value: _heightCm,
-        min: 140.0,
-        max: 200.0,
-        divisions: 60,
-        formatter: (value) => "${value.round()} cm",
-        onChanged: (value) => setState(() => _heightCm = value),
+      PersonalizationCardSelector(
+        label: "How will you enjoy your sofa most of the time?",
+        helperText: "This helps us tailor the perfect proportions for you",
+        options: const [
+          PersonalizationOption(
+            title: "Lounging",
+            icon: Icons.weekend,
+          ),
+          PersonalizationOption(
+            title: "Formal Hosting",
+            icon: Icons.groups,
+          ),
+          PersonalizationOption(
+            title: "Family Living",
+            icon: Icons.family_restroom,
+          ),
+        ],
+        selectedIndex: _usagePatternIndex,
+        onChanged: (index) => setState(() => _usagePatternIndex = index),
+        crossAxisCount: 3,
       ),
       
-      const SizedBox(height: 24),
+      const SizedBox(height: 32),
       
-      PersonalizationSlider(
-        label: "Weight",
-        value: _weightKg,
-        min: 40.0,
-        max: 140.0,
-        divisions: 100,
-        formatter: (value) => "${value.round()} kg",
-        onChanged: (value) => setState(() => _weightKg = value),
+      PersonalizationCardSelector(
+        label: "Do you prefer firmer or softer seating?",
+        options: const [
+          PersonalizationOption(
+            title: "Firm",
+            iconPath: 'assets/icons/firm_seating.png',
+          ),
+          PersonalizationOption(
+            title: "Balanced",
+            icon: Icons.balance,
+          ),
+          PersonalizationOption(
+            title: "Soft",
+            icon: Icons.cloud,
+          ),
+        ],
+        selectedIndex: _firmnessPreferenceIndex,
+        onChanged: (index) => setState(() => _firmnessPreferenceIndex = index),
+        crossAxisCount: 3,
       ),
       
-      const SizedBox(height: 24),
+      const SizedBox(height: 32),
       
-      DiscreteSlider(
-        label: "Sitting Habit",
-        options: const ["Lounge", "Balanced", "Upright"],
-        selectedIndex: _sittingHabitIndex,
-        onChanged: (index) => setState(() => _sittingHabitIndex = index),
+      PersonalizationCardSelector(
+        label: "How many people should it comfortably fit?",
+        options: const [
+          PersonalizationOption(
+            title: "2",
+            icon: Icons.people,
+          ),
+          PersonalizationOption(
+            title: "3",
+            icon: Icons.group,
+          ),
+          PersonalizationOption(
+            title: "4",
+            icon: Icons.groups,
+          ),
+        ],
+        selectedIndex: _sofaCapacityIndex,
+        onChanged: (index) => setState(() => _sofaCapacityIndex = index),
+        crossAxisCount: 3,
       ),
       
-      const SizedBox(height: 24),
+      const SizedBox(height: 32),
       
-      CustomToggle(
-        label: "Do you experience back pain?",
-        value: _hasBackPain,
-        onChanged: (value) => setState(() => _hasBackPain = value),
+      PersonalizationCardSelector(
+        label: "Would you like extra lumbar support or deeper lounging seats?",
+        options: const [
+          PersonalizationOption(
+            title: "Lumbar Support",
+            iconPath: 'assets/icons/Lumbar_support.png',
+          ),
+          PersonalizationOption(
+            title: "Extra Deep Seat",
+            icon: Icons.event_seat,
+          ),
+          PersonalizationOption(
+            title: "Standard",
+            icon: Icons.chair,
+          ),
+        ],
+        selectedIndex: _seatSupportIndex,
+        onChanged: (index) => setState(() => _seatSupportIndex = index),
+        crossAxisCount: 3,
       ),
     ];
   }
 
   List<Widget> _buildChildForm() {
     return [
-      PersonalizationSlider(
-        label: "Age",
-        value: _ageYears.toDouble(),
-        min: 1.0,
-        max: 15.0,
-        divisions: 14,
-        formatter: (value) => "${value.round()} years",
-        onChanged: (value) => setState(() => _ageYears = value.round()),
+      PersonalizationCardSelector(
+        label: "How will your child mostly use the sofa?",
+        helperText: "This helps us create the perfect child-friendly design",
+        options: const [
+          PersonalizationOption(
+            title: "Reading & Quiet Time",
+            icon: Icons.menu_book,
+          ),
+          PersonalizationOption(
+            title: "Playtime & TV",
+            iconPath: 'assets/icons/Playtime.png',
+          ),
+          PersonalizationOption(
+            title: "Nap & Rest",
+            iconPath: 'assets/icons/nap_rest.png',
+          ),
+        ],
+        selectedIndex: _childUsageTypeIndex,
+        onChanged: (index) => setState(() => _childUsageTypeIndex = index),
+        crossAxisCount: 3,
       ),
       
-      const SizedBox(height: 24),
+      const SizedBox(height: 32),
       
-      PersonalizationSlider(
-        label: "Height",
-        value: _heightCm,
-        min: 80.0,
-        max: 180.0,
-        divisions: 100,
-        formatter: (value) => "${value.round()} cm",
-        onChanged: (value) => setState(() => _heightCm = value),
+      PersonalizationCardSelector(
+        label: "What's most important for your family?",
+        options: const [
+          PersonalizationOption(
+            title: "Easy to Clean",
+            icon: Icons.cleaning_services,
+          ),
+          PersonalizationOption(
+            title: "Extra Edge Softness",
+            icon: Icons.child_care,
+          ),
+          PersonalizationOption(
+            title: "Standard Comfort",
+            icon: Icons.home,
+          ),
+        ],
+        selectedIndex: _familyPriorityIndex,
+        onChanged: (index) => setState(() => _familyPriorityIndex = index),
+        crossAxisCount: 3,
       ),
       
-      const SizedBox(height: 24),
+      const SizedBox(height: 32),
       
-      PersonalizationSlider(
-        label: "Weight",
-        value: _weightKg,
-        min: 10.0,
-        max: 80.0,
-        divisions: 70,
-        formatter: (value) => "${value.round()} kg",
-        onChanged: (value) => setState(() => _weightKg = value),
+      PersonalizationCardSelector(
+        label: "How many little ones will share it?",
+        options: const [
+          PersonalizationOption(
+            title: "1",
+            icon: Icons.person,
+          ),
+          PersonalizationOption(
+            title: "2",
+            icon: Icons.people,
+          ),
+          PersonalizationOption(
+            title: "3+",
+            icon: Icons.group,
+          ),
+        ],
+        selectedIndex: _numberOfChildren - 1,
+        onChanged: (index) => setState(() => _numberOfChildren = index + 1),
+        crossAxisCount: 3,
       ),
       
-      const SizedBox(height: 24),
+      const SizedBox(height: 32),
       
-      CustomToggle(
-        label: "Consider growth in design?",
-        value: _growthConsideration,
-        onChanged: (value) => setState(() => _growthConsideration = value),
+      PersonalizationCardSelector(
+        label: "Would you like it designed to grow with your child?",
+        options: const [
+          PersonalizationOption(
+            title: "Yes, adaptable",
+            icon: Icons.trending_up,
+          ),
+          PersonalizationOption(
+            title: "No, keep as is",
+            icon: Icons.lock,
+          ),
+        ],
+        selectedIndex: _growthAdaptable ? 0 : 1,
+        onChanged: (index) => setState(() => _growthAdaptable = index == 0),
+        crossAxisCount: 2,
       ),
     ];
   }
 
   List<Widget> _buildPetForm() {
     return [
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Pet Species",
-            style: kNunitoSansSemiBold16.copyWith(color: kOffBlack),
+      PersonalizationCardSelector(
+        label: "Where does your pet like to relax?",
+        helperText: "This helps us design the perfect pet-friendly sofa",
+        options: const [
+          PersonalizationOption(
+            title: "Beside me on floor",
+            icon: Icons.pets,
           ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _speciesController,
-            decoration: InputDecoration(
-              hintText: "e.g., Dog, Cat, Rabbit",
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: kChristmasSilver),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: kOffBlack, width: 2),
-              ),
-            ),
-            onChanged: (value) => setState(() => _species = value),
+          PersonalizationOption(
+            title: "On sofa cushions",
+            icon: Icons.weekend,
+          ),
+          PersonalizationOption(
+            title: "On armrests/backrest",
+            icon: Icons.chair,
           ),
         ],
+        selectedIndex: _petRelaxLocationIndex,
+        onChanged: (index) => setState(() => _petRelaxLocationIndex = index),
+        crossAxisCount: 3,
       ),
       
-      const SizedBox(height: 24),
+      const SizedBox(height: 32),
       
-      PersonalizationSlider(
-        label: "Pet Weight",
-        value: _weightKg,
-        min: 1.0,
-        max: 100.0,
-        divisions: 99,
-        formatter: (value) => "${value.round()} kg",
-        onChanged: (value) => setState(() => _weightKg = value),
+      PersonalizationCardSelector(
+        label: "How much scratching or playful wear do you expect?",
+        options: const [
+          PersonalizationOption(
+            title: "Low",
+            icon: Icons.sentiment_satisfied,
+          ),
+          PersonalizationOption(
+            title: "Moderate",
+            icon: Icons.sentiment_neutral,
+          ),
+          PersonalizationOption(
+            title: "High",
+            icon: Icons.sports,
+          ),
+        ],
+        selectedIndex: _wearLevelIndex,
+        onChanged: (index) => setState(() => _wearLevelIndex = index),
+        crossAxisCount: 3,
       ),
       
-      const SizedBox(height: 24),
+      const SizedBox(height: 32),
       
-      CustomToggle(
-        label: "Does your pet have clawing behavior?",
-        value: _clawingBehavior,
-        onChanged: (value) => setState(() => _clawingBehavior = value),
+      PersonalizationCardSelector(
+        label: "How much shedding or allergy sensitivity should we plan for?",
+        options: const [
+          PersonalizationOption(
+            title: "Low",
+            icon: Icons.check_circle,
+          ),
+          PersonalizationOption(
+            title: "Medium",
+            icon: Icons.warning,
+          ),
+          PersonalizationOption(
+            title: "High",
+            icon: Icons.error,
+          ),
+        ],
+        selectedIndex: _allergySensitivityIndex,
+        onChanged: (index) => setState(() => _allergySensitivityIndex = index),
+        crossAxisCount: 3,
       ),
       
-      const SizedBox(height: 16),
+      const SizedBox(height: 32),
       
-      CustomToggle(
-        label: "Is your pet allergy sensitive?",
-        value: _allergySensitive,
-        onChanged: (value) => setState(() => _allergySensitive = value),
+      PersonalizationCardSelector(
+        label: "Would you like the sofa to be extra pet-friendly?",
+        options: const [
+          PersonalizationOption(
+            title: "Scratch-resistant",
+            icon: Icons.shield,
+          ),
+          PersonalizationOption(
+            title: "Easy-clean fabric",
+            icon: Icons.cleaning_services,
+          ),
+          PersonalizationOption(
+            title: "Standard durability",
+            icon: Icons.home,
+          ),
+        ],
+        selectedIndex: _petFriendlyFeatureIndex,
+        onChanged: (index) => setState(() => _petFriendlyFeatureIndex = index),
+        crossAxisCount: 3,
       ),
     ];
   }
 
   @override
   void dispose() {
-    _speciesController.dispose();
     super.dispose();
   }
 }

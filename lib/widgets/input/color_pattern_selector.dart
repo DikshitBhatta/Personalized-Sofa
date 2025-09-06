@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:timberr/constants.dart';
+import 'package:timberr/utils/image_assets.dart';
 import 'package:timberr/models/personalization_data.dart' as personalization;
 
 class ColorPicker extends StatelessWidget {
@@ -20,12 +21,20 @@ class ColorPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final presetColors = [
-      '#2C2C2C', '#8B4513', '#CD853F', '#D2691E', '#A0522D', 
-      '#800000', '#8B0000', '#DC143C', '#B22222', '#FF4500',
-      '#228B22', '#32CD32', '#9ACD32', '#6B8E23', '#556B2F',
-      '#4169E1', '#0000CD', '#191970', '#000080', '#1E90FF',
-      '#9932CC', '#8A2BE2', '#4B0082', '#6A5ACD', '#7B68EE',
-      '#FFD700', '#FFA500', '#FF8C00', '#DAA520', '#B8860B',
+     // Neutrals
+  '#2C2C2C', '#D3D3D3', '#F5F5F5', '#A0522D', '#8B4513',
+
+  // Earth Tones
+  '#CD853F', '#D2691E', '#800000', '#8B0000', '#B22222',
+
+  // Luxe Reds & Wines
+  '#DC143C', '#228B22', '#6B8E23', '#556B2F', '#191970',
+
+  // Blues
+  '#000080', '#0000CD', '#4169E1', '#9932CC', '#8A2BE2',
+
+  // Purples
+  '#4B0082', '#6A5ACD', '#7B68EE', '#B8860B', '#DAA520',
     ];
 
     return Column(
@@ -140,10 +149,30 @@ class PatternSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final patterns = [
-      PatternData(personalization.PatternType.check, "Check", "Classic checkered pattern", "🔲"),
-      PatternData(personalization.PatternType.herringbone, "Herringbone", "V-shaped weaving pattern", "🔷"),
-      PatternData(personalization.PatternType.jacquard, "Jacquard", "Intricate woven design", "🎨"),
-      PatternData(personalization.PatternType.stripe, "Stripe", "Linear striped pattern", "📏"),
+      PatternData(
+        personalization.PatternType.check,
+        "Check",
+        "Classic checkered pattern",
+        assetPath: ImageAssets.pattern(personalization.PatternType.check),
+      ),
+      PatternData(
+        personalization.PatternType.herringbone,
+        "Herringbone",
+        "V-shaped weaving pattern",
+        assetPath: ImageAssets.pattern(personalization.PatternType.herringbone),
+      ),
+      PatternData(
+        personalization.PatternType.jacquard,
+        "Jacquard",
+        "Intricate woven design",
+        assetPath: ImageAssets.pattern(personalization.PatternType.jacquard),
+      ),
+      PatternData(
+        personalization.PatternType.stripe,
+        "Stripe",
+        "Linear striped pattern",
+        assetPath: ImageAssets.pattern(personalization.PatternType.stripe),
+      ),
     ];
 
     return Column(
@@ -204,10 +233,34 @@ class PatternSelector extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Text(
-                      pattern.emoji,
-                      style: const TextStyle(fontSize: 20),
-                    ),
+                    if (pattern.assetPath != null)
+                      GestureDetector(
+                        onLongPress: () => _showImagePreview(context, pattern.assetPath!),
+                        child: Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: kChristmasSilver),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.asset(
+                              pattern.assetPath!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) => Container(
+                                color: kSnowFlakeWhite,
+                                child: const Icon(Icons.image_not_supported, color: kTinGrey),
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      Text(
+                        pattern.emoji ?? '',
+                        style: const TextStyle(fontSize: 20),
+                      ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Column(
@@ -275,11 +328,27 @@ class DetailsSelector extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildDetailSection(
+          context,
           "Stitching Type",
           [
-            DetailData(personalization.StitchingType.double, "Double", "Extra durability", "🧵"),
-            DetailData(personalization.StitchingType.contrast, "Contrast", "Visible accent stitching", "🎯"),
-            DetailData(personalization.StitchingType.hand, "Hand", "Artisan crafted", "✋"),
+            DetailData(
+              personalization.StitchingType.double,
+              "Double",
+              "Extra durability",
+              assetPath: ImageAssets.stitching(personalization.StitchingType.double),
+            ),
+            DetailData(
+              personalization.StitchingType.contrast,
+              "Contrast",
+              "Visible accent stitching",
+              assetPath: ImageAssets.stitching(personalization.StitchingType.contrast),
+            ),
+            DetailData(
+              personalization.StitchingType.hand,
+              "Hand",
+              "Artisan crafted",
+              assetPath: ImageAssets.stitching(personalization.StitchingType.hand),
+            ),
           ],
           selectedStitching,
           onStitchingSelected,
@@ -288,13 +357,39 @@ class DetailsSelector extends StatelessWidget {
         const SizedBox(height: 24),
         
         _buildDetailSection(
+          context,
           "Leg Material",
           [
-            DetailData(personalization.LegType.walnut, "Walnut", "Rich brown wood", "🌰"),
-            DetailData(personalization.LegType.oak, "Oak", "Classic hardwood", "🌳"),
-            DetailData(personalization.LegType.ash, "Ash", "Light colored wood", "🍃"),
-            DetailData(personalization.LegType.steel, "Steel", "Modern metal", "⚡"),
-            DetailData(personalization.LegType.bronze, "Bronze", "Warm metallic", "🥉"),
+            DetailData(
+              personalization.LegType.walnut,
+              "Walnut",
+              "Rich brown wood",
+              assetPath: ImageAssets.leg(personalization.LegType.walnut),
+            ),
+            DetailData(
+              personalization.LegType.oak,
+              "Oak",
+              "Classic hardwood",
+              assetPath: ImageAssets.leg(personalization.LegType.oak),
+            ),
+            DetailData(
+              personalization.LegType.ash,
+              "Ash",
+              "Light colored wood",
+              assetPath: ImageAssets.leg(personalization.LegType.ash),
+            ),
+            DetailData(
+              personalization.LegType.steel,
+              "Steel",
+              "Modern metal",
+              assetPath: ImageAssets.leg(personalization.LegType.steel),
+            ),
+            DetailData(
+              personalization.LegType.bronze,
+              "Bronze",
+              "Warm metallic",
+              assetPath: ImageAssets.leg(personalization.LegType.bronze),
+            ),
           ],
           selectedLeg,
           onLegSelected,
@@ -303,11 +398,27 @@ class DetailsSelector extends StatelessWidget {
         const SizedBox(height: 24),
         
         _buildDetailSection(
+          context,
           "Finish Type",
           [
-            DetailData(personalization.FinishType.matte, "Matte", "Non-reflective surface", "🎨"),
-            DetailData(personalization.FinishType.gloss, "Gloss", "High-shine finish", "✨"),
-            DetailData(personalization.FinishType.oil, "Oil", "Natural protection", "🌿"),
+            DetailData(
+              personalization.FinishType.matte,
+              "Matte",
+              "Non-reflective surface",
+              assetPath: ImageAssets.finish(personalization.FinishType.matte),
+            ),
+            DetailData(
+              personalization.FinishType.gloss,
+              "Gloss",
+              "High-shine finish",
+              assetPath: ImageAssets.finish(personalization.FinishType.gloss),
+            ),
+            DetailData(
+              personalization.FinishType.oil,
+              "Oil",
+              "Natural protection",
+              assetPath: ImageAssets.finish(personalization.FinishType.oil),
+            ),
           ],
           selectedFinish,
           onFinishSelected,
@@ -317,6 +428,7 @@ class DetailsSelector extends StatelessWidget {
   }
   
   Widget _buildDetailSection<T>(
+    BuildContext context,
     String title,
     List<DetailData<T>> options,
     T? selectedValue,
@@ -339,32 +451,64 @@ class DetailsSelector extends StatelessWidget {
             
             return GestureDetector(
               onTap: () => onSelected(option.value),
-              child: AnimatedContainer(
+                child: AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: isSelected ? kOffBlack : Colors.white,
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
                     color: isSelected ? kOffBlack : kChristmasSilver,
-                    width: 1,
+                    width: isSelected ? 2 : 1,
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: isSelected ? const Color(0x14000000) : const Color(0x08000000),
+                      offset: const Offset(0, 2),
+                      blurRadius: isSelected ? 8 : 4,
+                    ),
+                  ],
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      option.emoji,
-                      style: const TextStyle(fontSize: 16),
-                    ),
+                    if (option.assetPath != null)
+                      GestureDetector(
+                        onLongPress: () => _showImagePreview(context, option.assetPath!),
+                        child: Container(
+                          width: 28,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(6),
+                            color: kSnowFlakeWhite,
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(6),
+                            child: Image.asset(
+                              option.assetPath!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) => const Icon(Icons.image_not_supported, size: 18),
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      Text(
+                        option.emoji ?? '',
+                        style: const TextStyle(fontSize: 16),
+                      ),
                     const SizedBox(width: 8),
                     Text(
                       option.name,
                       style: kNunitoSans14.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: isSelected ? Colors.white : kOffBlack,
+                        color: kOffBlack,
                       ),
                     ),
+                    if (isSelected) ...[
+                      const SizedBox(width: 8),
+                      const Icon(Icons.check_circle, color: kSeaGreen, size: 18),
+                    ],
                   ],
                 ),
               ),
@@ -380,16 +524,61 @@ class PatternData {
   final personalization.PatternType type;
   final String name;
   final String description;
-  final String emoji;
+  final String? emoji; // fallback
+  final String? assetPath; // optional asset image
 
-  PatternData(this.type, this.name, this.description, this.emoji);
+  PatternData(this.type, this.name, this.description, {this.emoji, this.assetPath});
 }
 
 class DetailData<T> {
   final T value;
   final String name;
   final String description;
-  final String emoji;
+  final String? emoji; // fallback
+  final String? assetPath; // optional asset image
 
-  DetailData(this.value, this.name, this.description, this.emoji);
+  DetailData(this.value, this.name, this.description, {this.emoji, this.assetPath});
+}
+
+// Top-level helper to show a magnified preview of an asset image.
+void _showImagePreview(BuildContext context, String assetPath) {
+  showDialog(
+    context: context,
+    builder: (context) {
+      return Dialog(
+        insetPadding: const EdgeInsets.all(24),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: SizedBox(
+          width: double.infinity,
+          height: 360,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: InteractiveViewer(
+              panEnabled: true,
+              scaleEnabled: true,
+              maxScale: 4.0,
+              minScale: 1.0,
+              child: Image.asset(
+                assetPath,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  color: kSnowFlakeWhite,
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Icon(Icons.image_not_supported, size: 48, color: kTinGrey),
+                      SizedBox(height: 8),
+                      Text('Preview not available')
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    },
+  );
 }

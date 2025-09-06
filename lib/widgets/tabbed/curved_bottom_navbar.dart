@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:timberr/screens/home.dart';
 import 'package:timberr/screens/notification_screen.dart';
 import 'package:timberr/screens/profile/profile_screen.dart';
-import 'package:timberr/screens/profile/orders_screen.dart';
+import 'package:timberr/screens/orders_page.dart';
 import 'package:timberr/screens/personalization/personalization_launch.dart';
 
 class CurvedDockItem {
@@ -334,7 +334,8 @@ class CurvedBottomNavBar extends StatelessWidget {
               activeIcon: 'assets/icons/shopping_bag_icon_black.svg',
               onTap: () {
                 if (selectedPos != 1) {
-                  Get.to(() => const OrdersScreen(), transition: Transition.fadeIn);
+                  // Replace current stack with OrdersPage so it behaves like a tab (no back button)
+                  Get.offAll(() => const OrdersPage(), predicate: (route) => route.settings.name == null, transition: Transition.fadeIn);
                 }
               },
               active: selectedPos == 1,

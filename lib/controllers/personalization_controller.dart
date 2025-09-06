@@ -39,9 +39,9 @@ class PersonalizationController extends GetxController {
     update();
   }
   
-  // Step 2: Health & Ergonomics
-  void setHealthErgonomics(HealthErgonomicsData healthErgonomics) {
-    _personalizationData.value.healthErgonomics = healthErgonomics;
+  // Step 2: Usage Style
+  void setUsageStyle(UsageStyleData usageStyle) {
+    _personalizationData.value.usageStyle = usageStyle;
     _personalizationData.value.updatedAt = DateTime.now();
     _saveToFirestore();
     update();
@@ -88,7 +88,7 @@ class PersonalizationController extends GetxController {
       case 0:
         return _personalizationData.value.audienceType != null;
       case 1:
-        return _personalizationData.value.healthErgonomics != null && _validateHealthErgonomics();
+        return _personalizationData.value.usageStyle != null && _validateUsageStyle();
       case 2:
         return _personalizationData.value.styleMaterial?.materialType != null;
       case 3:
@@ -98,26 +98,26 @@ class PersonalizationController extends GetxController {
     }
   }
   
-  bool _validateHealthErgonomics() {
-    final healthData = _personalizationData.value.healthErgonomics;
-    if (healthData == null) return false;
+  bool _validateUsageStyle() {
+    final usageData = _personalizationData.value.usageStyle;
+    if (usageData == null) return false;
     
     switch (_personalizationData.value.audienceType) {
       case AudienceType.adult:
-        return healthData.heightCm != null && 
-               healthData.weightKg != null && 
-               healthData.sittingHabit != null && 
-               healthData.hasBackPain != null;
+        return usageData.usagePattern != null && 
+               usageData.firmnessPreference != null && 
+               usageData.sofaCapacity != null && 
+               usageData.seatSupport != null;
       case AudienceType.child:
-        return healthData.ageYears != null && 
-               healthData.heightCm != null && 
-               healthData.weightKg != null && 
-               healthData.growthConsideration != null;
+        return usageData.childUsageType != null && 
+               usageData.familyPriority != null && 
+               usageData.numberOfChildren != null && 
+               usageData.growthAdaptable != null;
       case AudienceType.pet:
-        return healthData.species?.isNotEmpty == true && 
-               healthData.weightKg != null && 
-               healthData.clawingBehavior != null && 
-               healthData.allergySensitive != null;
+        return usageData.petRelaxLocation != null && 
+               usageData.wearLevel != null && 
+               usageData.allergySensitivity != null && 
+               usageData.petFriendlyFeature != null;
       default:
         return false;
     }
@@ -208,7 +208,7 @@ class PersonalizationController extends GetxController {
       case 0:
         return "Who is this sofa for?";
       case 1:
-        return "Health & Ergonomics";
+        return "Usage Style";
       case 2:
         return "Style & Material";
       case 3:
@@ -223,7 +223,7 @@ class PersonalizationController extends GetxController {
       case 0:
         return "Tell us who will be using this sofa most often";
       case 1:
-        return "Help us create the perfect fit for your needs";
+        return "Tell us how you'll use your sofa";
       case 2:
         return "Choose your preferred style and materials";
       case 3:

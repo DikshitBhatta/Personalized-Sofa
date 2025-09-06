@@ -212,3 +212,181 @@ class CustomToggle extends StatelessWidget {
     );
   }
 }
+
+class PersonalizationCard extends StatelessWidget {
+  final String title;
+  final String? description;
+  final IconData? icon;
+  final String? iconPath;
+  final bool isSelected;
+  final VoidCallback onTap;
+  
+  const PersonalizationCard({
+    super.key,
+    required this.title,
+    this.description,
+    this.icon,
+    this.iconPath,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isSelected ? kOffBlack.withOpacity(0.05) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? kOffBlack : kChristmasSilver,
+            width: isSelected ? 2 : 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              offset: const Offset(0, 2),
+              blurRadius: 8,
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (icon != null || iconPath != null) ...[
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: isSelected ? kOffBlack : kSnowFlakeWhite,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: icon != null 
+                    ? Icon(
+                        icon,
+                        color: isSelected ? Colors.white : kOffBlack,
+                        size: 20,
+                      )
+                    : iconPath != null
+                        ? Image.asset(
+                            iconPath!,
+                            width: 20,
+                            height: 20,
+                            color: isSelected ? Colors.white : kOffBlack,
+                          )
+                        : const SizedBox(),
+              ),
+              const SizedBox(height: 8),
+            ],
+            Flexible(
+              child: Text(
+                title,
+                textAlign: TextAlign.center,
+                style: kNunitoSans14.copyWith(
+                  color: kOffBlack,
+                  fontSize: 13,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                ),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (description != null) ...[
+              const SizedBox(height: 2),
+              Flexible(
+                child: Text(
+                  description!,
+                  style: kNunitoSansSemiBold12.copyWith(
+                    color: kTinGrey,
+                    fontSize: 11,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class PersonalizationCardSelector extends StatelessWidget {
+  final String label;
+  final String? helperText;
+  final List<PersonalizationOption> options;
+  final int selectedIndex;
+  final ValueChanged<int> onChanged;
+  final int crossAxisCount;
+  
+  const PersonalizationCardSelector({
+    super.key,
+    required this.label,
+    this.helperText,
+    required this.options,
+    required this.selectedIndex,
+    required this.onChanged,
+    this.crossAxisCount = 2,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: kNunitoSansSemiBold16.copyWith(color: kOffBlack),
+        ),
+        if (helperText != null) ...[
+          const SizedBox(height: 4),
+          Text(
+            helperText!,
+            style: kNunitoSans14.copyWith(color: kTinGrey),
+          ),
+        ],
+        const SizedBox(height: 16),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: crossAxisCount == 3 ? 0.9 : 1.3,
+          ),
+          itemCount: options.length,
+          itemBuilder: (context, index) {
+            final option = options[index];
+            return PersonalizationCard(
+              title: option.title,
+              description: option.description,
+              icon: option.icon,
+              iconPath: option.iconPath,
+              isSelected: selectedIndex == index,
+              onTap: () => onChanged(index),
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class PersonalizationOption {
+  final String title;
+  final String? description;
+  final IconData? icon;
+  final String? iconPath;
+  
+  const PersonalizationOption({
+    required this.title,
+    this.description,
+    this.icon,
+    this.iconPath,
+  });
+}

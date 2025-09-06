@@ -7,7 +7,6 @@ import 'package:timberr/controllers/address_controller.dart';
 import 'package:timberr/controllers/card_details_controller.dart';
 import 'package:timberr/controllers/user_controller.dart';
 import 'package:timberr/screens/profile/my_reviews_screen.dart';
-import 'package:timberr/screens/profile/orders_screen.dart';
 import 'package:timberr/screens/profile/payment_methods_screen.dart';
 import 'package:timberr/screens/profile/settings_screen.dart';
 import 'package:timberr/screens/profile/shipping_address_screen.dart';
@@ -54,14 +53,6 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  void _toOrdersScreen() {
-    Get.to(
-      () => const OrdersScreen(),
-      transition: Transition.cupertino,
-      duration: const Duration(milliseconds: 600),
-      curve: Curves.easeOut,
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -142,12 +133,7 @@ class ProfileScreen extends StatelessWidget {
                 );
               }),
               const Spacer(flex: 2),
-              ProfileTile(
-                name: "My Orders",
-                description: "Already have 10 orders",
-                onTap: _toOrdersScreen,
-              ),
-              const Spacer(),
+              // Orders removed from profile as it's available in bottom nav
               GetBuilder<AddressController>(
                 builder: (addressController) {
                   String addressCount =

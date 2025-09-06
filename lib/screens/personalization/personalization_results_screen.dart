@@ -8,7 +8,7 @@ import 'package:timberr/models/personalization_data.dart' as pdata;
 import 'package:timberr/widgets/tiles/product_grid_tile.dart';
 import 'package:timberr/widgets/animation/fade_in_widget.dart';
 import 'package:timberr/widgets/glb_viewer.dart';
-import 'package:timberr/screens/home.dart';
+import 'package:timberr/screens/concierge/schedule_concierge_screen.dart';
 
 class PersonalizationResultsScreen extends StatefulWidget {
   const PersonalizationResultsScreen({super.key});
@@ -106,13 +106,13 @@ class _PersonalizationResultsScreenState extends State<PersonalizationResultsScr
           const SizedBox(height: 8),
         ],
         
-        if (personalizationData.healthErgonomics?.sittingHabit != null) ...[
+        if (personalizationData.usageStyle != null) ...[
           Row(
             children: [
               const Icon(Icons.weekend, size: 20, color: kTinGrey),
               const SizedBox(width: 12),
               Text(
-                "Sitting Style: ${_getSittingHabitName(personalizationData.healthErgonomics!.sittingHabit!)}",
+                "Usage Style: ${_getUsageStyleSummary(personalizationData.usageStyle!)}",
                 style: kNunitoSans14.copyWith(color: kOffBlack),
               ),
             ],
@@ -157,15 +157,44 @@ class _PersonalizationResultsScreenState extends State<PersonalizationResultsScr
     }
   }
 
-  String _getSittingHabitName(pdata.SittingHabit habit) {
-    switch (habit) {
-      case pdata.SittingHabit.lounge:
-        return "Lounging Style";
-      case pdata.SittingHabit.balanced:
-        return "Balanced Posture";
-      case pdata.SittingHabit.upright:
-        return "Upright Posture";
+  String _getUsageStyleSummary(pdata.UsageStyleData usageStyle) {
+    // Adult usage style
+    if (usageStyle.usagePattern != null) {
+      switch (usageStyle.usagePattern!) {
+        case pdata.UsagePattern.lounging:
+          return "Lounging Style";
+        case pdata.UsagePattern.formalHosting:
+          return "Formal Hosting";
+        case pdata.UsagePattern.familyLiving:
+          return "Family Living";
+      }
     }
+    
+    // Child usage style
+    if (usageStyle.childUsageType != null) {
+      switch (usageStyle.childUsageType!) {
+        case pdata.ChildUsageType.readingQuiet:
+          return "Reading & Quiet Time";
+        case pdata.ChildUsageType.playtimeTV:
+          return "Playtime & TV";
+        case pdata.ChildUsageType.napRest:
+          return "Nap & Rest";
+      }
+    }
+    
+    // Pet usage style
+    if (usageStyle.petRelaxLocation != null) {
+      switch (usageStyle.petRelaxLocation!) {
+        case pdata.PetRelaxLocation.besideFloor:
+          return "Pet-Friendly Floor Design";
+        case pdata.PetRelaxLocation.sofaCushions:
+          return "Pet-Sharing Comfort";
+        case pdata.PetRelaxLocation.armrestsBackrest:
+          return "Pet Perch Design";
+      }
+    }
+    
+    return "Custom Style";
   }
 
   @override
@@ -195,84 +224,84 @@ class _PersonalizationResultsScreenState extends State<PersonalizationResultsScr
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Success message
-                  FadeInWidget(
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            kSeaGreen.withOpacity(0.1),
-                            kSeaGreen.withOpacity(0.05),
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: kSeaGreen.withOpacity(0.3)),
-                      ),
-                      child: Column(
-                        children: [
-                          Container(
-                            width: 60,
-                            height: 60,
-                            decoration: BoxDecoration(
-                              color: kSeaGreen,
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            child: const Icon(
-                              Icons.check,
-                              color: Colors.white,
-                              size: 30,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            "Personalization Complete!",
-                            style: kNunitoSansBold20.copyWith(color: kOffBlack),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            "Based on your preferences, we've curated these perfect matches for you.",
-                            textAlign: TextAlign.center,
-                            style: kNunitoSans14.copyWith(color: kGrey),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  // FadeInWidget(
+                  //   child: Container(
+                  //     width: double.infinity,
+                  //     padding: const EdgeInsets.all(20),
+                  //     decoration: BoxDecoration(
+                  //       gradient: LinearGradient(
+                  //         begin: Alignment.topLeft,
+                  //         end: Alignment.bottomRight,
+                  //         colors: [
+                  //           kSeaGreen.withOpacity(0.1),
+                  //           kSeaGreen.withOpacity(0.05),
+                  //         ],
+                  //       ),
+                  //       borderRadius: BorderRadius.circular(16),
+                  //       border: Border.all(color: kSeaGreen.withOpacity(0.3)),
+                  //     ),
+                  //     child: Column(
+                  //       children: [
+                  //         Container(
+                  //           width: 60,
+                  //           height: 60,
+                  //           decoration: BoxDecoration(
+                  //             color: kSeaGreen,
+                  //             borderRadius: BorderRadius.circular(30),
+                  //           ),
+                  //           child: const Icon(
+                  //             Icons.check,
+                  //             color: Colors.white,
+                  //             size: 30,
+                  //           ),
+                  //         ),
+                  //         const SizedBox(height: 16),
+                  //         Text(
+                  //           "Personalization Complete!",
+                  //           style: kNunitoSansBold20.copyWith(color: kOffBlack),
+                  //         ),
+                  //         const SizedBox(height: 8),
+                  //         Text(
+                  //           "Based on your preferences, we've curated these perfect matches for you.",
+                  //           textAlign: TextAlign.center,
+                  //           style: kNunitoSans14.copyWith(color: kGrey),
+                  //         ),
+                  //       ],
+                  //     ),
+                  //   ),
+                  // ),
                   
-                  const SizedBox(height: 32),
+                  // const SizedBox(height: 32),
                   
                   // Your Personalization Summary
-                  if (_personalizationController.personalizationData.personalizationDetails != null)
-                    FadeInWidget(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Your Personalization",
-                            style: kNunitoSansSemiBold18.copyWith(color: kOffBlack),
-                          ),
-                          const SizedBox(height: 12),
-                          _buildPersonalizationSummary(),
-                          const SizedBox(height: 32),
-                        ],
-                      ),
-                    ),
+                  // if (_personalizationController.personalizationData.personalizationDetails != null)
+                  //   FadeInWidget(
+                  //     child: Column(
+                  //       crossAxisAlignment: CrossAxisAlignment.start,
+                  //       children: [
+                  //         Text(
+                  //           "Your Personalization",
+                  //           style: kNunitoSansSemiBold18.copyWith(color: kOffBlack),
+                  //         ),
+                  //         const SizedBox(height: 12),
+                  //         _buildPersonalizationSummary(),
+                  //         const SizedBox(height: 32),
+                  //       ],
+                  //     ),
+                  //   ),
                   
                   // Recommended Products
-                  Text(
-                    "Recommended Products",
-                    style: kNunitoSansSemiBold18.copyWith(color: kOffBlack),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    "Handpicked based on your preferences",
-                    style: kNunitoSans14.copyWith(color: kGrey),
-                  ),
+                  // Text(
+                  //   "Recommended Products",
+                  //   style: kNunitoSansSemiBold18.copyWith(color: kOffBlack),
+                  // ),
+                  // const SizedBox(height: 4),
+                  // Text(
+                  //   "Handpicked based on your preferences",
+                  //   style: kNunitoSans14.copyWith(color: kGrey),
+                  // ),
                   
-                  const SizedBox(height: 20),
+                  // const SizedBox(height: 20),
                   
                   if (_recommendedProducts.isEmpty)
                     Center(
@@ -289,7 +318,7 @@ class _PersonalizationResultsScreenState extends State<PersonalizationResultsScr
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  "Based on your preferences",
+                                  "Based on your preferences,  we've curated these perfect matches for you.",
                                   style: kNunitoSans14.copyWith(color: kGrey),
                                 ),
                                 const SizedBox(height: 20),
@@ -356,38 +385,19 @@ class _PersonalizationResultsScreenState extends State<PersonalizationResultsScr
                   
                   const SizedBox(height: 40),
                   
-                  // Action buttons
+                  // Single action button
                   Row(
                     children: [
                       Expanded(
-                        child: OutlinedButton(
-                          onPressed: () {
-                            Get.off(() => Home()); // Replace current screen with Home
-                          },
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: kOffBlack),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                          ),
-                          child: Text(
-                            "Browse All Products",
-                            style: kNunitoSans14.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: kOffBlack,
-                            ),
-                          ),
-                        ),
-                      ),
-                      
-                      const SizedBox(width: 16),
-                      
-                      Expanded(
                         child: ElevatedButton(
                           onPressed: () {
-                            // Navigate to a specific personalization history or profile
-                            Get.off(() => Home()); // Replace current screen with Home
+                            // Navigate to concierge scheduling screen with a smooth transition
+                            Get.to(
+                              () => const ScheduleConciergeScreen(),
+                              transition: Transition.cupertino,
+                              duration: const Duration(milliseconds: 600),
+                              curve: Curves.easeOut,
+                            );
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: kOffBlack,
@@ -397,7 +407,7 @@ class _PersonalizationResultsScreenState extends State<PersonalizationResultsScr
                             padding: const EdgeInsets.symmetric(vertical: 16),
                           ),
                           child: Text(
-                            "Done",
+                            "Schedule a Concierge Visit",
                             style: kNunitoSans14.copyWith(
                               fontWeight: FontWeight.w600,
                               color: Colors.white,

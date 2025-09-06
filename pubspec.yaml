@@ -41,7 +41,11 @@ flutter:
   - assets/fonts/
   - assets/slider/
   - assets/3dmodel/
-
+  - assets/fabrics/
+  - assets/materials/pattern/
+  - assets/materials/finish/
+  - assets/materials/legs/
+  - assets/materials/stetching/
   fonts:
   - family: NunitoSans
     fonts:

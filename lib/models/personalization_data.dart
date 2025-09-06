@@ -2,8 +2,8 @@ class PersonalizationData {
   // Step 1: Audience Selection
   AudienceType? audienceType;
   
-  // Step 2: Health & Ergonomics
-  HealthErgonomicsData? healthErgonomics;
+  // Step 2: Usage Style
+  UsageStyleData? usageStyle;
   
   // Step 3: Style & Material Preferences
   StyleMaterialData? styleMaterial;
@@ -19,7 +19,7 @@ class PersonalizationData {
   
   PersonalizationData({
     this.audienceType,
-    this.healthErgonomics,
+    this.usageStyle,
     this.styleMaterial,
     this.personalizationDetails,
     this.sessionId,
@@ -33,8 +33,8 @@ class PersonalizationData {
       audienceType: json['audience_type'] != null 
           ? AudienceType.values.firstWhere((e) => e.toString().split('.').last == json['audience_type'])
           : null,
-      healthErgonomics: json['health_ergonomics'] != null 
-          ? HealthErgonomicsData.fromJson(json['health_ergonomics'])
+      usageStyle: json['usage_style'] != null 
+          ? UsageStyleData.fromJson(json['usage_style'])
           : null,
       styleMaterial: json['style_material'] != null 
           ? StyleMaterialData.fromJson(json['style_material'])
@@ -52,7 +52,7 @@ class PersonalizationData {
   Map<String, dynamic> toJson() {
     return {
       'audience_type': audienceType?.toString().split('.').last,
-      'health_ergonomics': healthErgonomics?.toJson(),
+      'usage_style': usageStyle?.toJson(),
       'style_material': styleMaterial?.toJson(),
       'personalization_details': personalizationDetails?.toJson(),
       'session_id': sessionId,
@@ -65,66 +65,110 @@ class PersonalizationData {
 
 enum AudienceType { adult, child, pet }
 
-class HealthErgonomicsData {
+class UsageStyleData {
   // Adult specific
-  double? heightCm;
-  double? weightKg;
-  SittingHabit? sittingHabit;
-  bool? hasBackPain;
+  UsagePattern? usagePattern;
+  FirmnessPreference? firmnessPreference;
+  SofaCapacity? sofaCapacity;
+  SeatSupport? seatSupport;
   
   // Child specific
-  int? ageYears;
-  bool? growthConsideration;
+  ChildUsageType? childUsageType;
+  FamilyPriority? familyPriority;
+  int? numberOfChildren;
+  bool? growthAdaptable;
   
   // Pet specific
-  String? species;
-  bool? clawingBehavior;
-  bool? allergySensitive;
+  PetRelaxLocation? petRelaxLocation;
+  WearLevel? wearLevel;
+  AllergySensitivity? allergySensitivity;
+  PetFriendlyFeature? petFriendlyFeature;
   
-  HealthErgonomicsData({
-    this.heightCm,
-    this.weightKg,
-    this.sittingHabit,
-    this.hasBackPain,
-    this.ageYears,
-    this.growthConsideration,
-    this.species,
-    this.clawingBehavior,
-    this.allergySensitive,
+  UsageStyleData({
+    this.usagePattern,
+    this.firmnessPreference,
+    this.sofaCapacity,
+    this.seatSupport,
+    this.childUsageType,
+    this.familyPriority,
+    this.numberOfChildren,
+    this.growthAdaptable,
+    this.petRelaxLocation,
+    this.wearLevel,
+    this.allergySensitivity,
+    this.petFriendlyFeature,
   });
   
-  factory HealthErgonomicsData.fromJson(Map<String, dynamic> json) {
-    return HealthErgonomicsData(
-      heightCm: json['height_cm']?.toDouble(),
-      weightKg: json['weight_kg']?.toDouble(),
-      sittingHabit: json['sitting_habit'] != null 
-          ? SittingHabit.values.firstWhere((e) => e.toString().split('.').last == json['sitting_habit'])
+  factory UsageStyleData.fromJson(Map<String, dynamic> json) {
+    return UsageStyleData(
+      usagePattern: json['usage_pattern'] != null 
+          ? UsagePattern.values.firstWhere((e) => e.toString().split('.').last == json['usage_pattern'])
           : null,
-      hasBackPain: json['has_back_pain'],
-      ageYears: json['age_years'],
-      growthConsideration: json['growth_consideration'],
-      species: json['species'],
-      clawingBehavior: json['clawing_behavior'],
-      allergySensitive: json['allergy_sensitive'],
+      firmnessPreference: json['firmness_preference'] != null 
+          ? FirmnessPreference.values.firstWhere((e) => e.toString().split('.').last == json['firmness_preference'])
+          : null,
+      sofaCapacity: json['sofa_capacity'] != null 
+          ? SofaCapacity.values.firstWhere((e) => e.toString().split('.').last == json['sofa_capacity'])
+          : null,
+      seatSupport: json['seat_support'] != null 
+          ? SeatSupport.values.firstWhere((e) => e.toString().split('.').last == json['seat_support'])
+          : null,
+      childUsageType: json['child_usage_type'] != null 
+          ? ChildUsageType.values.firstWhere((e) => e.toString().split('.').last == json['child_usage_type'])
+          : null,
+      familyPriority: json['family_priority'] != null 
+          ? FamilyPriority.values.firstWhere((e) => e.toString().split('.').last == json['family_priority'])
+          : null,
+      numberOfChildren: json['number_of_children'],
+      growthAdaptable: json['growth_adaptable'],
+      petRelaxLocation: json['pet_relax_location'] != null 
+          ? PetRelaxLocation.values.firstWhere((e) => e.toString().split('.').last == json['pet_relax_location'])
+          : null,
+      wearLevel: json['wear_level'] != null 
+          ? WearLevel.values.firstWhere((e) => e.toString().split('.').last == json['wear_level'])
+          : null,
+      allergySensitivity: json['allergy_sensitivity'] != null 
+          ? AllergySensitivity.values.firstWhere((e) => e.toString().split('.').last == json['allergy_sensitivity'])
+          : null,
+      petFriendlyFeature: json['pet_friendly_feature'] != null 
+          ? PetFriendlyFeature.values.firstWhere((e) => e.toString().split('.').last == json['pet_friendly_feature'])
+          : null,
     );
   }
   
   Map<String, dynamic> toJson() {
     return {
-      'height_cm': heightCm,
-      'weight_kg': weightKg,
-      'sitting_habit': sittingHabit?.toString().split('.').last,
-      'has_back_pain': hasBackPain,
-      'age_years': ageYears,
-      'growth_consideration': growthConsideration,
-      'species': species,
-      'clawing_behavior': clawingBehavior,
-      'allergy_sensitive': allergySensitive,
+      'usage_pattern': usagePattern?.toString().split('.').last,
+      'firmness_preference': firmnessPreference?.toString().split('.').last,
+      'sofa_capacity': sofaCapacity?.toString().split('.').last,
+      'seat_support': seatSupport?.toString().split('.').last,
+      'child_usage_type': childUsageType?.toString().split('.').last,
+      'family_priority': familyPriority?.toString().split('.').last,
+      'number_of_children': numberOfChildren,
+      'growth_adaptable': growthAdaptable,
+      'pet_relax_location': petRelaxLocation?.toString().split('.').last,
+      'wear_level': wearLevel?.toString().split('.').last,
+      'allergy_sensitivity': allergySensitivity?.toString().split('.').last,
+      'pet_friendly_feature': petFriendlyFeature?.toString().split('.').last,
     };
   }
 }
 
-enum SittingHabit { lounge, balanced, upright }
+// Adult usage enums
+enum UsagePattern { lounging, formalHosting, familyLiving }
+enum FirmnessPreference { firm, balanced, soft }
+enum SofaCapacity { two, three, fourPlus, sectional }
+enum SeatSupport { lumbarSupport, extraDeep, standard }
+
+// Child usage enums
+enum ChildUsageType { readingQuiet, playtimeTV, napRest }
+enum FamilyPriority { easyClean, edgeSoftness, standardComfort }
+
+// Pet usage enums
+enum PetRelaxLocation { besideFloor, sofaCushions, armrestsBackrest }
+enum WearLevel { low, moderate, high }
+enum AllergySensitivity { low, medium, high }
+enum PetFriendlyFeature { scratchResistant, easyClean, standardDurability }
 
 class StyleMaterialData {
   MaterialType? materialType;

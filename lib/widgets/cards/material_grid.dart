@@ -15,15 +15,15 @@ class MaterialGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final materials = [
-      MaterialData(personalization.MaterialType.fullGrain, "Full-grain", "Premium leather, ages beautifully", "🐄"),
-      MaterialData(personalization.MaterialType.semiAniline, "Semi-aniline", "Soft touch, natural grain", "✨"),
-      MaterialData(personalization.MaterialType.nubuck, "Nubuck", "Velvety texture, durable", "🎨"),
-      MaterialData(personalization.MaterialType.pu, "PU Leather", "Easy care, budget-friendly", "🛡️"),
-      MaterialData(personalization.MaterialType.cotton, "Cotton", "Breathable, comfortable", "🌿"),
-      MaterialData(personalization.MaterialType.linen, "Linen", "Natural, relaxed feel", "🌾"),
-      MaterialData(personalization.MaterialType.velvet, "Velvet", "Luxurious, soft touch", "👑"),
-      MaterialData(personalization.MaterialType.alcantara, "Alcantara", "Premium microfiber", "⭐"),
-      MaterialData(personalization.MaterialType.ecoFabric, "Eco Fabric", "Sustainable choice", "♻️"),
+      MaterialData(personalization.MaterialType.fullGrain, "Full-grain", "Premium leather, ages beautifully", 'assets/fabrics/Full_grain_leather.jpg'),
+      MaterialData(personalization.MaterialType.semiAniline, "Semi-aniline", "Soft touch, natural grain", 'assets/fabrics/Semi_aniline.png'),
+      MaterialData(personalization.MaterialType.nubuck, "Nubuck", "Velvety texture, durable", 'assets/fabrics/nubuck.jpg'),
+      MaterialData(personalization.MaterialType.pu, "PU Leather", "Easy care, budget-friendly", 'assets/fabrics/PU_leather.jpg'),
+      MaterialData(personalization.MaterialType.cotton, "Cotton", "Breathable, comfortable", 'assets/fabrics/cotton.jpg'),
+      MaterialData(personalization.MaterialType.linen, "Linen", "Natural, relaxed feel", 'assets/fabrics/Linen.jpg'),
+      MaterialData(personalization.MaterialType.velvet, "Velvet", "Luxurious, soft touch", 'assets/fabrics/velvet.jpg'),
+      MaterialData(personalization.MaterialType.alcantara, "Alcantara", "Premium microfiber", 'assets/fabrics/alcantara.jpeg'),
+      MaterialData(personalization.MaterialType.ecoFabric, "Eco Fabric", "Sustainable choice", 'assets/fabrics/eco_fabric.jpg'),
     ];
 
     return GridView.builder(
@@ -44,7 +44,7 @@ class MaterialGrid extends StatelessWidget {
           onTap: () => onMaterialSelected(material.type),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 300),
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
@@ -61,13 +61,33 @@ class MaterialGrid extends StatelessWidget {
               ],
             ),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    Text(
-                      material.emoji,
-                      style: const TextStyle(fontSize: 24),
+                    GestureDetector(
+                      onLongPress: () => _showImagePreview(context, material.assetPath),
+                      child: Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          color: kSnowFlakeWhite,
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.asset(
+                            material.assetPath,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => Container(
+                              color: kSnowFlakeWhite,
+                              alignment: Alignment.center,
+                              child: const Icon(Icons.image_not_supported, color: kTinGrey),
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                     const Spacer(),
                     if (isSelected)
@@ -86,22 +106,28 @@ class MaterialGrid extends StatelessWidget {
                       ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  material.name,
-                  style: kNunitoSansSemiBold16.copyWith(
-                    color: isSelected ? kOffBlack : kTinGrey,
+                const SizedBox(height: 8),
+                Flexible(
+                  child: Text(
+                    material.name,
+                    style: kNunitoSansSemiBold16.copyWith(
+                      color: isSelected ? kOffBlack : kTinGrey,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  material.description,
-                  style: kNunitoSans14.copyWith(
-                    color: kGrey,
-                    fontSize: 12,
+                const SizedBox(height: 4),
+                Flexible(
+                  child: Text(
+                    material.description,
+                    style: kNunitoSans14.copyWith(
+                      color: kGrey,
+                      fontSize: 12,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -186,9 +212,9 @@ class MaterialData {
   final personalization.MaterialType type;
   final String name;
   final String description;
-  final String emoji;
+  final String assetPath;
 
-  MaterialData(this.type, this.name, this.description, this.emoji);
+  MaterialData(this.type, this.name, this.description, this.assetPath);
 }
 
 class FunctionalityData {
@@ -197,4 +223,47 @@ class FunctionalityData {
   final String emoji;
 
   FunctionalityData(this.type, this.name, this.emoji);
+}
+
+// Top-level helper to preview an asset image in an InteractiveViewer dialog.
+void _showImagePreview(BuildContext context, String assetPath) {
+  showDialog(
+    context: context,
+    builder: (context) {
+      return Dialog(
+        insetPadding: const EdgeInsets.all(24),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: SizedBox(
+          width: double.infinity,
+          height: 360,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: InteractiveViewer(
+              panEnabled: true,
+              scaleEnabled: true,
+              maxScale: 4.0,
+              minScale: 1.0,
+              child: Image.asset(
+                assetPath,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  color: kSnowFlakeWhite,
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Icon(Icons.image_not_supported, size: 48, color: kTinGrey),
+                      SizedBox(height: 8),
+                      Text('Preview not available')
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    },
+  );
 }
