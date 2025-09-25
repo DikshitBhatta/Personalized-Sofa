@@ -307,19 +307,15 @@ class PatternSelector extends StatelessWidget {
 class DetailsSelector extends StatelessWidget {
   final personalization.StitchingType? selectedStitching;
   final personalization.LegType? selectedLeg;
-  final personalization.FinishType? selectedFinish;
   final ValueChanged<personalization.StitchingType> onStitchingSelected;
   final ValueChanged<personalization.LegType> onLegSelected;
-  final ValueChanged<personalization.FinishType> onFinishSelected;
   
   const DetailsSelector({
     super.key,
     required this.selectedStitching,
     required this.selectedLeg,
-    required this.selectedFinish,
     required this.onStitchingSelected,
     required this.onLegSelected,
-    required this.onFinishSelected,
   });
 
   @override
@@ -397,32 +393,7 @@ class DetailsSelector extends StatelessWidget {
         
         const SizedBox(height: 24),
         
-        _buildDetailSection(
-          context,
-          "Finish Type",
-          [
-            DetailData(
-              personalization.FinishType.matte,
-              "Matte",
-              "Non-reflective surface",
-              assetPath: ImageAssets.finish(personalization.FinishType.matte),
-            ),
-            DetailData(
-              personalization.FinishType.gloss,
-              "Gloss",
-              "High-shine finish",
-              assetPath: ImageAssets.finish(personalization.FinishType.gloss),
-            ),
-            DetailData(
-              personalization.FinishType.oil,
-              "Oil",
-              "Natural protection",
-              assetPath: ImageAssets.finish(personalization.FinishType.oil),
-            ),
-          ],
-          selectedFinish,
-          onFinishSelected,
-        ),
+        // Finish type removed
       ],
     );
   }

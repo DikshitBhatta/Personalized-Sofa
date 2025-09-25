@@ -5,43 +5,76 @@ class PersonalizationProgressBar extends StatelessWidget {
   final int currentStep;
   final int totalSteps;
   final List<bool> stepCompletionStatus;
+  final List<String>? stepLabels;
   
   const PersonalizationProgressBar({
     super.key,
     required this.currentStep,
     required this.totalSteps,
     required this.stepCompletionStatus,
+    this.stepLabels,
   });
+
+  // Calculate visible window of 4 steps
+  List<int> _getVisibleSteps() {
+    const int windowSize = 4;
+    int startIndex;
+    
+    if (currentStep <= 1) {
+      // Show steps 0,1,2,3 when on step 0 or 1
+      startIndex = 0;
+    } else if (currentStep >= totalSteps - 2) {
+      // Show last 4 steps when near the end
+      startIndex = totalSteps - windowSize;
+    } else {
+      // Show current step in position 1 (second position)
+      startIndex = currentStep - 1;
+    }
+    
+    // Ensure we don't go out of bounds
+    startIndex = startIndex.clamp(0, totalSteps - windowSize);
+    
+    return List.generate(windowSize, (i) => startIndex + i)
+        .where((index) => index < totalSteps)
+        .toList();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final visibleSteps = _getVisibleSteps();
+    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           // Progress indicators
-          Row(
-            children: List.generate(totalSteps, (index) {
-              final isCompleted = stepCompletionStatus.length > index && stepCompletionStatus[index];
-              final isPast = currentStep > index;
-              
-              return Expanded(
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: isCompleted || isPast ? kSeaGreen : kChristmasSilver,
-                          borderRadius: BorderRadius.circular(2),
+          SizedBox(
+            width: double.infinity,
+            child: Row(
+              children: List.generate(visibleSteps.length, (i) {
+                final index = visibleSteps[i];
+                final isCompleted = stepCompletionStatus.length > index && stepCompletionStatus[index];
+                final isPast = currentStep > index;
+                
+                return Expanded(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: isCompleted || isPast ? kSeaGreen : kChristmasSilver,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
                         ),
                       ),
-                    ),
-                    if (index < totalSteps - 1) const SizedBox(width: 8),
-                  ],
-                ),
-              );
-            }),
+                      if (i < visibleSteps.length - 1) const SizedBox(width: 8),
+                    ],
+                  ),
+                );
+              }),
+            ),
           ),
           
           const SizedBox(height: 16),
@@ -49,7 +82,7 @@ class PersonalizationProgressBar extends StatelessWidget {
           // Step indicators
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: List.generate(totalSteps, (index) {
+            children: visibleSteps.map((index) {
               final isCompleted = stepCompletionStatus.length > index && stepCompletionStatus[index];
               final isCurrent = currentStep == index;
               final isPast = currentStep > index;
@@ -73,7 +106,7 @@ class PersonalizationProgressBar extends StatelessWidget {
                         ),
                 ),
               );
-            }),
+            }).toList(),
           ),
           
           const SizedBox(height: 8),
@@ -81,12 +114,19 @@ class PersonalizationProgressBar extends StatelessWidget {
           // Step labels
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
-              Text('Audience', style: TextStyle(fontSize: 10, color: kTinGrey)),
-              Text('Health', style: TextStyle(fontSize: 10, color: kTinGrey)),
-              Text('Style', style: TextStyle(fontSize: 10, color: kTinGrey)),
-              Text('Details', style: TextStyle(fontSize: 10, color: kTinGrey)),
-            ],
+            children: visibleSteps.map((index) {
+              final label = stepLabels != null && stepLabels!.length > index 
+                  ? stepLabels![index] 
+                  : 'Step ${index + 1}';
+              return Flexible(
+                child: Text(
+                  label, 
+                  style: const TextStyle(fontSize: 10, color: kTinGrey),
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              );
+            }).toList(),
           ),
         ],
       ),

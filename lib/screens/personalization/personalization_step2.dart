@@ -5,6 +5,7 @@ import 'package:timberr/controllers/personalization_controller.dart';
 import 'package:timberr/models/personalization_data.dart';
 import 'package:timberr/widgets/input/personalization_controls.dart';
 import 'package:timberr/widgets/progress/personalization_progress_bar.dart';
+import 'package:timberr/screens/personalization/personalization_step2b.dart';
 import 'package:timberr/screens/personalization/personalization_step3.dart';
 
 class PersonalizationStep2Screen extends StatefulWidget {
@@ -29,11 +30,12 @@ class _PersonalizationStep2ScreenState extends State<PersonalizationStep2Screen>
   int _numberOfChildren = 1;
   bool _growthAdaptable = true;
   
-  // Pet usage style variables
-  int _petRelaxLocationIndex = 1; // On the sofa cushions by default
-  int _wearLevelIndex = 1; // Moderate by default
-  int _allergySensitivityIndex = 1; // Medium by default
-  int _petFriendlyFeatureIndex = 2; // Standard durability by default
+  // Pet health variables
+  int _petTypeIndex = 0; // Dog by default
+  String _customPetName = '';
+  int _petSizeIndex = 1; // Medium by default
+  int _temperatureSensitivityIndex = 2; // Normal by default
+  int _heightPreferenceIndex = 0; // Low-rise by default
 
   @override
   void initState() {
@@ -56,11 +58,12 @@ class _PersonalizationStep2ScreenState extends State<PersonalizationStep2Screen>
       _numberOfChildren = usageData.numberOfChildren ?? 1;
       _growthAdaptable = usageData.growthAdaptable ?? true;
       
-      // Pet data
-      _petRelaxLocationIndex = usageData.petRelaxLocation?.index ?? 1;
-      _wearLevelIndex = usageData.wearLevel?.index ?? 1;
-      _allergySensitivityIndex = usageData.allergySensitivity?.index ?? 1;
-      _petFriendlyFeatureIndex = usageData.petFriendlyFeature?.index ?? 2;
+      // Pet health data
+      _petTypeIndex = usageData.petType?.index ?? 0;
+      _customPetName = usageData.customPetName ?? '';
+      _petSizeIndex = usageData.petSize?.index ?? 1;
+      _temperatureSensitivityIndex = usageData.temperatureSensitivity?.index ?? 2;
+      _heightPreferenceIndex = usageData.heightPreference?.index ?? 0;
     }
   }
 
@@ -87,13 +90,14 @@ class _PersonalizationStep2ScreenState extends State<PersonalizationStep2Screen>
         );
         break;
       case AudienceType.pet:
-        usageData = UsageStyleData(
-          petRelaxLocation: PetRelaxLocation.values[_petRelaxLocationIndex],
-          wearLevel: WearLevel.values[_wearLevelIndex],
-          allergySensitivity: AllergySensitivity.values[_allergySensitivityIndex],
-          petFriendlyFeature: PetFriendlyFeature.values[_petFriendlyFeatureIndex],
+        _controller.setPetHealthData(
+          petType: PetType.values[_petTypeIndex],
+          customPetName: _customPetName.isNotEmpty ? _customPetName : null,
+          petSize: PetSize.values[_petSizeIndex],
+          temperatureSensitivity: TemperatureSensitivity.values[_temperatureSensitivityIndex],
+          heightPreference: HeightPreference.values[_heightPreferenceIndex],
         );
-        break;
+        return;
       default:
         return;
     }
@@ -130,12 +134,17 @@ class _PersonalizationStep2ScreenState extends State<PersonalizationStep2Screen>
               // Progress bar
               PersonalizationProgressBar(
                 currentStep: controller.currentStep,
-                totalSteps: 4,
-                stepCompletionStatus: [
-                  controller.isStepComplete(0),
-                  controller.isStepComplete(1),
-                  controller.isStepComplete(2),
-                  controller.isStepComplete(3),
+                totalSteps: 8,
+                stepCompletionStatus: List.generate(8, (i) => controller.isStepComplete(i)),
+                stepLabels: const [
+                  'Audience',
+                  'Health',
+                  'Style',
+                  'Details',
+                  'Comfort',
+                  'Room',
+                  'Final',
+                  'Extras',
                 ],
               ),
               
@@ -218,7 +227,12 @@ class _PersonalizationStep2ScreenState extends State<PersonalizationStep2Screen>
                             _saveUsageStyleData();
                             if (controller.canProceedToNext()) {
                               controller.nextStep();
-                              Get.to(() => PersonalizationStep3Screen());
+                              // Navigate to Step2B for pets, otherwise Step3
+                              if (controller.shouldShowPetUsageStep()) {
+                                Get.to(() => const PersonalizationStep2BScreen());
+                              } else {
+                                Get.to(() => PersonalizationStep3Screen());
+                              }
                             } else {
                               Get.snackbar(
                                 "Complete Required Fields",
@@ -351,7 +365,7 @@ class _PersonalizationStep2ScreenState extends State<PersonalizationStep2Screen>
           ),
           PersonalizationOption(
             title: "Playtime & TV",
-            iconPath: 'assets/icons/Playtime.png',
+            iconPath: 'assets/icons/playtime.png',
           ),
           PersonalizationOption(
             title: "Nap & Rest",
@@ -433,94 +447,107 @@ class _PersonalizationStep2ScreenState extends State<PersonalizationStep2Screen>
   List<Widget> _buildPetForm() {
     return [
       PersonalizationCardSelector(
-        label: "Where does your pet like to relax?",
+        label: "What type of pet do you have?",
         helperText: "This helps us design the perfect pet-friendly sofa",
         options: const [
           PersonalizationOption(
-            title: "Beside me on floor",
+            title: "Dog",
             icon: Icons.pets,
           ),
           PersonalizationOption(
-            title: "On sofa cushions",
-            icon: Icons.weekend,
+            title: "Cat",
+            icon: Icons.pets,
           ),
           PersonalizationOption(
-            title: "On armrests/backrest",
-            icon: Icons.chair,
+            title: "Other",
+            icon: Icons.pets_outlined,
           ),
         ],
-        selectedIndex: _petRelaxLocationIndex,
-        onChanged: (index) => setState(() => _petRelaxLocationIndex = index),
+        selectedIndex: _petTypeIndex,
+        onChanged: (index) => setState(() => _petTypeIndex = index),
         crossAxisCount: 3,
       ),
+      
+      // Show custom pet name input if "Other" is selected
+      if (_petTypeIndex == 2) ...[
+        const SizedBox(height: 16),
+        TextFormField(
+          initialValue: _customPetName,
+          onChanged: (value) => setState(() => _customPetName = value),
+          decoration: InputDecoration(
+            labelText: "What type of pet is it?",
+            hintText: "e.g., Rabbit, Bird, etc.",
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        ),
+      ],
       
       const SizedBox(height: 32),
       
       PersonalizationCardSelector(
-        label: "How much scratching or playful wear do you expect?",
+        label: "What size is your pet?",
         options: const [
           PersonalizationOption(
-            title: "Low",
-            icon: Icons.sentiment_satisfied,
-          ),
-          PersonalizationOption(
-            title: "Moderate",
-            icon: Icons.sentiment_neutral,
-          ),
-          PersonalizationOption(
-            title: "High",
-            icon: Icons.sports,
-          ),
-        ],
-        selectedIndex: _wearLevelIndex,
-        onChanged: (index) => setState(() => _wearLevelIndex = index),
-        crossAxisCount: 3,
-      ),
-      
-      const SizedBox(height: 32),
-      
-      PersonalizationCardSelector(
-        label: "How much shedding or allergy sensitivity should we plan for?",
-        options: const [
-          PersonalizationOption(
-            title: "Low",
-            icon: Icons.check_circle,
+            title: "Small",
+            icon: Icons.pets,
           ),
           PersonalizationOption(
             title: "Medium",
-            icon: Icons.warning,
+            icon: Icons.pets,
           ),
           PersonalizationOption(
-            title: "High",
-            icon: Icons.error,
+            title: "Large",
+            icon: Icons.pets,
           ),
         ],
-        selectedIndex: _allergySensitivityIndex,
-        onChanged: (index) => setState(() => _allergySensitivityIndex = index),
+        selectedIndex: _petSizeIndex,
+        onChanged: (index) => setState(() => _petSizeIndex = index),
         crossAxisCount: 3,
       ),
       
       const SizedBox(height: 32),
       
       PersonalizationCardSelector(
-        label: "Would you like the sofa to be extra pet-friendly?",
+        label: "Does your pet get cold easily, or overheat easily?",
         options: const [
           PersonalizationOption(
-            title: "Scratch-resistant",
-            icon: Icons.shield,
+            title: "Gets cold",
+            icon: Icons.ac_unit,
           ),
           PersonalizationOption(
-            title: "Easy-clean fabric",
-            icon: Icons.cleaning_services,
+            title: "Overheats",
+            icon: Icons.whatshot,
           ),
           PersonalizationOption(
-            title: "Standard durability",
-            icon: Icons.home,
+            title: "Normal",
+            icon: Icons.device_thermostat,
           ),
         ],
-        selectedIndex: _petFriendlyFeatureIndex,
-        onChanged: (index) => setState(() => _petFriendlyFeatureIndex = index),
+        selectedIndex: _temperatureSensitivityIndex,
+        onChanged: (index) => setState(() => _temperatureSensitivityIndex = index),
         crossAxisCount: 3,
+      ),
+      
+      const SizedBox(height: 32),
+      
+      PersonalizationCardSelector(
+        label: "Height preference for your pet?",
+        helperText: "For small pets, low-rise is often better for easy access",
+        options: const [
+          PersonalizationOption(
+            title: "Low-rise",
+            icon: Icons.height,
+          ),
+          PersonalizationOption(
+            title: "Plush premium",
+            icon: Icons.weekend,
+          ),
+        ],
+        selectedIndex: _heightPreferenceIndex,
+        onChanged: (index) => setState(() => _heightPreferenceIndex = index),
+        crossAxisCount: 2,
       ),
     ];
   }

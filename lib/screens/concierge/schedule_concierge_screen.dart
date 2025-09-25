@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:timberr/constants.dart';
-import 'package:timberr/screens/home.dart';
+
 import 'package:timberr/controllers/address_controller.dart';
 import 'package:timberr/screens/profile/shipping_address_screen.dart';
 import 'package:timberr/screens/concierge/payment_screen.dart';
@@ -110,63 +110,7 @@ class _ScheduleConciergeScreenState extends State<ScheduleConciergeScreen> {
        contactFilled;
   }
 
-  void _scheduleVisit() {
-    if (_isFormValid()) {
-      // TODO: Implement actual scheduling logic
-      Get.dialog(
-        Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: kSeaGreen,
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: const Icon(Icons.check, color: Colors.white, size: 30),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  "Visit Scheduled!",
-                  style: kNunitoSansBold20.copyWith(color: kOffBlack),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "Sarah will contact you via ${_selectedContactPreference.toLowerCase()} (${_contactController.text.trim()}) to confirm the details.",
-                  textAlign: TextAlign.center,
-                  style: kNunitoSans14.copyWith(color: kGrey),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    Get.back(); // Close dialog
-                    Get.off(() => Home()); // Navigate to home
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: kOffBlack,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
-                  child: Text(
-                    "Done",
-                    style: kNunitoSans14.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        barrierDismissible: false,
-      );
-    }
-  }
+
 
   @override
   Widget build(BuildContext context) {

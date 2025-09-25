@@ -5,7 +5,7 @@ import 'package:timberr/controllers/personalization_controller.dart';
 import 'package:timberr/models/personalization_data.dart' as personalization;
 import 'package:timberr/widgets/input/color_pattern_selector.dart';
 import 'package:timberr/widgets/progress/personalization_progress_bar.dart';
-import 'package:timberr/screens/personalization/personalization_results_screen.dart';
+import 'package:timberr/screens/personalization/personalization_step5.dart';
 
 class PersonalizationStep4Screen extends StatefulWidget {
   const PersonalizationStep4Screen({super.key});
@@ -22,7 +22,6 @@ class _PersonalizationStep4ScreenState extends State<PersonalizationStep4Screen>
   personalization.PatternType? _selectedPattern;
   personalization.StitchingType? _selectedStitching;
   personalization.LegType? _selectedLeg;
-  personalization.FinishType? _selectedFinish;
 
   @override
   void initState() {
@@ -38,7 +37,6 @@ class _PersonalizationStep4ScreenState extends State<PersonalizationStep4Screen>
       _selectedPattern = details.patternType;
       _selectedStitching = details.stitchingType;
       _selectedLeg = details.legType;
-      _selectedFinish = details.finishType;
     }
   }
 
@@ -49,7 +47,6 @@ class _PersonalizationStep4ScreenState extends State<PersonalizationStep4Screen>
       patternType: _selectedPattern,
       stitchingType: _selectedStitching,
       legType: _selectedLeg,
-      finishType: _selectedFinish,
     );
     
     _controller.setPersonalizationDetails(personalizationDetails);
@@ -59,7 +56,7 @@ class _PersonalizationStep4ScreenState extends State<PersonalizationStep4Screen>
     return (_selectedColorHex?.isNotEmpty == true || _selectedPantoneCode?.isNotEmpty == true) &&
            _selectedStitching != null &&
            _selectedLeg != null &&
-           _selectedFinish != null;
+           true;
   }
 
   @override
@@ -87,14 +84,20 @@ class _PersonalizationStep4ScreenState extends State<PersonalizationStep4Screen>
           return Column(
             children: [
               // Progress bar
+              // Progress bar
               PersonalizationProgressBar(
                 currentStep: controller.currentStep,
-                totalSteps: 4,
-                stepCompletionStatus: [
-                  controller.isStepComplete(0),
-                  controller.isStepComplete(1),
-                  controller.isStepComplete(2),
-                  controller.isStepComplete(3),
+                totalSteps: 8,
+                stepCompletionStatus: List.generate(8, (i) => controller.isStepComplete(i)),
+                stepLabels: const [
+                  'Audience',
+                  'Health',
+                  'Style',
+                  'Details',
+                  'Comfort',
+                  'Room',
+                  'Final',
+                  'Extras',
                 ],
               ),
               
@@ -149,14 +152,14 @@ class _PersonalizationStep4ScreenState extends State<PersonalizationStep4Screen>
                       
                       // Details selection
                       Text(
-                        "Finishing Details",
+                        "Design Details",
                         style: kNunitoSansSemiBold18.copyWith(color: kOffBlack),
                       ),
                       const SizedBox(height: 4),
                       Row(
                         children: [
                           Text(
-                            "Choose your preferred finishing options",
+                            "Choose your preferred design options",
                             style: kNunitoSans14.copyWith(color: kGrey),
                           ),
                           const SizedBox(width: 4),
@@ -172,7 +175,6 @@ class _PersonalizationStep4ScreenState extends State<PersonalizationStep4Screen>
                       DetailsSelector(
                         selectedStitching: _selectedStitching,
                         selectedLeg: _selectedLeg,
-                        selectedFinish: _selectedFinish,
                         onStitchingSelected: (stitching) {
                           setState(() {
                             _selectedStitching = stitching;
@@ -181,11 +183,6 @@ class _PersonalizationStep4ScreenState extends State<PersonalizationStep4Screen>
                         onLegSelected: (leg) {
                           setState(() {
                             _selectedLeg = leg;
-                          });
-                        },
-                        onFinishSelected: (finish) {
-                          setState(() {
-                            _selectedFinish = finish;
                           });
                         },
                       ),
@@ -249,18 +246,19 @@ class _PersonalizationStep4ScreenState extends State<PersonalizationStep4Screen>
                           onPressed: () async {
                             _savePersonalizationDetails();
                             if (_isFormValid()) {
-                              await controller.completePersonalization();
-                              _showCompletionDialog();
+                              // Proceed to comfort preferences screen (step 4)
+                              controller.nextStep();
+                              Get.to(() => const PersonalizationStep5Screen());
                             } else {
                               Get.snackbar(
                                 "Complete Required Fields",
-                                "Please select a color and all finishing details before completing",
+                                "Please select a color and all design details before continuing",
                                 snackPosition: SnackPosition.BOTTOM,
                               );
                             }
                           },
                           child: Text(
-                            "Complete Design",
+                            "Continue",
                             style: kNunitoSansSemiBold16.copyWith(color: kTinGrey),
                           ),
                         ),
@@ -355,8 +353,7 @@ class _PersonalizationStep4ScreenState extends State<PersonalizationStep4Screen>
           if (_selectedLeg != null)
             _buildPreviewRow("Legs", _getLegName(_selectedLeg!)),
           
-          if (_selectedFinish != null)
-            _buildPreviewRow("Finish", _getFinishName(_selectedFinish!)),
+          // finish removed from preview
         ],
       ),
     );
@@ -422,136 +419,5 @@ class _PersonalizationStep4ScreenState extends State<PersonalizationStep4Screen>
     }
   }
 
-  String _getFinishName(personalization.FinishType finish) {
-    switch (finish) {
-      case personalization.FinishType.matte:
-        return "Matte Finish";
-      case personalization.FinishType.gloss:
-        return "Gloss Finish";
-      case personalization.FinishType.oil:
-        return "Oil Finish";
-    }
-  }
-
-  void _showCompletionDialog() {
-    Get.dialog(
-      Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: kSeaGreen,
-                  borderRadius: BorderRadius.circular(40),
-                ),
-                child: const Icon(
-                  Icons.check,
-                  color: Colors.white,
-                  size: 40,
-                ),
-              ),
-              
-              const SizedBox(height: 24),
-              
-              Text(
-                "Your Personalization Design Has Been Reserved!",
-                style: kNunitoSansBold20.copyWith(color: kOffBlack),
-              ),
-              
-              const SizedBox(height: 12),
-              
-              Text(
-                "Our team will review it and get back to you with a quote.",
-                textAlign: TextAlign.center,
-                style: kNunitoSans14.copyWith(color: kGrey),
-              ),
-              
-              const SizedBox(height: 24),
-              
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () {
-                        Get.back(); // Close dialog
-                        // Navigate to personalized recommendations screen after a brief delay
-                        Future.delayed(const Duration(milliseconds: 300), () {
-                          Get.to(
-                            () => const PersonalizationResultsScreen(),
-                            transition: Transition.rightToLeft,
-                          );
-                        });
-                      },
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: kOffBlack),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: Text(
-                        "View More",
-                        style: kNunitoSans14.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: kOffBlack,
-                        ),
-                      ),
-                    ),
-                  ),
-                  
-                  const SizedBox(width: 12),
-                  
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Close dialog and pop back to Home screen
-                        Get.back(); // Close dialog
-                        Future.delayed(const Duration(milliseconds: 300), () {
-                          // Pop until we find a route that is NOT a personalization screen
-                          // This will get us back to the Home screen
-                          Get.until((route) {
-                            // Check if the route contains personalization-related content
-                            final routeStr = route.toString().toLowerCase();
-                            final routeName = route.settings.name?.toLowerCase() ?? '';
-                            
-                            // If this route is NOT a personalization screen, stop here
-                            final isPersonalizationRoute = 
-                                routeStr.contains('personalization') ||
-                                routeName.contains('personalization');
-                            
-                            // Also stop if we've reached the first route as a fallback
-                            return !isPersonalizationRoute || route.isFirst;
-                          });
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: kOffBlack,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: Text(
-                        "Done",
-                        style: kNunitoSans14.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-      barrierDismissible: false,
-    );
-  }
+  
 }

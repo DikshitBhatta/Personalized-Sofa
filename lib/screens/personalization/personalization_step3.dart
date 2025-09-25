@@ -68,14 +68,20 @@ class _PersonalizationStep3ScreenState extends State<PersonalizationStep3Screen>
           return Column(
             children: [
               // Progress bar
+              // Progress bar
               PersonalizationProgressBar(
                 currentStep: controller.currentStep,
-                totalSteps: 4,
-                stepCompletionStatus: [
-                  controller.isStepComplete(0),
-                  controller.isStepComplete(1),
-                  controller.isStepComplete(2),
-                  controller.isStepComplete(3),
+                totalSteps: 8,
+                stepCompletionStatus: List.generate(8, (i) => controller.isStepComplete(i)),
+                stepLabels: const [
+                  'Audience',
+                  'Health',
+                  'Style',
+                  'Details',
+                  'Comfort',
+                  'Room',
+                  'Final',
+                  'Extras',
                 ],
               ),
               

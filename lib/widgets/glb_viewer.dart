@@ -2,17 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
 import 'package:timberr/constants.dart';
 import 'package:timberr/screens/fullscreen_3d_view.dart';
+import 'dart:io';
 
 class GlbViewer extends StatefulWidget {
   final String assetPath;
   final double? height;
   final double? width;
+  final String? cameraOrbit;
   
   const GlbViewer({
     super.key, 
     required this.assetPath,
     this.height,
     this.width,
+  this.cameraOrbit,
   });
 
   @override
@@ -28,6 +31,7 @@ class _GlbViewerState extends State<GlbViewer> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    debugPrint("GlbViewer: Initializing with asset path: ${widget.assetPath}");
     _rotationController = AnimationController(
       duration: const Duration(seconds: 8),
       vsync: this,
@@ -38,15 +42,28 @@ class _GlbViewerState extends State<GlbViewer> with TickerProviderStateMixin {
       vsync: this,
     )..repeat(reverse: true);
     
-    // Give the model viewer some time to load, then show fallback if needed
-    Future.delayed(const Duration(seconds: 5), () {
+    // Give the model viewer more time to load remote models; increase to 12s
+    Future.delayed(const Duration(seconds: 12), () {
       if (mounted && _isLoading) {
+        debugPrint("GlbViewer: Timeout reached, showing error fallback for: ${widget.assetPath}");
         setState(() {
           _hasError = true;
           _isLoading = false;
         });
       }
     });
+  }
+
+  String _getModelViewerSrc() {
+    // Check if this is a local file path
+    if (File(widget.assetPath).existsSync()) {
+      // For local files, ModelViewer needs a file:// URI
+      debugPrint("GlbViewer: Converting local path to file URI: ${widget.assetPath}");
+      return 'file://${widget.assetPath}';
+    }
+    // For URLs, use as-is
+    debugPrint("GlbViewer: Using remote URL: ${widget.assetPath}");
+    return widget.assetPath;
   }
 
   @override
@@ -91,22 +108,25 @@ class _GlbViewerState extends State<GlbViewer> with TickerProviderStateMixin {
                   widthFactor: 0.9,
                   heightFactor: 0.9,
                   child: ModelViewer(
-                    backgroundColor: const Color.fromARGB(0xFF, 0xF8, 0xF8, 0xF8),
-                    src: widget.assetPath,
+                    backgroundColor: Colors.white,
+                    src: _getModelViewerSrc(),
                     alt: "Personalized 3D Sofa Model",
                     ar: false,
                     autoRotate: true,
                     autoRotateDelay: 1000,
-                    rotationPerSecond: '30deg',
+                    rotationPerSecond: '20deg',
                     cameraControls: true,
                     touchAction: TouchAction.panY,
                     interactionPrompt: InteractionPrompt.auto,
                     loading: Loading.eager,
-                    fieldOfView: '30deg',
-                    minCameraOrbit: 'auto 0deg 1.5m',
-                    maxCameraOrbit: 'auto 180deg 2.5m',
+                    // Tune camera to be slightly further back so the whole model fits
+                    fieldOfView: '28deg',
+                    // Allow override from widget; default moves camera back on Z axis
+                    cameraOrbit: widget.cameraOrbit ?? '0deg 1.6m 3.0m',
+                    minCameraOrbit: 'auto 0deg 2.0m',
+                    maxCameraOrbit: 'auto 180deg 4.0m',
                     onWebViewCreated: (controller) {
-                      debugPrint("3D Model viewer created successfully");
+                      debugPrint("GlbViewer: ModelViewer WebView created for: ${widget.assetPath}");
                       setState(() {
                         _isLoading = false;
                       });

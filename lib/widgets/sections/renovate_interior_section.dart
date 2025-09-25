@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:timberr/constants.dart';
+import 'package:timberr/screens/catalogue_screen.dart';
 
 class RenovateInteriorSection extends StatelessWidget {
   const RenovateInteriorSection({super.key});
@@ -107,7 +109,7 @@ class RenovateInteriorSection extends StatelessWidget {
                   // Call to action button
                   GestureDetector(
                     onTap: () {
-                      // Navigate to catalog or products page
+                      Get.to(() => const CatalogueScreen());
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(

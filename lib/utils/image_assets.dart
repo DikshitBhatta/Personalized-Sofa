@@ -45,17 +45,7 @@ class ImageAssets {
     }
   }
 
-  // Finish
-  static String finish(personalization.FinishType type) {
-    switch (type) {
-      case personalization.FinishType.matte:
-        return 'assets/materials/finish/matte_finish.jpg';
-      case personalization.FinishType.gloss:
-        return 'assets/materials/finish/gloss_finish.png';
-      case personalization.FinishType.oil:
-        return 'assets/materials/finish/oil_finish.jpeg';
-    }
-  }
+  // Finish images removed (finish type no longer used)
 
   // Fabrics (used in MaterialGrid)
   static String fabric(personalization.MaterialType type) {

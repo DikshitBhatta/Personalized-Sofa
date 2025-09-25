@@ -81,7 +81,7 @@ class PersonalizationLaunchScreen extends StatelessWidget {
               const SizedBox(height: 16),
               _buildFeatureItem("📏", "Perfect measurements", "Ergonomic design for comfort"),
               const SizedBox(height: 16),
-              _buildFeatureItem("🎨", "Your style choices", "Materials, colors, and finishes"),
+              _buildFeatureItem("🎨", "Your style choices", "Materials, colors, and details"),
               const SizedBox(height: 16),
               _buildFeatureItem("✨", "Professional quality", "Handcrafted with premium materials"),
               
