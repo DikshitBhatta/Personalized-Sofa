@@ -116,7 +116,7 @@ class _PersonalizationStep4ScreenState extends State<PersonalizationStep4Screen>
                       const SizedBox(height: 8),
                       Text(
                         controller.getStepDescription(3),
-                        style: kNunitoSans18.copyWith(color: kTinGrey),
+                        style: kNunitoSans18.copyWith(color: kGraniteGrey),
                       ),
                       
                       const SizedBox(height: 32),
@@ -228,7 +228,7 @@ class _PersonalizationStep4ScreenState extends State<PersonalizationStep4Screen>
                           },
                           child: Text(
                             "Back",
-                            style: kNunitoSansSemiBold16.copyWith(color: kTinGrey),
+                            style: kNunitoSansSemiBold16.copyWith(color: kGraniteGrey),
                           ),
                         ),
                       ),
@@ -283,12 +283,24 @@ class _PersonalizationStep4ScreenState extends State<PersonalizationStep4Screen>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            kOffBlack.withOpacity(0.1),
-            kOffBlack.withOpacity(0.05),
+            kIvoryGradientLight,
+            kIvoryGradientMid,
+            kIvoryGradientDark,
           ],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: kOffBlack.withOpacity(0.3)),
+        border: Border.all(
+          color: kIvoryGradientDark.withOpacity(0.5),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: kIvoryGradientDark.withOpacity(0.2),
+            spreadRadius: 0,
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -321,7 +333,7 @@ class _PersonalizationStep4ScreenState extends State<PersonalizationStep4Screen>
                 "Color: ",
                 style: kNunitoSans14.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: kTinGrey,
+                  color: kGraniteGrey,
                 ),
               ),
               if (_selectedColorHex != null) ...[
@@ -369,7 +381,7 @@ class _PersonalizationStep4ScreenState extends State<PersonalizationStep4Screen>
             "$label: ",
             style: kNunitoSans14.copyWith(
               fontWeight: FontWeight.w600,
-              color: kTinGrey,
+              color: kGraniteGrey,
             ),
           ),
           Text(

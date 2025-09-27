@@ -106,7 +106,7 @@ class _PersonalizationStep2BScreenState extends State<PersonalizationStep2BScree
                       const SizedBox(height: 8),
                       Text(
                         controller.getStepDescription(2),
-                        style: kNunitoSans18.copyWith(color: kTinGrey),
+                        style: kNunitoSans18.copyWith(color: kGraniteGrey),
                       ),
                       
                       const SizedBox(height: 32),
@@ -261,7 +261,7 @@ class _PersonalizationStep2BScreenState extends State<PersonalizationStep2BScree
                           },
                           child: Text(
                             "Back",
-                            style: kNunitoSansSemiBold16.copyWith(color: kTinGrey),
+                            style: kNunitoSansSemiBold16.copyWith(color: kGraniteGrey),
                           ),
                         ),
                       ),
@@ -284,7 +284,7 @@ class _PersonalizationStep2BScreenState extends State<PersonalizationStep2BScree
                           },
                           child: Text(
                             "Continue",
-                            style: kNunitoSansSemiBold16.copyWith(color: kTinGrey),
+                            style: kNunitoSansSemiBold16.copyWith(color: kGraniteGrey),
                           ),
                         ),
                       ),

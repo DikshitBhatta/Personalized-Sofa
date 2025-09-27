@@ -68,12 +68,12 @@ class _ConciergePaymentScreenState extends State<ConciergePaymentScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         title: Row(
           children: [
-            const Icon(Icons.task_alt, color: Colors.green, size: 22),
+            const Icon(Icons.task_alt, color: kSeaGreen, size: 22),
             const SizedBox(width: 8),
-            const Expanded(
+            Expanded(
               child: Text(
                 'Payment Submitted',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style: kNunitoSansSemiBold18.copyWith(color: kOffBlack),
               ),
             ),
           ],
@@ -81,12 +81,15 @@ class _ConciergePaymentScreenState extends State<ConciergePaymentScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Text("Thank you—your concierge retainer has been submitted for review."),
+          children: [
+            Text(
+              "Thank you—your concierge retainer has been submitted for review.",
+              style: kNunitoSans14.copyWith(color: kGrey),
+            ),
             SizedBox(height: 12),
             _NoteBox(
-              color: Color(0xFFE8F5E9),
-              border: Color(0xFFC8E6C9),
+              color: kIvoryGradientLight,
+              border: kIvoryGradientDark,
               icon: Icons.info_outline,
               text:
                   "Our concierge will verify your payment and confirm the home visit via your preferred contact.",
@@ -100,7 +103,10 @@ class _ConciergePaymentScreenState extends State<ConciergePaymentScreen> {
               Navigator.of(c).pop();
               Get.off(() => Home());
             },
-            child: const Text('Got it'),
+            child: Text(
+              'Got it',
+              style: kNunitoSansSemiBold16.copyWith(color: kOffBlack),
+            ),
           ),
         ],
       ),
@@ -109,19 +115,23 @@ class _ConciergePaymentScreenState extends State<ConciergePaymentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Stack(
       children: [
         Scaffold(
           backgroundColor: kBackgroundBeige,
           appBar: AppBar(
-            backgroundColor: kBackgroundBeige,
-            title: const Text(
-              'Proceed to Payment',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            centerTitle: true,
-          ),
+        backgroundColor: kBackgroundBeige,
+        elevation: 0,
+        leading: IconButton(
+          onPressed: () => Get.back(),
+          icon: const Icon(Icons.arrow_back_ios_new, color: kOffBlack, size: 20),
+        ),
+        centerTitle: true,
+        title: Text(
+          "Proceed to Payment",
+          style: kMerriweatherBold16.copyWith(color: kOffBlack),
+        ),
+      ),
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -143,15 +153,14 @@ class _ConciergePaymentScreenState extends State<ConciergePaymentScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
+                          Text(
                             'Concierge Retainer',
-                            style: TextStyle(fontWeight: FontWeight.w600),
+                            style: kNunitoSansSemiBold16.copyWith(color: kOffBlack),
                           ),
                           Text(
                             '฿${retainerAmount.toStringAsFixed(2)}',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w800,
-                              color: Colors.green.shade700,
+                            style: kNunitoSansBold18.copyWith(
+                              color: kSeaGreen,
                             ),
                           ),
                         ],
@@ -164,7 +173,7 @@ class _ConciergePaymentScreenState extends State<ConciergePaymentScreen> {
                 // Payment method
                 Text(
                   'Choose Payment Method',
-                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  style: kNunitoSansSemiBold18.copyWith(color: kOffBlack),
                 ),
                 const SizedBox(height: 12),
                 _MethodSelector(
@@ -194,10 +203,14 @@ class _ConciergePaymentScreenState extends State<ConciergePaymentScreen> {
                           width: double.infinity,
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
-                            color: (screenshotUploaded ? const Color(0xFFE8F5E9) : const Color(0xFFE3F2FD)),
+                            gradient: LinearGradient(
+                              colors: [kIvoryGradientLight, kIvoryGradientMid, kIvoryGradientDark],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
-                              color: (screenshotUploaded ? const Color(0xFFC8E6C9) : const Color(0xFFBBDEFB)),
+                              color: kIvoryGradientDark.withOpacity(0.5),
                             ),
                           ),
                           child: Column(
@@ -205,25 +218,28 @@ class _ConciergePaymentScreenState extends State<ConciergePaymentScreen> {
                             children: [
                               Icon(
                                 screenshotUploaded ? Icons.check_circle : Icons.upload_file,
-                                color: screenshotUploaded ? Colors.green.shade700 : Colors.blue.shade700,
+                                color: screenshotUploaded ? kSeaGreen : kOffBlack,
                               ),
                               const SizedBox(height: 8),
                               Text(
                                 screenshotUploaded
                                     ? 'Payment screenshot uploaded'
                                     : 'Upload payment screenshot',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  color: screenshotUploaded ? Colors.green.shade800 : Colors.blue.shade800,
+                                style: kNunitoSansSemiBold16.copyWith(
+                                  color: screenshotUploaded ? kSeaGreen : kOffBlack,
                                 ),
                               ),
                               const SizedBox(height: 8),
                               if (!screenshotUploaded)
                                 ElevatedButton.icon(
                                   onPressed: _pickPaymentScreenshot,
-                                  icon: const Icon(Icons.photo_library),
-                                  label: const Text('Choose Screenshot'),
+                                  icon: const Icon(Icons.photo_library, color: kLynxWhite),
+                                  label: Text(
+                                    'Choose Screenshot',
+                                    style: kNunitoSansSemiBold16.copyWith(color: kLynxWhite),
+                                  ),
                                   style: ElevatedButton.styleFrom(
+                                    backgroundColor: kOffBlack,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
@@ -250,15 +266,15 @@ class _ConciergePaymentScreenState extends State<ConciergePaymentScreen> {
                             child: ElevatedButton(
                               onPressed: _processPayment,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green.shade600,
+                                backgroundColor: kSeaGreen,
                                 padding: const EdgeInsets.symmetric(vertical: 14),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
-                              child: const Text(
+                              child: Text(
                                 'Submit for Review',
-                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                                style: kNunitoSansSemiBold16.copyWith(color: kLynxWhite),
                               ),
                             ),
                           ),
@@ -269,7 +285,7 @@ class _ConciergePaymentScreenState extends State<ConciergePaymentScreen> {
                 if (paymentMethod == 'line' && !showQRCode) ...[
                   _Card(
                     title: 'LINE Pay',
-                    emoji: '💚',
+                    emoji: '🖤',
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -284,13 +300,16 @@ class _ConciergePaymentScreenState extends State<ConciergePaymentScreen> {
                           child: ElevatedButton(
                             onPressed: _processPayment, // stub—wire to your LINE Pay flow
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green.shade600,
+                              backgroundColor: kOffBlack,
                               padding: const EdgeInsets.symmetric(vertical: 14),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
                             ),
-                            child: const Text('Pay with LINE', style: TextStyle(color: Colors.white)),
+                            child: Text(
+                              'Pay with LINE',
+                              style: kNunitoSansSemiBold16.copyWith(color: kLynxWhite),
+                            ),
                           ),
                         ),
                       ],
@@ -326,7 +345,7 @@ class _ConciergePaymentScreenState extends State<ConciergePaymentScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(msg),
-        backgroundColor: isError ? Colors.red.shade700 : Colors.black87,
+        backgroundColor: isError ? kFireOpal : kOffBlack,
       ),
     );
   }
@@ -346,11 +365,11 @@ class _Card extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: kLynxWhite,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: kOffBlack.withOpacity(0.06),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),
@@ -365,7 +384,7 @@ class _Card extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
+                  style: kNunitoSansBold18.copyWith(color: kOffBlack),
                 ),
               ),
             ],
@@ -390,7 +409,7 @@ class _KV extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Text(label, style: const TextStyle(color: Colors.black54)),
+            child: Text(label, style: kNunitoSans14.copyWith(color: kGrey)),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -398,7 +417,7 @@ class _KV extends StatelessWidget {
             child: Text(
               value,
               textAlign: TextAlign.right,
-              style: const TextStyle(fontWeight: FontWeight.w600),
+              style: kNunitoSansSemiBold16.copyWith(color: kOffBlack),
             ),
           ),
         ],
@@ -416,8 +435,8 @@ class _NoteBox extends StatelessWidget {
   const _NoteBox({
     required this.icon,
     required this.text,
-    this.color = const Color(0xFFF3F6FA),
-    this.border = const Color(0xFFE5EAF1),
+    this.color = kIvoryGradientLight,
+    this.border = kIvoryGradientDark,
   });
 
   @override
@@ -429,12 +448,12 @@ class _NoteBox extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 18, color: Colors.black54),
+          Icon(icon, size: 18, color: kGrey),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(fontSize: 13.5, color: Colors.black87),
+              style: kNunitoSans14.copyWith(color: kOffBlack),
             ),
           ),
         ],
@@ -457,28 +476,28 @@ class _QRPlaceholder extends StatelessWidget {
           width: 220,
           height: 220,
           decoration: BoxDecoration(
-            color: Colors.grey.shade100,
+            color: kSnowFlakeWhite,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey.shade300),
+            border: Border.all(color: kChristmasSilver),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.qr_code, size: 96, color: Colors.grey.shade600),
+              Icon(Icons.qr_code, size: 96, color: kGrey),
               const SizedBox(height: 8),
-              Text('QR Code', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+              Text('QR Code', style: kNunitoSans12Grey),
             ],
           ),
         ),
         const SizedBox(height: 14),
         Text(
           'Amount: ฿${amount.toStringAsFixed(2)}',
-          style: TextStyle(fontWeight: FontWeight.w700, color: Colors.green.shade700),
+          style: kNunitoSansBold16.copyWith(color: kSeaGreen),
         ),
         const SizedBox(height: 6),
         Text(
           'Transaction ID: $transactionId',
-          style: const TextStyle(fontFamily: 'monospace', fontSize: 12, color: Colors.black54),
+          style: kNunitoSans12Grey.copyWith(fontFamily: 'monospace'),
         ),
       ],
     );
@@ -495,15 +514,15 @@ class _MethodSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration:
-          BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), boxShadow: [
-        BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 12, offset: const Offset(0, 6)),
+          BoxDecoration(color: kLynxWhite, borderRadius: BorderRadius.circular(12), boxShadow: [
+        BoxShadow(color: kOffBlack.withOpacity(0.05), blurRadius: 12, offset: const Offset(0, 6)),
       ]),
       child: Column(
         children: [
           RadioListTile<String>(
             title: Row(
               children: [
-                Icon(Icons.qr_code, color: Colors.blue.shade700),
+                Icon(Icons.qr_code, color: kOffBlack),
                 const SizedBox(width: 8),
                 const Text('QR Code Payment'),
               ],
@@ -517,7 +536,7 @@ class _MethodSelector extends StatelessWidget {
           RadioListTile<String>(
             title: Row(
               children: [
-                Icon(Icons.payment, color: Colors.green.shade700),
+                Icon(Icons.payment, color: kOffBlack),
                 const SizedBox(width: 8),
                 const Text('LINE Pay'),
               ],

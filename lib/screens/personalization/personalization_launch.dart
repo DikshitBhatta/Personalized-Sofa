@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:timberr/constants.dart';
+import 'package:timberr/controllers/personalization_controller.dart';
 import 'package:timberr/models/personalization_data.dart';
 import 'package:timberr/screens/personalization/personalization_flow.dart';
 import 'package:timberr/widgets/buttons/custom_elevated_button.dart';
@@ -17,11 +18,17 @@ class PersonalizationLaunchScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: kBackgroundBeige,
         elevation: 0,
+        leading: IconButton(
+          onPressed: () {
+            Get.back();
+          },
+          icon: const Icon(Icons.arrow_back_ios_new, color: kOffBlack, size: 20),
+        ),
+        centerTitle: true,
         title: Text(
           "PERSONALIZE YOUR SOFA",
           style: kMerriweatherBold16.copyWith(color: kOffBlack),
         ),
-        centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),

@@ -1,0 +1,85 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Allow authenticated users to read products (public data)
+    match /Products/{productId} {
+      allow read: if request.auth != null;
+      allow write: if false; // Only admins should write products
+    }
+    
+    // Allow users to read/write their own user data
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // Allow personalization sessions under user document
+      match /personalization_sessions/{sessionId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+    
+    // Allow users to manage their favorites
+    match /favorites/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Allow users to manage their cart
+    match /cart/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Allow users to manage their orders
+    match /orders/{orderId} {
+      allow read, write: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && 
+        request.resource.data.userId == request.auth.uid;
+    }
+    
+    // Allow users to manage their addresses - UPDATED FOR YOUR DATA STRUCTURE
+    match /addresses/{addressId} {
+      allow read, write: if request.auth != null && 
+        resource.data.user_id == request.auth.uid;
+      allow create: if request.auth != null && 
+        request.resource.data.user_id == request.auth.uid;
+    }
+    
+    // Allow users to manage their card details
+    match /cardDetails/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Allow users to read/write reviews they created
+    match /reviews/{reviewId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && 
+        request.resource.data.userId == request.auth.uid;
+    }
+    
+    // Categories (public read access)
+    match /categories/{categoryId} {
+      allow read: if request.auth != null;
+      allow write: if false; // Admin only
+    }
+    
+    match /analytics/{analyticsId} {
+      allow read: if false; // Admin only
+      allow create: if request.auth != null;
+    }
+    
+    // Cart items collection
+    match /cart_items/{cartItemId} {
+      allow read, write, create, delete: if request.auth != null;
+    }
+    
+    // Card details collection
+    match /card_details/{cardId} {
+      allow read, write, create, delete: if request.auth != null && 
+        resource.data.user_id == request.auth.uid;
+      allow create: if request.auth != null && 
+        request.resource.data.user_id == request.auth.uid;
+    }
+  }
+}

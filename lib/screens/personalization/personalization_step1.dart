@@ -63,7 +63,7 @@ class PersonalizationStep1Screen extends StatelessWidget {
                       const SizedBox(height: 8),
                       Text(
                         controller.getStepDescription(0),
-                        style: kNunitoSans18.copyWith(color: kTinGrey),
+                        style: kNunitoSans18.copyWith(color: kGraniteGrey),
                       ),
                       
                       const SizedBox(height: 32),
@@ -133,7 +133,7 @@ class PersonalizationStep1Screen extends StatelessWidget {
                           onPressed: () => Get.back(),
                           child: Text(
                             "Back",
-                            style: kNunitoSansSemiBold16.copyWith(color: kTinGrey),
+                            style: kNunitoSansSemiBold16.copyWith(color: kGraniteGrey),
                           ),
                         ),
                       ),

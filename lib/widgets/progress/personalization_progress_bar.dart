@@ -64,7 +64,7 @@ class PersonalizationProgressBar extends StatelessWidget {
                         child: Container(
                           height: 4,
                           decoration: BoxDecoration(
-                            color: isCompleted || isPast ? kOffBlack : kChristmasSilver,
+                            color: isCompleted || isPast ? kOffBlack : Colors.white,
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
@@ -91,7 +91,7 @@ class PersonalizationProgressBar extends StatelessWidget {
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: isCompleted ? kOffBlack : (isCurrent ? kOffBlack : kChristmasSilver),
+                  color: isCompleted ? kOffBlack : (isCurrent ? kOffBlack : Colors.white),
                   shape: BoxShape.circle,
                 ),
                 child: Center(

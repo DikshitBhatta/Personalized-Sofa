@@ -2,19 +2,37 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:timberr/constants.dart';
 import 'package:timberr/controllers/address_controller.dart';
-import 'package:timberr/screens/input/add_shipping_screen.dart';
+import 'package:timberr/screens/input/enhanced_add_shipping_screen.dart';
 import 'package:timberr/widgets/cards/address_card.dart';
 
-class ShippingAddressScreen extends StatelessWidget {
+class ShippingAddressScreen extends StatefulWidget {
   const ShippingAddressScreen({super.key});
 
-  void _addOnTap() {
-    Get.to(
-      () => AddShippingScreen(),
+  @override
+  State<ShippingAddressScreen> createState() => _ShippingAddressScreenState();
+}
+
+class _ShippingAddressScreenState extends State<ShippingAddressScreen> {
+  final AddressController _addressController = Get.find<AddressController>();
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch addresses when screen loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _addressController.fetchAddresses();
+    });
+  }
+
+  void _addOnTap() async {
+    await Get.to(
+      () => const EnhancedAddShippingScreen(),
       transition: Transition.cupertino,
       duration: const Duration(milliseconds: 600),
       curve: Curves.easeOut,
     );
+    // Refresh addresses when returning from add screen
+    await _addressController.fetchAddresses();
   }
 
   @override

@@ -356,7 +356,7 @@ class _PersonalizationResultsScreenState extends State<PersonalizationResultsScr
                     Center(
                       child: Column(
                         children: [
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 10),
                           // 3D Model Viewer
                           FadeInWidget(
                             child: Column(
@@ -371,6 +371,40 @@ class _PersonalizationResultsScreenState extends State<PersonalizationResultsScr
                                   style: kNunitoSans14.copyWith(color: kGrey),
                                 ),
                                 const SizedBox(height: 20),
+
+                                // Personalization summary (placed right below the intro text)
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: kLynxWhite,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: kGrey.withOpacity(0.2)),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.palette_outlined,
+                                            color: kOffBlack,
+                                            size: 20,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            "Your Personalization",
+                                            style: kNunitoSansSemiBold16.copyWith(color: kOffBlack, fontSize: 14),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 12),
+                                      _buildPersonalizationSummary(),
+                                    ],
+                                  ),
+                                ),
+
+                                const SizedBox(height: 20),
+
                                 // NEW: Two-preview system
                                 Obx(() {
                                   final generatingPreviews = _sofaGenCtrl.isGeneratingPreviews.value;
@@ -412,7 +446,7 @@ class _PersonalizationResultsScreenState extends State<PersonalizationResultsScr
                                               width: double.infinity,
                                               decoration: BoxDecoration(
                                                 borderRadius: BorderRadius.circular(12),
-                                                border: Border.all(color: kSeaGreen.withOpacity(0.3)),
+                                                border: Border.all(color: kOffBlack.withOpacity(0.3)),
                                               ),
                                               child: ClipRRect(
                                                 borderRadius: BorderRadius.circular(12),
@@ -446,8 +480,8 @@ class _PersonalizationResultsScreenState extends State<PersonalizationResultsScr
                                             ),
                                             // Price tag positioned at bottom right
                                             Positioned(
-                                              bottom: 12,
-                                              right: 12,
+                                              bottom: 0,
+                                              left: 12,
                                               child: Container(
                                                 decoration: BoxDecoration(
                                                   boxShadow: [
@@ -673,8 +707,8 @@ class _PersonalizationResultsScreenState extends State<PersonalizationResultsScr
                                         icon: const Icon(Icons.edit, size: 18),
                                         label: const Text('Edit Personalization'),
                                         style: OutlinedButton.styleFrom(
-                                          foregroundColor: kSeaGreen,
-                                          side: BorderSide(color: kSeaGreen),
+                                          foregroundColor: kOffBlack,
+                                          side: BorderSide(color: kOffBlack),
                                           padding: const EdgeInsets.symmetric(vertical: 12),
                                         ),
                                       ),
@@ -741,34 +775,7 @@ class _PersonalizationResultsScreenState extends State<PersonalizationResultsScr
                                     ],
                                   ),
                                 ),
-                                Container(
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    color: kLynxWhite,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: kGrey.withOpacity(0.2)),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.palette_outlined,
-                                            color: kOffBlack,
-                                            size: 20,
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Text(
-                                            "Your Personalization",
-                                            style: kNunitoSansSemiBold16.copyWith(color: kOffBlack, fontSize: 14),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 12),
-                                      _buildPersonalizationSummary(),
-                                    ],
-                                  ),
-                                ),
+                                
                                 
                                 const SizedBox(height: 16),
                               ],

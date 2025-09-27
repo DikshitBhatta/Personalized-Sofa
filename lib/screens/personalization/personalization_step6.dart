@@ -146,7 +146,7 @@ class _PersonalizationStep6ScreenState extends State<PersonalizationStep6Screen>
             const SizedBox(height: 12),
             Text(
               "No photo added yet",
-              style: kNunitoSans16.copyWith(color: kTinGrey),
+              style: kNunitoSans16.copyWith(color: kGraniteGrey),
             ),
             const SizedBox(height: 4),
             Text(
@@ -318,7 +318,7 @@ class _PersonalizationStep6ScreenState extends State<PersonalizationStep6Screen>
                       const SizedBox(height: 8),
                       Text(
                         controller.getStepDescription(5),
-                        style: kNunitoSans18.copyWith(color: kTinGrey),
+                        style: kNunitoSans18.copyWith(color: kGraniteGrey),
                       ),
 
                       const SizedBox(height: 32),
@@ -427,7 +427,7 @@ class _PersonalizationStep6ScreenState extends State<PersonalizationStep6Screen>
                                   const SizedBox(height: 4),
                                   Text(
                                     "A photo of your room helps us suggest furniture that matches your space, lighting, and existing decor. This step is optional but highly recommended for better personalization.",
-                                    style: kNunitoSans14.copyWith(color: kTinGrey),
+                                    style: kNunitoSans14.copyWith(color: kGraniteGrey),
                                   ),
                                 ],
                               ),
@@ -470,7 +470,7 @@ class _PersonalizationStep6ScreenState extends State<PersonalizationStep6Screen>
                           },
                           child: Text(
                             "Back",
-                            style: kNunitoSansSemiBold16.copyWith(color: kTinGrey),
+                            style: kNunitoSansSemiBold16.copyWith(color: kGraniteGrey),
                           ),
                         ),
                       ),

@@ -110,7 +110,7 @@ class _PersonalizationStep7ScreenState extends State<PersonalizationStep7Screen>
                       const SizedBox(height: 8),
                       Text(
                         controller.getStepDescription(6),
-                        style: kNunitoSans18.copyWith(color: kTinGrey),
+                        style: kNunitoSans18.copyWith(color: kGraniteGrey),
                       ),
 
                       const SizedBox(height: 32),
@@ -245,7 +245,7 @@ class _PersonalizationStep7ScreenState extends State<PersonalizationStep7Screen>
                                   const SizedBox(height: 4),
                                   Text(
                                     "These preferences help us fine-tune our recommendations to match exactly what you're looking for in your perfect sofa.",
-                                    style: kNunitoSans14.copyWith(color: kTinGrey),
+                                    style: kNunitoSans14.copyWith(color: kGraniteGrey),
                                   ),
                                 ],
                               ),
@@ -288,7 +288,7 @@ class _PersonalizationStep7ScreenState extends State<PersonalizationStep7Screen>
                           },
                           child: Text(
                             "Back",
-                            style: kNunitoSansSemiBold16.copyWith(color: kTinGrey),
+                            style: kNunitoSansSemiBold16.copyWith(color: kGraniteGrey),
                           ),
                         ),
                       ),

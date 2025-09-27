@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:timberr/constants.dart';
 import 'package:timberr/models/address.dart';
+import 'package:timberr/controllers/address_controller.dart';
 import 'package:timberr/screens/input/edit_shipping_screen.dart';
 
 class AddressCard extends StatelessWidget {
@@ -24,6 +25,53 @@ class AddressCard extends StatelessWidget {
       transition: Transition.cupertino,
       duration: const Duration(milliseconds: 600),
       curve: Curves.easeOut,
+    );
+  }
+
+  void _onDeleteTap() {
+    Get.dialog(
+      AlertDialog(
+        backgroundColor: kBackgroundBeige,
+        title: const Text(
+          "Delete Address",
+          style: kMerriweatherBold16,
+        ),
+        content: Text(
+          "Are you sure you want to delete this address?\n\n${address.displayAddress()}",
+          style: kNunitoSans14,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text(
+              "Cancel",
+              style: kNunitoSans14.copyWith(color: kGrey),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back(); // Close dialog
+              final AddressController addressController = Get.find<AddressController>();
+              addressController.deleteAddress(index);
+              Get.snackbar(
+                "Deleted",
+                "Address deleted successfully!",
+                snackPosition: SnackPosition.BOTTOM,
+                backgroundColor: kSeaGreen.withOpacity(0.8),
+                colorText: Colors.white,
+                duration: const Duration(seconds: 2),
+              );
+            },
+            child: Text(
+              "Delete",
+              style: kNunitoSans14.copyWith(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -56,14 +104,30 @@ class AddressCard extends StatelessWidget {
                   style: kNunitoSansBold18,
                 ),
                 if (isEditable)
-                  GestureDetector(
-                    onTap: _onEditTap,
-                    child: SvgPicture.asset(
-                      "assets/icons/edit_icon.svg",
-                      height: 24,
-                      width: 24,
-                      fit: BoxFit.scaleDown,
-                    ),
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: _onDeleteTap,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          child: const Icon(
+                            Icons.delete_outline,
+                            color: Colors.red,
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: _onEditTap,
+                        child: SvgPicture.asset(
+                          "assets/icons/edit_icon.svg",
+                          height: 24,
+                          width: 24,
+                          fit: BoxFit.scaleDown,
+                        ),
+                      ),
+                    ],
                   ),
               ],
             ),

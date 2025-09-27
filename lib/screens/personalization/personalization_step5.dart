@@ -136,7 +136,7 @@ class _PersonalizationStep5ScreenState extends State<PersonalizationStep5Screen>
                       const SizedBox(height: 8),
                       Text(
                         controller.getStepDescription(4),
-                        style: kNunitoSans18.copyWith(color: kTinGrey),
+                        style: kNunitoSans18.copyWith(color: kGraniteGrey),
                       ),
 
                       const SizedBox(height: 32),
@@ -277,7 +277,7 @@ class _PersonalizationStep5ScreenState extends State<PersonalizationStep5Screen>
                           },
                           child: Text(
                             "Back",
-                            style: kNunitoSansSemiBold16.copyWith(color: kTinGrey),
+                            style: kNunitoSansSemiBold16.copyWith(color: kGraniteGrey),
                           ),
                         ),
                       ),

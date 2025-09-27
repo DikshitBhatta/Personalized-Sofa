@@ -100,7 +100,7 @@ class _PersonalizationStep3ScreenState extends State<PersonalizationStep3Screen>
                       const SizedBox(height: 8),
                       Text(
                         controller.getStepDescription(2),
-                        style: kNunitoSans18.copyWith(color: kTinGrey),
+                        style: kNunitoSans18.copyWith(color: kGraniteGrey),
                       ),
                       
                       const SizedBox(height: 32),
@@ -200,7 +200,7 @@ class _PersonalizationStep3ScreenState extends State<PersonalizationStep3Screen>
                           },
                           child: Text(
                             "Back",
-                            style: kNunitoSansSemiBold16.copyWith(color: kTinGrey),
+                            style: kNunitoSansSemiBold16.copyWith(color: kGraniteGrey),
                           ),
                         ),
                       ),
@@ -252,14 +252,26 @@ class _PersonalizationStep3ScreenState extends State<PersonalizationStep3Screen>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            kIvoryGradientLight,
+            kIvoryGradientMid,
+            kIvoryGradientDark,
+          ],
+        ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: kChristmasSilver),
-        boxShadow: const [
+        border: Border.all(
+          color: kIvoryGradientDark.withOpacity(0.5),
+          width: 1,
+        ),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x10000000),
-            offset: Offset(0, 2),
-            blurRadius: 10,
+            color: kIvoryGradientDark.withOpacity(0.2),
+            spreadRadius: 0,
+            blurRadius: 15,
+            offset: const Offset(0, 5),
           ),
         ],
       ),
@@ -309,7 +321,7 @@ class _PersonalizationStep3ScreenState extends State<PersonalizationStep3Screen>
             "$label:",
             style: kNunitoSans14.copyWith(
               fontWeight: FontWeight.w600,
-              color: kTinGrey,
+              color: kGraniteGrey,
             ),
           ),
         ),

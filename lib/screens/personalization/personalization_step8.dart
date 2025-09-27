@@ -122,7 +122,7 @@ class _PersonalizationStep8ScreenState extends State<PersonalizationStep8Screen>
                       const SizedBox(height: 8),
                       Text(
                         controller.getStepDescription(7),
-                        style: kNunitoSans18.copyWith(color: kTinGrey),
+                        style: kNunitoSans18.copyWith(color: kGraniteGrey),
                       ),
 
                       const SizedBox(height: 32),
@@ -171,7 +171,7 @@ class _PersonalizationStep8ScreenState extends State<PersonalizationStep8Screen>
                                 children: [
                                   Icon(
                                     extra['icon'],
-                                    color: isSelected ? Colors.white : kTinGrey,
+                                    color: isSelected ? Colors.white : kGraniteGrey,
                                     size: 16,
                                   ),
                                   const SizedBox(width: 8),
@@ -259,7 +259,7 @@ class _PersonalizationStep8ScreenState extends State<PersonalizationStep8Screen>
                                   const SizedBox(height: 4),
                                   Text(
                                     "We'll use all your preferences to find the perfect sofa recommendations just for you.",
-                                    style: kNunitoSans14.copyWith(color: kTinGrey),
+                                    style: kNunitoSans14.copyWith(color: kGraniteGrey),
                                   ),
                                 ],
                               ),
@@ -308,7 +308,7 @@ class _PersonalizationStep8ScreenState extends State<PersonalizationStep8Screen>
                           },
                           child: Text(
                             "Back",
-                            style: kNunitoSansSemiBold16.copyWith(color: kTinGrey),
+                            style: kNunitoSansSemiBold16.copyWith(color: kGraniteGrey),
                           ),
                         ),
                       ),
