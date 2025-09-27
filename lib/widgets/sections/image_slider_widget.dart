@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:get/get.dart';
+import 'package:timberr/constants.dart';
 import 'package:timberr/models/personalization_data.dart';
 import 'package:timberr/screens/personalization/personalization_launch.dart';
 
@@ -102,7 +103,7 @@ class _ImageSliderWidgetState extends State<ImageSliderWidget> {
         height: 200,
         margin: const EdgeInsets.symmetric(horizontal: 20),
         decoration: BoxDecoration(
-          color: Colors.grey.shade200,
+          color: kChristmasSilver,
           borderRadius: BorderRadius.circular(20),
         ),
         child: const Center(
@@ -185,11 +186,11 @@ class _ImageSliderWidgetState extends State<ImageSliderWidget> {
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) {
                 return Container(
-                  color: Colors.grey.shade300,
+                  color: kNoghreiSilver,
                   child: const Icon(
                     Icons.image_not_supported,
                     size: 50,
-                    color: Colors.grey,
+                    color: kTrolleyGrey,
                   ),
                 );
               },

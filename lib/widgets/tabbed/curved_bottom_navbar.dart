@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:timberr/constants.dart';
 import 'package:timberr/screens/home.dart';
 import 'package:timberr/screens/notification_screen.dart';
 import 'package:timberr/screens/profile/profile_screen.dart';
@@ -256,26 +257,16 @@ class _BottomBarPainter extends CustomPainter {
       canvas.drawShadow(shadowPath, Colors.black.withOpacity(0.08), elevation * 0.5, true);
     }
 
-    // Draw the main background with gradient
-    final gradient = LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: [
-        Colors.white,
-        Colors.grey.shade50,
-      ],
-    );
-
-    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
+    // Draw the main background with solid color
     final paint = Paint()
-      ..shader = gradient.createShader(rect)
+      ..color = color
       ..style = PaintingStyle.fill;
     
     canvas.drawPath(path, paint);
 
     // Add inner shadow effect for more depth
     final innerShadowPaint = Paint()
-      ..color = Colors.grey.withOpacity(0.1)
+      ..color = Colors.white.withOpacity(0.1)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
 
@@ -318,6 +309,9 @@ class CurvedBottomNavBar extends StatelessWidget {
       children: [
         // Curved dock background
         CurvedDock(
+          color: kNavBarBlack,
+          iconColor: kSilverGrey,
+          activeIconColor: Colors.white,
           leftItems: [
             CurvedDockItem(
               icon: 'assets/icons/home_icon.svg',

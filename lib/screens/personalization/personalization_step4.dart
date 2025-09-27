@@ -5,6 +5,7 @@ import 'package:timberr/controllers/personalization_controller.dart';
 import 'package:timberr/models/personalization_data.dart' as personalization;
 import 'package:timberr/widgets/input/color_pattern_selector.dart';
 import 'package:timberr/widgets/progress/personalization_progress_bar.dart';
+import 'package:timberr/widgets/buttons/custom_elevated_button.dart';
 import 'package:timberr/screens/personalization/personalization_step5.dart';
 
 class PersonalizationStep4Screen extends StatefulWidget {
@@ -62,9 +63,9 @@ class _PersonalizationStep4ScreenState extends State<PersonalizationStep4Screen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kLynxWhite,
+      backgroundColor: kBackgroundBeige,
       appBar: AppBar(
-        backgroundColor: kLynxWhite,
+        backgroundColor: kBackgroundBeige,
         elevation: 0,
         leading: IconButton(
           onPressed: () {
@@ -239,7 +240,7 @@ class _PersonalizationStep4ScreenState extends State<PersonalizationStep4Screen>
                       child: Container(
                         height: 50,
                         decoration: BoxDecoration(
-                          border: Border.all(color: kChristmasSilver),
+                          color: kOffBlack,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: TextButton(
@@ -259,7 +260,7 @@ class _PersonalizationStep4ScreenState extends State<PersonalizationStep4Screen>
                           },
                           child: Text(
                             "Continue",
-                            style: kNunitoSansSemiBold16.copyWith(color: kTinGrey),
+                            style: kNunitoSansSemiBold16.copyWith(color: kLynxWhite),
                           ),
                         ),
                       ),
@@ -282,12 +283,12 @@ class _PersonalizationStep4ScreenState extends State<PersonalizationStep4Screen>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            kSeaGreen.withOpacity(0.1),
-            kSeaGreen.withOpacity(0.05),
+            kOffBlack.withOpacity(0.1),
+            kOffBlack.withOpacity(0.05),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: kSeaGreen.withOpacity(0.3)),
+        border: Border.all(color: kOffBlack.withOpacity(0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -298,7 +299,7 @@ class _PersonalizationStep4ScreenState extends State<PersonalizationStep4Screen>
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: kSeaGreen,
+                  color: kOffBlack,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Icon(Icons.preview, color: Colors.white),

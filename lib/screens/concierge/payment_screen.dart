@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:get/get.dart';
+import 'package:timberr/constants.dart';
 import 'package:timberr/screens/home.dart';
 
 class ConciergePaymentScreen extends StatefulWidget {
@@ -112,7 +113,9 @@ class _ConciergePaymentScreenState extends State<ConciergePaymentScreen> {
     return Stack(
       children: [
         Scaffold(
+          backgroundColor: kBackgroundBeige,
           appBar: AppBar(
+            backgroundColor: kBackgroundBeige,
             title: const Text(
               'Proceed to Payment',
               style: TextStyle(fontWeight: FontWeight.bold),

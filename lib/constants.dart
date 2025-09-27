@@ -6,18 +6,24 @@ import 'package:get/get.dart';
 const kOffBlack = Color(0xFF303030);
 const kLeadBlack = Color(0xFF212121);
 const kRaisinBlack = Color(0xFF222222);
-const kGrey = Color(0xFF808080);
-const kTinGrey = Color(0xFF909090);
-const kGraniteGrey = Color(0xFF606060);
-const kBasaltGrey = Color(0xFF999999);
-const kTrolleyGrey = Color(0xFF828282);
-const kNoghreiSilver = Color(0xFFBDBDBD);
-const kChristmasSilver = Color(0xFFE0E0E0);
-const kLynxWhite = Color(0xFFF7F7F7);
-const kSnowFlakeWhite = Color(0xFFF0F0F0);
+const kGrey = Color(0xFF8B8680); // Warm gray with ivory undertones
+const kTinGrey = Color(0xFF9B9490); // Light warm gray
+const kGraniteGrey = Color(0xFF6B645F); // Darker warm gray
+const kBasaltGrey = Color(0xFFA39E99); // Medium warm gray
+const kTrolleyGrey = Color(0xFF8A8580); // Warm taupe gray
+const kNoghreiSilver = Color(0xFFCFC9C3); // Warm silver with ivory tones
+const kChristmasSilver = Color(0xFFDED8D0); // Your requested ivory color
+const kLynxWhite = Color(0xFFF5F2EE); // Warm off-white ivory
+const kSnowFlakeWhite = Color(0xFFEFEBE6); // Light ivory
+const kBackgroundBeige = Color(0xFFDAD2C7); // Main background color for all screens
 const kSeaGreen = Color(0xFF2AA952);
 const kCrayolaGreen = Color(0xFF27AE60);
 const kFireOpal = Color(0xFFEB5757);
+const kSilverGrey = Color(0xFF8E8E93); // For inactive bottom nav icons
+const kNavBarBlack = Color(0xFF1C1C1C); // For bottom navigation bar background
+const kIvoryGradientLight = Color(0xFFCEC4B6); // Light ivory for gradient
+const kIvoryGradientMid = Color(0xFFC9BFB5); // Mid ivory for gradient
+const kIvoryGradientDark = Color(0xFFCBC0B4); // Dark ivory for gradient
 
 const kNunitoSans10Grey =
     TextStyle(fontFamily: "NunitoSans", fontSize: 10, color: kGrey);

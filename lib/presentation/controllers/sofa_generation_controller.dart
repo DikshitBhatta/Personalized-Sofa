@@ -107,13 +107,37 @@ class SofaGenerationController extends GetxController {
       print('SofaGenerationController: _saveGeneratedModel called with:');
       print('  result.glbUrl: ${result.glbUrl}');
       print('  chosenGlbPath: $chosenGlbPath');
-      print('  Will save glbUrl as: ${chosenGlbPath ?? result.glbUrl}');
+      
+      String? finalGlbUrl;
+      
+      // If we already have a cached local path, use it
+      if (chosenGlbPath != null && chosenGlbPath.startsWith('/')) {
+        finalGlbUrl = chosenGlbPath;
+        print('SofaGenerationController: Using provided local GLB path: $finalGlbUrl');
+      } 
+      // Otherwise, attempt to cache the remote GLB locally
+      else if (result.glbUrl != null && result.glbUrl.isNotEmpty) {
+        print('SofaGenerationController: Attempting to cache GLB locally: ${result.glbUrl}');
+        finalGlbUrl = await GlbCacheService.downloadAndCache(
+          result.glbUrl, 
+          fileName: 'generated_sofa_${DateTime.now().millisecondsSinceEpoch}.glb'
+        );
+        
+        if (finalGlbUrl != null) {
+          print('SofaGenerationController: GLB cached successfully at: $finalGlbUrl');
+        } else {
+          print('SofaGenerationController: GLB caching failed, model will not be saved to avoid CORS issues');
+          // Don't save the model if we can't cache the GLB locally
+          throw Exception('Failed to cache GLB locally - cannot save model with remote URL due to CORS restrictions');
+        }
+      } else {
+        throw Exception('No valid GLB URL provided');
+      }
       
       final model = GeneratedSofaModel(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         name: 'Personalized Sofa ${DateTime.now().toString().split(' ')[0]}',
-        // Prefer the local cached GLB path if available
-        glbUrl: chosenGlbPath ?? result.glbUrl,
+        glbUrl: finalGlbUrl, // Only save with local cached path
         thumbnailUrl: result.thumbnailUrl,
         personalizationData: personalizationData,
         createdAt: DateTime.now(),
@@ -121,16 +145,20 @@ class SofaGenerationController extends GetxController {
         refinePrompt: cfg.toRefineTexturePrompt(),
       );
 
-      print('SofaGenerationController: Created model with glbUrl: ${model.glbUrl}');
+      print('SofaGenerationController: Created model with LOCAL glbUrl: ${model.glbUrl}');
       
       final success = await SavedModelsService.saveModel(model);
       if (success) {
-        print('SofaGenerationController: Model saved successfully with glbUrl: ${model.glbUrl}');
+        print('SofaGenerationController: Model saved successfully with LOCAL glbUrl: ${model.glbUrl}');
       } else {
         print('SofaGenerationController: Failed to save model');
+        throw Exception('Failed to save model to storage');
       }
     } catch (e) {
       print('SofaGenerationController: Error saving model: $e');
+      // Show user-friendly error message
+      errorMessage.value = 'Failed to save model: ${e.toString()}';
+      rethrow;
     }
   }
 
@@ -269,23 +297,35 @@ class SofaGenerationController extends GetxController {
           refinedModel.value = refined;
 
           // Cache the GLB locally
+          String? finalGlbUrl = refined.glbUrl;
           if (refined.glbUrl != null) {
+            print('SofaGenerationController: Attempting to cache refined GLB locally: ${refined.glbUrl}');
             final localPath = await GlbCacheService.downloadAndCache(
               refined.glbUrl!, 
               fileName: 'refined_sofa_${DateTime.now().millisecondsSinceEpoch}.glb'
             );
             if (localPath != null) {
+              print('SofaGenerationController: GLB cached locally at: $localPath');
+              finalGlbUrl = localPath;
               refinedModel.value = RefinedModel(
                 glbUrl: localPath,
                 thumbnailUrl: refined.thumbnailUrl,
                 taskId: refineTaskId,
               );
+            } else {
+              print('SofaGenerationController: GLB caching failed, using remote URL');
             }
           }
 
           // Save the model if personalization data is provided
           if (personalizationData != null) {
-            await _saveRefinedModel(refined, cfg, personalizationData);
+            // Use the final GLB URL (local if cached, remote if not)
+            final modelToSave = RefinedModel(
+              glbUrl: finalGlbUrl,
+              thumbnailUrl: refined.thumbnailUrl,
+              taskId: refineTaskId,
+            );
+            await _saveRefinedModel(modelToSave, cfg, personalizationData);
           }
 
           break;

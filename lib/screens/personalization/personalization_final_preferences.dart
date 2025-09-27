@@ -53,9 +53,9 @@ class _PersonalizationFinalPreferencesScreenState extends State<PersonalizationF
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kLynxWhite,
+      backgroundColor: kBackgroundBeige,
       appBar: AppBar(
-        backgroundColor: kLynxWhite,
+        backgroundColor: kBackgroundBeige,
         elevation: 0,
         leading: IconButton(
           onPressed: () {

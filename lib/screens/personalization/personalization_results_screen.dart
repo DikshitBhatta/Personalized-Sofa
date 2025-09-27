@@ -11,6 +11,10 @@ import 'package:timberr/widgets/glb_viewer.dart';
 import 'package:timberr/presentation/controllers/sofa_generation_controller.dart';
 import 'package:timberr/domain/models/sofa_config.dart';
 import 'package:timberr/models/preview_model.dart';
+import 'package:timberr/widgets/pricing/sofa_price_display.dart';
+import 'package:timberr/extensions/personalization_pricing_extension.dart';
+import 'package:timberr/widgets/buttons/custom_elevated_button.dart';
+import 'package:timberr/screens/concierge/schedule_concierge_screen.dart';
 import 'edit_personalization_screen.dart';
 
 class PersonalizationResultsScreen extends StatefulWidget {
@@ -245,9 +249,9 @@ class _PersonalizationResultsScreenState extends State<PersonalizationResultsScr
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kLynxWhite,
+      backgroundColor: kBackgroundBeige,
       appBar: AppBar(
-        backgroundColor: kLynxWhite,
+        backgroundColor: kBackgroundBeige,
         elevation: 0,
         leading: IconButton(
           onPressed: () => Get.back(),
@@ -401,42 +405,66 @@ class _PersonalizationResultsScreenState extends State<PersonalizationResultsScr
                                         Text('Your Personalized 3D Sofa', style: kNunitoSans16.copyWith(color: kOffBlack, fontWeight: FontWeight.bold)),
                                         const SizedBox(height: 8),
                                         // Add error handling and fallback for refined model
-                                        Container(
-                                          height: 300,
-                                          width: double.infinity,
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(12),
-                                            border: Border.all(color: kSeaGreen.withOpacity(0.3)),
-                                          ),
-                                          child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(12),
-                                            child: Stack(
-                                              children: [
-                                                // Try to display the refined model with fallback
-                                                _buildRefinedModelDisplay(refinedModel),
-                                                // Success indicator
-                                                Positioned(
-                                                  top: 8,
-                                                  right: 8,
-                                                  child: Container(
-                                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                                    decoration: BoxDecoration(
-                                                      color: kSeaGreen.withOpacity(0.9),
-                                                      borderRadius: BorderRadius.circular(6),
-                                                    ),
-                                                    child: Text(
-                                                      'Refined Model',
-                                                      style: kNunitoSans12Grey.copyWith(
-                                                        color: Colors.white, 
-                                                        fontSize: 11,
-                                                        fontWeight: FontWeight.w600,
+                                        Stack(
+                                          children: [
+                                            Container(
+                                              height: 300,
+                                              width: double.infinity,
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(12),
+                                                border: Border.all(color: kSeaGreen.withOpacity(0.3)),
+                                              ),
+                                              child: ClipRRect(
+                                                borderRadius: BorderRadius.circular(12),
+                                                child: Stack(
+                                                  children: [
+                                                    // Try to display the refined model with fallback
+                                                    _buildRefinedModelDisplay(refinedModel),
+                                                    // Success indicator
+                                                    Positioned(
+                                                      top: 8,
+                                                      right: 8,
+                                                      child: Container(
+                                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                                        decoration: BoxDecoration(
+                                                          color: kSeaGreen.withOpacity(0.9),
+                                                          borderRadius: BorderRadius.circular(6),
+                                                        ),
+                                                        child: Text(
+                                                          'Refined Model',
+                                                          style: kNunitoSans12Grey.copyWith(
+                                                            color: Colors.white, 
+                                                            fontSize: 11,
+                                                            fontWeight: FontWeight.w600,
+                                                          ),
+                                                        ),
                                                       ),
                                                     ),
-                                                  ),
+                                                  ],
                                                 ),
-                                              ],
+                                              ),
                                             ),
-                                          ),
+                                            // Price tag positioned at bottom right
+                                            Positioned(
+                                              bottom: 12,
+                                              right: 12,
+                                              child: Container(
+                                                decoration: BoxDecoration(
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      color: Colors.black.withOpacity(0.3),
+                                                      blurRadius: 8,
+                                                      offset: const Offset(0, 4),
+                                                    ),
+                                                  ],
+                                                ),
+                                                child: const CompactPriceTag(
+                                                  showBreakdown: false,
+                                                  height: 60,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                         const SizedBox(height: 12),
                                         Row(
@@ -634,6 +662,28 @@ class _PersonalizationResultsScreenState extends State<PersonalizationResultsScr
                                   }),
                                 const SizedBox(height: 16),
 
+                                // Edit Personalization Button - Moved above note
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: OutlinedButton.icon(
+                                        onPressed: () {
+                                          Get.to(() => const EditPersonalizationScreen());
+                                        },
+                                        icon: const Icon(Icons.edit, size: 18),
+                                        label: const Text('Edit Personalization'),
+                                        style: OutlinedButton.styleFrom(
+                                          foregroundColor: kSeaGreen,
+                                          side: BorderSide(color: kSeaGreen),
+                                          padding: const EdgeInsets.symmetric(vertical: 12),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                const SizedBox(height: 16),
+
                                 // Note and custom preferences input
                                 Container(
                                   width: double.infinity,
@@ -663,26 +713,6 @@ class _PersonalizationResultsScreenState extends State<PersonalizationResultsScr
                                           hintText: 'E.g., prefer firmer cushions, change leg color to oak',
                                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                                         ),
-                                      ),
-                                      const SizedBox(height: 12),
-                                      // Edit Personalization Button
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: OutlinedButton.icon(
-                                              onPressed: () {
-                                                Get.to(() => const EditPersonalizationScreen());
-                                              },
-                                              icon: const Icon(Icons.edit, size: 18),
-                                              label: const Text('Edit Personalization'),
-                                              style: OutlinedButton.styleFrom(
-                                                foregroundColor: kSeaGreen,
-                                                side: BorderSide(color: kSeaGreen),
-                                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
                                       ),
                                       const SizedBox(height: 12),
                                       Row(
@@ -739,6 +769,8 @@ class _PersonalizationResultsScreenState extends State<PersonalizationResultsScr
                                     ],
                                   ),
                                 ),
+                                
+                                const SizedBox(height: 16),
                               ],
                             ),
                           ),
@@ -768,6 +800,85 @@ class _PersonalizationResultsScreenState extends State<PersonalizationResultsScr
                   
                   const SizedBox(height: 40),
                   
+                  // Concierge Button - Only show when refined model is available
+                  GetBuilder<SofaGenerationController>(
+                    builder: (controller) {
+                      final refinedModel = controller.refinedModel.value;
+                      if (refinedModel != null && refinedModel.glbUrl != null) {
+                        return Column(
+                          children: [
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    kOffBlack.withOpacity(0.1),
+                                    kOffBlack.withOpacity(0.05),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: kOffBlack.withOpacity(0.3)),
+                              ),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        width: 40,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          color: kOffBlack,
+                                          borderRadius: BorderRadius.circular(20),
+                                        ),
+                                        child: const Icon(Icons.support_agent, color: Colors.white),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              "Ready for Next Step?",
+                                              style: kNunitoSansSemiBold16.copyWith(color: kOffBlack),
+                                            ),
+                                            Text(
+                                              "Schedule a concierge visit to finalize your order",
+                                              style: kNunitoSans14.copyWith(color: kTinGrey),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 16),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    height: 50,
+                                    child: CustomElevatedButton(
+                                      onTap: () {
+                                        Get.to(
+                                          () => const ScheduleConciergeScreen(),
+                                          transition: Transition.cupertino,
+                                          duration: const Duration(milliseconds: 600),
+                                          curve: Curves.easeOut,
+                                        );
+                                      },
+                                      text: "Schedule a Concierge Visit",
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                          ],
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
                   
                 ],
               ),

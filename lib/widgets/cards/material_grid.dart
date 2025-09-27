@@ -95,7 +95,7 @@ class MaterialGrid extends StatelessWidget {
                         width: 20,
                         height: 20,
                         decoration: const BoxDecoration(
-                          color: kSeaGreen,
+                          color: kOffBlack,
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(

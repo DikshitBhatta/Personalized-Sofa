@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
+import 'package:timberr/constants.dart';
 
 /// Simple test widget to compare local asset vs remote URL loading in ModelViewer
 class ModelViewerTest extends StatelessWidget {
@@ -22,7 +23,7 @@ class ModelViewerTest extends StatelessWidget {
               ar: false,
               autoRotate: true,
               cameraControls: true,
-              backgroundColor: Colors.grey.shade200,
+              backgroundColor: kChristmasSilver,
               loading: Loading.eager,
               onWebViewCreated: (controller) {
                 debugPrint("ModelViewer Test: WebView created for $testUrl");

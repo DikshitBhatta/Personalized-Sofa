@@ -72,6 +72,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: kBackgroundBeige,
       body: GestureDetector(
         onTap: () {
           FocusScope.of(context).unfocus();

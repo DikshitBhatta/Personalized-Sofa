@@ -5,6 +5,7 @@ import 'package:timberr/controllers/personalization_controller.dart';
 import 'package:timberr/models/personalization_data.dart';
 import 'package:timberr/widgets/input/personalization_controls.dart';
 import 'package:timberr/widgets/progress/personalization_progress_bar.dart';
+import 'package:timberr/widgets/buttons/custom_elevated_button.dart';
 import 'package:timberr/screens/personalization/personalization_step8.dart';
 
 class PersonalizationStep7Screen extends StatefulWidget {
@@ -57,9 +58,9 @@ class _PersonalizationStep7ScreenState extends State<PersonalizationStep7Screen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kLynxWhite,
+      backgroundColor: kBackgroundBeige,
       appBar: AppBar(
-        backgroundColor: kLynxWhite,
+        backgroundColor: kBackgroundBeige,
         elevation: 0,
         leading: IconButton(
           onPressed: () {
@@ -201,16 +202,35 @@ class _PersonalizationStep7ScreenState extends State<PersonalizationStep7Screen>
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: kSeaGreen.withOpacity(0.1),
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              kIvoryGradientLight,
+                              kIvoryGradientMid,
+                              kIvoryGradientDark,
+                            ],
+                          ),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: kSeaGreen.withOpacity(0.3)),
+                          border: Border.all(
+                            color: kIvoryGradientDark.withOpacity(0.5),
+                            width: 1,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: kIvoryGradientDark.withOpacity(0.2),
+                              spreadRadius: 0,
+                              blurRadius: 10,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
                         ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Icon(
                               Icons.lightbulb_outline,
-                              color: kSeaGreen,
+                              color: kOffBlack,
                               size: 20,
                             ),
                             const SizedBox(width: 12),
@@ -220,7 +240,7 @@ class _PersonalizationStep7ScreenState extends State<PersonalizationStep7Screen>
                                 children: [
                                   Text(
                                     "Almost there!",
-                                    style: kNunitoSansSemiBold16.copyWith(color: kSeaGreen),
+                                    style: kNunitoSansSemiBold16.copyWith(color: kOffBlack,),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
@@ -280,7 +300,7 @@ class _PersonalizationStep7ScreenState extends State<PersonalizationStep7Screen>
                       child: Container(
                         height: 50,
                         decoration: BoxDecoration(
-                          border: Border.all(color: kChristmasSilver),
+                          color: kOffBlack,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: TextButton(
@@ -299,7 +319,7 @@ class _PersonalizationStep7ScreenState extends State<PersonalizationStep7Screen>
                           },
                           child: Text(
                             "Continue",
-                            style: kNunitoSansSemiBold16.copyWith(color: kTinGrey),
+                            style: kNunitoSansSemiBold16.copyWith(color: kLynxWhite),
                           ),
                         ),
                       ),

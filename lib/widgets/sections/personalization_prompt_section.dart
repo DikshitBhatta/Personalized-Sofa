@@ -16,12 +16,24 @@ class PersonalizationPromptSection extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            kSeaGreen.withOpacity(0.1),
-            kSeaGreen.withOpacity(0.05),
+            kIvoryGradientLight,
+            kIvoryGradientMid,
+            kIvoryGradientDark,
           ],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: kSeaGreen.withOpacity(0.3)),
+        border: Border.all(
+          color: kIvoryGradientDark.withOpacity(0.5),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: kIvoryGradientDark.withOpacity(0.2),
+            spreadRadius: 0,
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

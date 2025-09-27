@@ -5,6 +5,7 @@ import 'package:timberr/controllers/personalization_controller.dart';
 import 'package:timberr/models/personalization_data.dart';
 import 'package:timberr/widgets/input/personalization_controls.dart';
 import 'package:timberr/widgets/progress/personalization_progress_bar.dart';
+import 'package:timberr/widgets/buttons/custom_elevated_button.dart';
 import 'package:timberr/screens/personalization/personalization_step2b.dart';
 import 'package:timberr/screens/personalization/personalization_step3.dart';
 
@@ -108,9 +109,9 @@ class _PersonalizationStep2ScreenState extends State<PersonalizationStep2Screen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kLynxWhite,
+      backgroundColor: kBackgroundBeige,
       appBar: AppBar(
-        backgroundColor: kLynxWhite,
+        backgroundColor: kBackgroundBeige,
         elevation: 0,
         leading: IconButton(
           onPressed: () {
@@ -219,7 +220,7 @@ class _PersonalizationStep2ScreenState extends State<PersonalizationStep2Screen>
                       child: Container(
                         height: 50,
                         decoration: BoxDecoration(
-                          border: Border.all(color: kChristmasSilver),
+                          color: kOffBlack,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: TextButton(
@@ -243,7 +244,7 @@ class _PersonalizationStep2ScreenState extends State<PersonalizationStep2Screen>
                           },
                           child: Text(
                             "Continue",
-                            style: kNunitoSansSemiBold16.copyWith(color: kTinGrey),
+                            style: kNunitoSansSemiBold16.copyWith(color: kLynxWhite),
                           ),
                         ),
                       ),

@@ -45,7 +45,9 @@ class _EditPersonalInformationScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: kBackgroundBeige,
       appBar: AppBar(
+        backgroundColor: kBackgroundBeige,
         leading: IconButton(
           onPressed: () {
             Get.back();

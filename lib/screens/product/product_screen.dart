@@ -42,6 +42,7 @@ class ProductScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return Scaffold(
+      backgroundColor: kBackgroundBeige,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

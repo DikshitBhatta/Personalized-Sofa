@@ -5,6 +5,7 @@ import 'package:timberr/controllers/personalization_controller.dart';
 import 'package:timberr/models/personalization_data.dart';
 import 'package:timberr/widgets/cards/audience_card.dart';
 import 'package:timberr/widgets/progress/personalization_progress_bar.dart';
+import 'package:timberr/widgets/buttons/custom_elevated_button.dart';
 import 'package:timberr/screens/personalization/personalization_step2.dart';
 
 class PersonalizationStep1Screen extends StatelessWidget {
@@ -13,9 +14,9 @@ class PersonalizationStep1Screen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kLynxWhite,
+      backgroundColor: kBackgroundBeige,
       appBar: AppBar(
-        backgroundColor: kLynxWhite,
+        backgroundColor: kBackgroundBeige,
         elevation: 0,
         leading: IconButton(
           onPressed: () => Get.back(),
@@ -144,7 +145,7 @@ class PersonalizationStep1Screen extends StatelessWidget {
                       child: Container(
                         height: 50,
                         decoration: BoxDecoration(
-                          border: Border.all(color: kChristmasSilver),
+                          color: kOffBlack,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: TextButton(
@@ -162,7 +163,7 @@ class PersonalizationStep1Screen extends StatelessWidget {
                                 },
                           child: Text(
                             "Continue",
-                            style: kNunitoSansSemiBold16.copyWith(color: kTinGrey),
+                            style: kNunitoSansSemiBold16.copyWith(color: kLynxWhite),
                           ),
                         ),
                       ),

@@ -55,9 +55,9 @@ class _PersonalizationNiceToHavesScreenState extends State<PersonalizationNiceTo
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kLynxWhite,
+      backgroundColor: kBackgroundBeige,
       appBar: AppBar(
-        backgroundColor: kLynxWhite,
+        backgroundColor: kBackgroundBeige,
         elevation: 0,
         leading: IconButton(
           onPressed: () {
@@ -167,9 +167,28 @@ class _PersonalizationNiceToHavesScreenState extends State<PersonalizationNiceTo
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: kSeaGreen.withOpacity(0.1),
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                kIvoryGradientLight,
+                                kIvoryGradientMid,
+                                kIvoryGradientDark,
+                              ],
+                            ),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: kSeaGreen.withOpacity(0.3)),
+                            border: Border.all(
+                              color: kIvoryGradientDark.withOpacity(0.5),
+                              width: 1,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: kIvoryGradientDark.withOpacity(0.2),
+                                spreadRadius: 0,
+                                blurRadius: 10,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,

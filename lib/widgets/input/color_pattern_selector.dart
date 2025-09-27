@@ -290,7 +290,7 @@ class PatternSelector extends StatelessWidget {
                     if (isSelected)
                       const Icon(
                         Icons.check_circle,
-                        color: kSeaGreen,
+                        color: kOffBlack,
                         size: 20,
                       ),
                   ],
@@ -478,7 +478,7 @@ class DetailsSelector extends StatelessWidget {
                     ),
                     if (isSelected) ...[
                       const SizedBox(width: 8),
-                      const Icon(Icons.check_circle, color: kSeaGreen, size: 18),
+                      const Icon(Icons.check_circle, color: kOffBlack, size: 18),
                     ],
                   ],
                 ),

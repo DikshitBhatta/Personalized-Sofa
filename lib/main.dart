@@ -24,8 +24,8 @@ class TimberrApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: false,
         fontFamily: "NunitoSans",
-        appBarTheme: const AppBarTheme(color: Colors.white, elevation: 0),
-        scaffoldBackgroundColor: Colors.white,
+        appBarTheme: const AppBarTheme(color: kLynxWhite, elevation: 0),
+        scaffoldBackgroundColor: kLynxWhite,
         textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(foregroundColor: kOffBlack),
         ),

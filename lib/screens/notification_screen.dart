@@ -12,9 +12,9 @@ class NotificationScreen extends StatelessWidget {
       canPop: false,
       onPopInvoked: (_) => kOnExitConfirmation(),
       child: Scaffold(
-        backgroundColor: Colors.grey.shade50,
+        backgroundColor: kBackgroundBeige,
         appBar: AppBar(
-          backgroundColor: Colors.grey.shade50,
+          backgroundColor: kBackgroundBeige,
           title: const Text(
             "NOTIFICATION",
             style: kMerriweatherBold16,

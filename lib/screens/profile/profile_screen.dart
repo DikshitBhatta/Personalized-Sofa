@@ -60,9 +60,9 @@ class ProfileScreen extends StatelessWidget {
       canPop: false,
       onPopInvoked: (_) => kOnExitConfirmation(),
       child: Scaffold(
-        backgroundColor: Colors.grey.shade50,
+        backgroundColor: kBackgroundBeige,
         appBar: AppBar(
-          backgroundColor: Colors.grey.shade50,
+          backgroundColor: kBackgroundBeige,
           leading: IconButton(
             onPressed: () {
               _userController.uploadProfilePicture();

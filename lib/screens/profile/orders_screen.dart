@@ -12,7 +12,9 @@ class OrdersScreen extends StatelessWidget {
       length: 3,
       initialIndex: 0,
       child: Scaffold(
+        backgroundColor: kBackgroundBeige,
         appBar: AppBar(
+          backgroundColor: kBackgroundBeige,
           leading: IconButton(
             onPressed: () {
               Get.back();

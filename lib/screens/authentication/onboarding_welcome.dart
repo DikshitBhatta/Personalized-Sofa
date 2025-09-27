@@ -18,6 +18,7 @@ class OnBoardingWelcomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: kBackgroundBeige,
       body: Container(
         width: double.infinity,
         decoration: const BoxDecoration(

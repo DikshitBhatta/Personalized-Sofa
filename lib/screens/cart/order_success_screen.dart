@@ -30,6 +30,7 @@ class OrderSuccessScreen extends StatelessWidget {
       canPop: false,
       onPopInvoked: (_) => kOnExitConfirmation(),
       child: Scaffold(
+        backgroundColor: kBackgroundBeige,
         body: Center(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30),

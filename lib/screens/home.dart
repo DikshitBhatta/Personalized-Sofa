@@ -27,7 +27,7 @@ class Home extends StatelessWidget {
       canPop: false,
       onPopInvoked: (_) => kOnExitConfirmation(),
       child: Scaffold(
-        backgroundColor: Colors.grey.shade50,
+        backgroundColor: kBackgroundBeige,
         bottomNavigationBar: const CurvedBottomNavBar(
           selectedPos: 0,
         ),
@@ -97,6 +97,9 @@ class Home extends StatelessWidget {
                 );
               }),
             ),
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 10),
+            ),
             
             // Renovate Interior Section
             SliverToBoxAdapter(
@@ -105,12 +108,9 @@ class Home extends StatelessWidget {
               
             // Image Slider Section
             SliverToBoxAdapter(
-              key: const ValueKey('image_slider_section'),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 20),
-                child: ImageSliderWidget(
-                  key: const ValueKey('home_image_slider'),
-                ),
+                child: ImageSliderWidget(),
               ),
             ),
           ],

@@ -42,25 +42,70 @@ class _GlbViewerState extends State<GlbViewer> with TickerProviderStateMixin {
       vsync: this,
     )..repeat(reverse: true);
     
-    // Give the model viewer more time to load remote models; increase to 12s
-    Future.delayed(const Duration(seconds: 12), () {
-      if (mounted && _isLoading) {
-        debugPrint("GlbViewer: Timeout reached, showing error fallback for: ${widget.assetPath}");
+    // Check if this is a remote URL (likely to have CORS issues)
+    if (widget.assetPath.startsWith('http')) {
+      debugPrint("GlbViewer: Remote URL detected, may have CORS issues: ${widget.assetPath}");
+      // Shorter timeout for remote URLs since they likely won't work
+      Future.delayed(const Duration(seconds: 3), () {
+        if (mounted && _isLoading) {
+          debugPrint("GlbViewer: Remote URL timeout reached, showing error fallback");
+          setState(() {
+            _hasError = true;
+            _isLoading = false;
+          });
+        }
+      });
+    } else {
+      // Give local files more time to load
+      Future.delayed(const Duration(seconds: 8), () {
+        if (mounted && _isLoading) {
+          debugPrint("GlbViewer: Local file timeout reached, showing error fallback for: ${widget.assetPath}");
+          setState(() {
+            _hasError = true;
+            _isLoading = false;
+          });
+        }
+      });
+    }
+  }
+
+  String _getModelViewerSrc() {
+    debugPrint("GlbViewer: Processing asset path: ${widget.assetPath}");
+    
+    // Immediately reject remote URLs to avoid CORS issues
+    if (widget.assetPath.startsWith('http')) {
+      debugPrint("GlbViewer: Remote URL detected, will show error fallback due to CORS restrictions");
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _hasError = true;
+            _isLoading = false;
+          });
+        }
+      });
+      return widget.assetPath; // Return something to avoid null issues
+    }
+    
+    // Check if this is a local file path
+    if (widget.assetPath.startsWith('/') || widget.assetPath.startsWith('file://')) {
+      final filePath = widget.assetPath.startsWith('file://') 
+          ? widget.assetPath.substring(7) 
+          : widget.assetPath;
+      
+      if (File(filePath).existsSync()) {
+        final fileSize = File(filePath).lengthSync();
+        debugPrint("GlbViewer: Local file exists (${fileSize} bytes), converting to file URI: $filePath");
+        return 'file://$filePath';
+      } else {
+        debugPrint("GlbViewer: Local file does not exist: $filePath");
         setState(() {
           _hasError = true;
           _isLoading = false;
         });
+        return widget.assetPath; // Return original to avoid null issues
       }
-    });
-  }
-
-  String _getModelViewerSrc() {
-    // Check if this is a local file path
-    if (File(widget.assetPath).existsSync()) {
-      // For local files, ModelViewer needs a file:// URI
-      debugPrint("GlbViewer: Converting local path to file URI: ${widget.assetPath}");
-      return 'file://${widget.assetPath}';
     }
+    
     // For URLs, use as-is
     debugPrint("GlbViewer: Using remote URL: ${widget.assetPath}");
     return widget.assetPath;
@@ -135,7 +180,7 @@ class _GlbViewerState extends State<GlbViewer> with TickerProviderStateMixin {
                 ),
               ),
             
-            // Enhanced 3D-like animated fallback when model fails to load
+            // Enhanced fallback when model fails to load
             if (_hasError)
               Container(
                 decoration: BoxDecoration(
@@ -154,16 +199,39 @@ class _GlbViewerState extends State<GlbViewer> with TickerProviderStateMixin {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Animated 3D sofa representation
-                      AnimatedBuilder(
-                        animation: _floatController,
-                        builder: (context, child) {
-                          return Transform.translate(
-                            offset: Offset(0, _floatController.value * 10 - 5),
-                            child: AnimatedBuilder(
-                              animation: _rotationController,
-                              builder: (context, child) {
-                                return Transform.rotate(
+                      // Show different messages based on error type
+                      if (widget.assetPath.startsWith('http')) ...[
+                        Icon(
+                          Icons.cloud_off,
+                          size: 48,
+                          color: Colors.orange.withOpacity(0.7),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          "Unable to load remote model",
+                          style: kNunitoSansSemiBold16.copyWith(
+                            color: Colors.orange,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          "Model needs to be cached locally",
+                          style: kNunitoSans14.copyWith(
+                            color: kGrey,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ] else ...[
+                        // Animated 3D sofa representation for local file errors
+                        AnimatedBuilder(
+                          animation: _floatController,
+                          builder: (context, child) {
+                            return Transform.translate(
+                              offset: Offset(0, _floatController.value * 10 - 5),
+                              child: AnimatedBuilder(
+                                animation: _rotationController,
+                                builder: (context, child) {
+                                  return Transform.rotate(
                                   angle: _rotationController.value * 0.5,
                                   child: Container(
                                     width: 120,
@@ -296,6 +364,7 @@ class _GlbViewerState extends State<GlbViewer> with TickerProviderStateMixin {
                           ],
                         ),
                       ),
+                      ], // Close the else block
                     ],
                   ),
                 ),

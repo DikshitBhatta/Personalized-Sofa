@@ -13,9 +13,9 @@ class PersonalizationLaunchScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kLynxWhite,
+      backgroundColor: kBackgroundBeige,
       appBar: AppBar(
-        backgroundColor: kLynxWhite,
+        backgroundColor: kBackgroundBeige,
         elevation: 0,
         title: Text(
           "PERSONALIZE YOUR SOFA",
@@ -26,18 +26,38 @@ class PersonalizationLaunchScreen extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: SingleChildScrollView(
+          physics: const NeverScrollableScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 40),
+              const SizedBox(height: 10),
               
               Container(
                 width: double.infinity,
                 height: 200,
                 decoration: BoxDecoration(
-                  color: kSeaGreen.withOpacity(0.1),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      kIvoryGradientLight,
+                      kIvoryGradientMid,
+                      kIvoryGradientDark,
+                    ],
+                  ),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: kSeaGreen.withOpacity(0.3)),
+                  border: Border.all(
+                    color: kIvoryGradientDark.withOpacity(0.5),
+                    width: 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: kIvoryGradientDark.withOpacity(0.2),
+                      spreadRadius: 0,
+                      blurRadius: 15,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -45,7 +65,7 @@ class PersonalizationLaunchScreen extends StatelessWidget {
                     Icon(
                       Icons.chair,
                       size: 60,
-                      color: kSeaGreen,
+                      color: kOffBlack,
                     ),
                     const SizedBox(height: 16),
                     Text(
@@ -55,31 +75,29 @@ class PersonalizationLaunchScreen extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       "Personalized just for you",
-                      style: kNunitoSans14.copyWith(color: kTinGrey),
+                      style: kNunitoSans14.copyWith(color: kGraniteGrey),
                     ),
                   ],
                 ),
               ),
               
-              const SizedBox(height: 40),
+              const SizedBox(height: 20),
               
               Text(
-                "Get a sofa that's perfect for you",
+                "Design your perfect sofa",
                 style: kNunitoSansBold24.copyWith(color: kOffBlack),
               ),
               
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
               
               Text(
-                "Our personalization process takes just a few minutes and ensures you get exactly what you need:",
+                "Our personalization process takes few minutes and ensures you get exactly what you need:",
                 style: kNunitoSans16.copyWith(color: kTinGrey),
               ),
               
               const SizedBox(height: 24),
               
               _buildFeatureItem("🎯", "Tailored to your needs", "Based on who will use it most"),
-              const SizedBox(height: 16),
-              _buildFeatureItem("📏", "Perfect measurements", "Ergonomic design for comfort"),
               const SizedBox(height: 16),
               _buildFeatureItem("🎨", "Your style choices", "Materials, colors, and details"),
               const SizedBox(height: 16),

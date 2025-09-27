@@ -1,9 +1,11 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:timberr/constants.dart';
 import 'package:timberr/models/generated_sofa_model.dart';
 import 'package:timberr/services/saved_models_service.dart';
 import 'package:timberr/widgets/glb_viewer.dart';
+import 'package:timberr/screens/glb_debug_screen.dart';
 
 class CatalogueScreen extends StatefulWidget {
   const CatalogueScreen({super.key});
@@ -82,9 +84,9 @@ class _CatalogueScreenState extends State<CatalogueScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: kBackgroundBeige,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: kBackgroundBeige,
         elevation: 0,
         title: Text(
           'My Catalogue',
@@ -95,6 +97,18 @@ class _CatalogueScreenState extends State<CatalogueScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
+          // Debug button (visible in debug mode)
+          IconButton(
+            icon: const Icon(Icons.bug_report, color: kOffBlack),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const GlbDebugScreen(),
+                ),
+              );
+            },
+          ),
           if (_savedModels.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.delete_sweep, color: kOffBlack),
@@ -200,6 +214,13 @@ class _CatalogueScreenState extends State<CatalogueScreen> {
   }
 
   Widget _buildModelCard(GeneratedSofaModel model) {
+    // Debug: Print model details
+    print('CatalogScreen: Model Card - ID: ${model.id}');
+    print('  - GLB URL: ${model.glbUrl}');
+    print('  - Thumbnail URL: ${model.thumbnailUrl}');
+    print('  - GLB is local: ${model.glbUrl?.startsWith('/') ?? false}');
+    print('  - GLB exists locally: ${model.glbUrl != null && model.glbUrl!.startsWith('/') ? File(model.glbUrl!).existsSync() : false}');
+    
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -322,9 +343,9 @@ class ModelDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: kBackgroundBeige,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: kBackgroundBeige,
         elevation: 0,
         title: Text(
           model.name,

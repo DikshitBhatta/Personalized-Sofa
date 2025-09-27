@@ -24,7 +24,9 @@ class CartScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: kBackgroundBeige,
       appBar: AppBar(
+        backgroundColor: kBackgroundBeige,
         leading: IconButton(
           onPressed: () {
             Get.back();

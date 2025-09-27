@@ -190,7 +190,7 @@ class CustomToggle extends StatelessWidget {
             width: 60,
             height: 30,
             decoration: BoxDecoration(
-              color: value ? kSeaGreen : kChristmasSilver,
+              color: value ? kOffBlack : kChristmasSilver,
               borderRadius: BorderRadius.circular(15),
             ),
             child: AnimatedAlign(
@@ -239,7 +239,7 @@ class PersonalizationCard extends StatelessWidget {
         duration: const Duration(milliseconds: 300),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: isSelected ? kOffBlack.withOpacity(0.05) : Colors.white,
+          color: isSelected ? kOffBlack : Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected ? kOffBlack : kChristmasSilver,
@@ -286,7 +286,7 @@ class PersonalizationCard extends StatelessWidget {
                 title,
                 textAlign: TextAlign.center,
                 style: kNunitoSans14.copyWith(
-                  color: kOffBlack,
+                  color: isSelected ? Colors.white : kOffBlack,
                   fontSize: 13,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
                 ),
@@ -300,7 +300,7 @@ class PersonalizationCard extends StatelessWidget {
                 child: Text(
                   description!,
                   style: kNunitoSansSemiBold12.copyWith(
-                    color: kTinGrey,
+                    color: isSelected ? Colors.white.withOpacity(0.8) : kTinGrey,
                     fontSize: 11,
                   ),
                   maxLines: 2,

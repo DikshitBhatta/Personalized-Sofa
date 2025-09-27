@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
+import 'package:timberr/constants.dart';
 import 'package:timberr/controllers/address_controller.dart';
 import 'package:timberr/controllers/card_details_controller.dart';
 import 'package:timberr/controllers/cart_controller.dart';
@@ -78,6 +79,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: kBackgroundBeige,
       body: Center(
         child:
             LottieBuilder.asset("assets/lottie/splash_loading_animation.json"),

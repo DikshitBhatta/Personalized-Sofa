@@ -5,6 +5,7 @@ import 'package:timberr/controllers/personalization_controller.dart';
 import 'package:timberr/models/personalization_data.dart' as personalization;
 import 'package:timberr/widgets/cards/material_grid.dart';
 import 'package:timberr/widgets/progress/personalization_progress_bar.dart';
+import 'package:timberr/widgets/buttons/custom_elevated_button.dart';
 import 'package:timberr/screens/personalization/personalization_step4.dart';
 
 class PersonalizationStep3Screen extends StatefulWidget {
@@ -46,9 +47,9 @@ class _PersonalizationStep3ScreenState extends State<PersonalizationStep3Screen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kLynxWhite,
+      backgroundColor: kBackgroundBeige,
       appBar: AppBar(
-        backgroundColor: kLynxWhite,
+        backgroundColor: kBackgroundBeige,
         elevation: 0,
         leading: IconButton(
           onPressed: () {
@@ -211,7 +212,7 @@ class _PersonalizationStep3ScreenState extends State<PersonalizationStep3Screen>
                       child: Container(
                         height: 50,
                         decoration: BoxDecoration(
-                          border: Border.all(color: kChristmasSilver),
+                         color: kOffBlack,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: TextButton(
@@ -230,7 +231,7 @@ class _PersonalizationStep3ScreenState extends State<PersonalizationStep3Screen>
                           },
                           child: Text(
                             "Continue",
-                            style: kNunitoSansSemiBold16.copyWith(color: kTinGrey),
+                            style: kNunitoSansSemiBold16.copyWith(color: kLynxWhite),
                           ),
                         ),
                       ),
@@ -271,10 +272,10 @@ class _PersonalizationStep3ScreenState extends State<PersonalizationStep3Screen>
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: kSeaGreen.withOpacity(0.1),
+                  color: kOffBlack.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Icon(Icons.info_outline, color: kSeaGreen),
+                child: const Icon(Icons.info_outline, color: kOffBlack),
               ),
               const SizedBox(width: 12),
               Expanded(

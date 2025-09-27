@@ -5,6 +5,8 @@ import 'package:timberr/controllers/personalization_controller.dart';
 import 'package:timberr/models/personalization_data.dart';
 import 'package:timberr/widgets/progress/personalization_progress_bar.dart';
 import 'package:timberr/screens/personalization/personalization_results_screen.dart';
+import 'package:timberr/widgets/pricing/sofa_price_display.dart';
+import 'package:timberr/widgets/buttons/custom_elevated_button.dart';
 
 class PersonalizationStep8Screen extends StatefulWidget {
   const PersonalizationStep8Screen({super.key});
@@ -61,14 +63,16 @@ class _PersonalizationStep8ScreenState extends State<PersonalizationStep8Screen>
         _selectedExtras.add(extraValue);
       }
     });
+    // Save immediately to update pricing
+    _saveNiceToHaves();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kLynxWhite,
+      backgroundColor: kBackgroundBeige,
       appBar: AppBar(
-        backgroundColor: kLynxWhite,
+        backgroundColor: kBackgroundBeige,
         elevation: 0,
         leading: IconButton(
           onPressed: () {
@@ -143,7 +147,7 @@ class _PersonalizationStep8ScreenState extends State<PersonalizationStep8Screen>
                           crossAxisCount: 2,
                           crossAxisSpacing: 12,
                           mainAxisSpacing: 12,
-                          childAspectRatio: 3,
+                          childAspectRatio: 2.5, // Reduced from 3 to give more height for 2-line text
                         ),
                         itemCount: _availableExtras.length,
                         itemBuilder: (context, index) {
@@ -156,10 +160,10 @@ class _PersonalizationStep8ScreenState extends State<PersonalizationStep8Screen>
                             child: Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: isSelected ? kSeaGreen.withOpacity(0.1) : Colors.white,
+                                color: isSelected ? kOffBlack : Colors.white,
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
-                                  color: isSelected ? kSeaGreen : kChristmasSilver,
+                                  color: isSelected ? kOffBlack : kChristmasSilver,
                                   width: isSelected ? 2 : 1,
                                 ),
                               ),
@@ -167,23 +171,28 @@ class _PersonalizationStep8ScreenState extends State<PersonalizationStep8Screen>
                                 children: [
                                   Icon(
                                     extra['icon'],
-                                    color: isSelected ? kSeaGreen : kTinGrey,
-                                    size: 20,
+                                    color: isSelected ? Colors.white : kTinGrey,
+                                    size: 16,
                                   ),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
                                       extra['title'],
                                       style: kNunitoSans14.copyWith(
-                                        color: isSelected ? kSeaGreen : kOffBlack,
-                                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                                        color: isSelected ? Colors.white : kOffBlack,
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 12, // Smaller font to fit better
                                       ),
+                                      maxLines: 2, // Allow 2 lines
+                                      overflow: TextOverflow.ellipsis, // Handle any remaining overflow
                                     ),
                                   ),
                                   if (isSelected)
+                                    const SizedBox(width: 8),
+                                  if (isSelected)
                                     Icon(
                                       Icons.check_circle,
-                                      color: kSeaGreen,
+                                      color: Colors.white,
                                       size: 18,
                                     ),
                                 ],
@@ -211,7 +220,13 @@ class _PersonalizationStep8ScreenState extends State<PersonalizationStep8Screen>
                         title: const Text("Modular/Expandable design"),
                         subtitle: const Text("Ability to add or rearrange sections later"),
                         value: _modularExpandable,
-                        onChanged: (value) => setState(() => _modularExpandable = value ?? false),
+                        activeColor: kOffBlack,
+                        checkColor: Colors.white,
+                        onChanged: (value) {
+                          setState(() => _modularExpandable = value ?? false);
+                          // Save immediately to update pricing
+                          _saveNiceToHaves();
+                        },
                       ),
 
                       const SizedBox(height: 32),
@@ -220,16 +235,16 @@ class _PersonalizationStep8ScreenState extends State<PersonalizationStep8Screen>
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: kSeaGreen.withOpacity(0.1),
+                          color: kOffBlack.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: kSeaGreen.withOpacity(0.3)),
+                          border: Border.all(color: kOffBlack.withOpacity(0.3)),
                         ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Icon(
                               Icons.celebration,
-                              color: kSeaGreen,
+                              color: kOffBlack,
                               size: 20,
                             ),
                             const SizedBox(width: 12),
@@ -239,7 +254,7 @@ class _PersonalizationStep8ScreenState extends State<PersonalizationStep8Screen>
                                 children: [
                                   Text(
                                     "You're all set!",
-                                    style: kNunitoSansSemiBold16.copyWith(color: kSeaGreen),
+                                    style: kNunitoSansSemiBold16.copyWith(color: kOffBlack),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
@@ -253,7 +268,13 @@ class _PersonalizationStep8ScreenState extends State<PersonalizationStep8Screen>
                         ),
                       ),
 
-                      const SizedBox(height: 40),
+                      const SizedBox(height: 24),
+                      
+                      // Compact pricing display
+                      // Compact pricing display
+                      const CompactPriceTag(
+                        showBreakdown: false,
+                      ),                      const SizedBox(height: 24),
                     ],
                   ),
                 ),
@@ -299,7 +320,7 @@ class _PersonalizationStep8ScreenState extends State<PersonalizationStep8Screen>
                       child: Container(
                         height: 50,
                         decoration: BoxDecoration(
-                          color: kSeaGreen,
+                          color: kOffBlack,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: TextButton(
@@ -315,7 +336,7 @@ class _PersonalizationStep8ScreenState extends State<PersonalizationStep8Screen>
                                 "Personalization Complete!",
                                 "Your preferences have been saved successfully",
                                 snackPosition: SnackPosition.BOTTOM,
-                                backgroundColor: kSeaGreen,
+                                backgroundColor: kOffBlack,
                                 colorText: Colors.white,
                               );
                               
@@ -331,7 +352,7 @@ class _PersonalizationStep8ScreenState extends State<PersonalizationStep8Screen>
                           },
                           child: Text(
                             "Complete",
-                            style: kNunitoSansSemiBold16.copyWith(color: Colors.white),
+                            style: kNunitoSansSemiBold16.copyWith(color: kLynxWhite),
                           ),
                         ),
                       ),
