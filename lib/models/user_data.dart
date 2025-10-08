@@ -5,6 +5,7 @@ class UserData {
   bool newArrivalsNotification;
   bool deliveryStatusNotification;
   bool salesNotification;
+  String role;
   
   UserData(
       {this.name = "",
@@ -12,7 +13,8 @@ class UserData {
       this.profilePictureUrl,
       this.newArrivalsNotification = false,
       this.deliveryStatusNotification = true,
-      this.salesNotification = true});
+      this.salesNotification = true,
+      this.role = "user"});
       
   factory UserData.fromJson(Map<String, dynamic> json) {
     return UserData(
@@ -22,6 +24,7 @@ class UserData {
       newArrivalsNotification: json['new_arrivals_notification'] ?? false,
       salesNotification: json['sales_notification'] ?? true,
       deliveryStatusNotification: json['delivery_status_notification'] ?? true,
+      role: json['role'] ?? 'user',
     );
   }
   
@@ -33,6 +36,7 @@ class UserData {
       'new_arrivals_notification': newArrivalsNotification,
       'sales_notification': salesNotification,
       'delivery_status_notification': deliveryStatusNotification,
+      'role': role,
     };
   }
 }

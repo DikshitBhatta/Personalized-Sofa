@@ -6,17 +6,22 @@ import 'package:timberr/constants.dart';
 import 'package:timberr/controllers/address_controller.dart';
 import 'package:timberr/controllers/card_details_controller.dart';
 import 'package:timberr/controllers/user_controller.dart';
+import 'package:timberr/role/role_controller.dart';
+import 'package:timberr/role/role_guard_widgets.dart';
+import 'package:timberr/role/role_navigation_service.dart';
 import 'package:timberr/screens/profile/my_reviews_screen.dart';
 import 'package:timberr/screens/profile/payment_methods_screen.dart';
 import 'package:timberr/screens/profile/settings_screen.dart';
 import 'package:timberr/screens/profile/shipping_address_screen.dart';
 import 'package:timberr/widgets/tabbed/curved_bottom_navbar.dart';
 import 'package:timberr/widgets/tiles/profile_tile.dart';
+import 'package:timberr/Admin/AdminDashboard.dart';
 
 class ProfileScreen extends StatelessWidget {
   ProfileScreen({super.key});
   final UserController _userController = Get.find();
   final CardDetailsController _cardDetailsController = Get.find();
+  final RoleController _roleController = Get.find();
   void _toSettingsScreen() {
     Get.to(
       () => SettingsScreen(),
@@ -25,6 +30,17 @@ class ProfileScreen extends StatelessWidget {
       curve: Curves.easeOut,
     );
   }
+
+  void _toAdminDashboard() {
+    Get.to(
+      () => const AdminDashboard(),
+      transition: Transition.cupertino,
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeOut,
+    );
+  }
+
+
 
   void _toReviewScreen() {
     Get.to(
@@ -164,6 +180,26 @@ class ProfileScreen extends StatelessWidget {
                 onTap: _toReviewScreen,
               ),
               const Spacer(),
+              // Show admin options only for admin users
+              PermissionGuard(
+                adminOnly: true,
+                child: Column(
+                  children: [
+                    ProfileTile(
+                      name: "Switch to Admin Interface",
+                      description: "Access full admin dashboard",
+                      onTap: () => RoleNavigationService.switchToAdminInterface(),
+                    ),
+                    const Spacer(),
+                    ProfileTile(
+                      name: "Admin Dashboard",
+                      description: "Manage orders, users & concierges",
+                      onTap: _toAdminDashboard,
+                    ),
+                    const Spacer(),
+                  ],
+                ),
+              ),
               ProfileTile(
                 name: "Setting",
                 description: "Notification, Password, FAQ, Contact",

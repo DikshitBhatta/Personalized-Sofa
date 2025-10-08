@@ -4,10 +4,21 @@ import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:timberr/constants.dart';
 import 'package:timberr/wrapper.dart';
+import 'package:timberr/role/role_access.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  
+  // Initialize role system after Firebase
+  try {
+    await RoleBasedAccessControl.initializeRoleSystem();
+    print('✅ Role system initialized successfully');
+  } catch (e) {
+    print('⚠️ Role system initialization failed: $e');
+    print('📋 App will continue with fallback role handling');
+  }
+  
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
   );

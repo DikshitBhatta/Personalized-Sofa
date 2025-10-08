@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+// removed unused firebase_storage import
 import 'package:timberr/constants.dart';
 import 'package:timberr/models/user_data.dart';
 import 'package:timberr/screens/authentication/onboarding_welcome.dart';
@@ -9,7 +9,7 @@ import 'package:timberr/screens/authentication/onboarding_welcome.dart';
 class UserController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseStorage _storage = FirebaseStorage.instance;
+  // FirebaseStorage instance removed because it's currently unused
   UserData userData = UserData();
 
   Future<void> fetchUserData() async {

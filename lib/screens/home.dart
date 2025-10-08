@@ -5,7 +5,7 @@ import 'package:timberr/constants.dart';
 import 'package:timberr/controllers/home_controller.dart';
 import 'package:timberr/screens/cart/cart_screen.dart';
 import 'package:timberr/screens/search_delegate/product_search_delegate.dart';
-import 'package:timberr/widgets/tabbed/category_tab_bar.dart';
+// removed unused import
 import 'package:timberr/widgets/tabbed/curved_bottom_navbar.dart';
 import 'package:timberr/widgets/tiles/product_grid_tile.dart';
 import 'package:timberr/widgets/sections/renovate_interior_section.dart';

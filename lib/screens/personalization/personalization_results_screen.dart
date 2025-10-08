@@ -12,7 +12,7 @@ import 'package:timberr/presentation/controllers/sofa_generation_controller.dart
 import 'package:timberr/domain/models/sofa_config.dart';
 import 'package:timberr/models/preview_model.dart';
 import 'package:timberr/widgets/pricing/sofa_price_display.dart';
-import 'package:timberr/extensions/personalization_pricing_extension.dart';
+// removed unused import
 import 'package:timberr/widgets/buttons/custom_elevated_button.dart';
 import 'package:timberr/screens/concierge/schedule_concierge_screen.dart';
 import 'edit_personalization_screen.dart';

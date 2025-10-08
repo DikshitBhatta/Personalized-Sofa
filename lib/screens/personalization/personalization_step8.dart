@@ -6,7 +6,7 @@ import 'package:timberr/models/personalization_data.dart';
 import 'package:timberr/widgets/progress/personalization_progress_bar.dart';
 import 'package:timberr/screens/personalization/personalization_results_screen.dart';
 import 'package:timberr/widgets/pricing/sofa_price_display.dart';
-import 'package:timberr/widgets/buttons/custom_elevated_button.dart';
+// removed unused import
 
 class PersonalizationStep8Screen extends StatefulWidget {
   const PersonalizationStep8Screen({super.key});

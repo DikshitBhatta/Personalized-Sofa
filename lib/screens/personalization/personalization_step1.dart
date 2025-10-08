@@ -5,7 +5,7 @@ import 'package:timberr/controllers/personalization_controller.dart';
 import 'package:timberr/models/personalization_data.dart';
 import 'package:timberr/widgets/cards/audience_card.dart';
 import 'package:timberr/widgets/progress/personalization_progress_bar.dart';
-import 'package:timberr/widgets/buttons/custom_elevated_button.dart';
+// removed unused import
 import 'package:timberr/screens/personalization/personalization_step2.dart';
 
 class PersonalizationStep1Screen extends StatelessWidget {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:timberr/constants.dart';
-import 'package:timberr/controllers/personalization_controller.dart';
+// removed unused import
 import 'package:timberr/models/personalization_data.dart';
 import 'package:timberr/screens/personalization/personalization_flow.dart';
 import 'package:timberr/widgets/buttons/custom_elevated_button.dart';
