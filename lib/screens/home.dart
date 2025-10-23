@@ -5,6 +5,7 @@ import 'package:timberr/constants.dart';
 import 'package:timberr/controllers/home_controller.dart';
 import 'package:timberr/screens/cart/cart_screen.dart';
 import 'package:timberr/screens/search_delegate/product_search_delegate.dart';
+import 'package:timberr/screens/concierge/schedule_concierge_screen.dart';
 // removed unused import
 import 'package:timberr/widgets/tabbed/curved_bottom_navbar.dart';
 import 'package:timberr/widgets/tiles/product_grid_tile.dart';
@@ -16,7 +17,7 @@ class Home extends StatelessWidget {
   final HomeController _controller = Get.find();
   void _onCartTap() {
     Get.to(
-      () => CartScreen(),
+            () => CartScreen(),
       transition: Transition.fade,
     );
   }

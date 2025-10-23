@@ -262,7 +262,7 @@ class _PersonalizationStep2ScreenState extends State<PersonalizationStep2Screen>
   List<Widget> _buildAdultForm() {
     return [
       PersonalizationCardSelector(
-        label: "How will you enjoy your sofa most of the time?",
+        label: "How will you use it most?",
         helperText: "This helps us tailor the perfect proportions for you",
         options: const [
           PersonalizationOption(

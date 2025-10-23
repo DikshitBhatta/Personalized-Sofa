@@ -2,32 +2,41 @@ import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:timberr/constants.dart';
-import 'package:timberr/wrapper.dart';
 import 'package:timberr/models/user_data.dart';
 import 'package:timberr/role/role_access.dart';
 import 'package:timberr/role/role_controller.dart';
 import 'package:timberr/role/admin_wrapper.dart';
-import 'package:timberr/controllers/home_controller.dart';
-import 'package:timberr/controllers/favorites_controller.dart';
-import 'package:timberr/controllers/cart_controller.dart';
-import 'package:timberr/controllers/user_controller.dart';
-import 'package:timberr/controllers/address_controller.dart';
-import 'package:timberr/controllers/card_details_controller.dart';
+import 'package:timberr/routes/app_routes.dart';
+import 'package:timberr/screens/authentication/user_onboarding_screen.dart';
 
+/// Controller for authentication operations
+/// Handles sign in, sign up, and post-auth routing
 class AuthController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   
   User? get user => _auth.currentUser;
 
+  @override
+  void onInit() {
+    super.onInit();
+    print('🔐 AuthController: Initialized');
+  }
+
+  /// Sign in with email and password
   Future signIn(String email, String password) async {
     try {
+      print('🔑 AuthController: Attempting sign in...');
       await _auth.signInWithEmailAndPassword(email: email, password: password);
-      // Sign in with success - redirect based on role
+      print('✅ AuthController: Sign in successful');
+      
+      // Sign in successful - redirect based on role
       await _redirectBasedOnRole();
     } on FirebaseAuthException catch (error) {
+      print('❌ AuthController: Sign in failed - ${error.message}');
       kDefaultDialog("Error", error.message ?? 'Authentication failed');
     } catch (error) {
+      print('❌ AuthController: Unknown error - $error');
       kDefaultDialog("Error", 'Some Unknown Error occurred');
     }
   }
@@ -36,71 +45,47 @@ class AuthController extends GetxController {
   Future<void> _redirectBasedOnRole() async {
     try {
       if (_auth.currentUser == null) {
-        Get.offAll(() => const Wrapper());
+        print('⚠️ AuthController: No user found, redirecting to wrapper');
+        Get.offAllNamed(AppRoutes.wrapper);
         return;
       }
 
-      // Check user role
-      final userRole = await RoleBasedAccessControl.getCurrentUserRole();
-      final isAdmin = userRole == 'admin';
+      print('� AuthController: Checking user role...');
+      final roleController = Get.find<RoleController>();
+      await roleController.refreshUserRole();
+      
+      final isAdmin = roleController.isAdmin;
+      print('👤 AuthController: User is ${isAdmin ? "admin" : "regular user"}');
 
       if (isAdmin) {
-        // Redirect admin to admin wrapper
-        _initializeAdminControllers();
+        // Admin user - redirect to admin wrapper
+        print('🔧 AuthController: Redirecting to admin interface');
         Get.offAll(() => const AdminWrapper());
       } else {
-        // Redirect regular user to normal app flow
-        Get.offAll(() => const Wrapper());
+        // Regular user - use named route to splash screen
+        // SplashBinding will handle controller initialization
+        print('🏠 AuthController: Redirecting to splash screen');
+        Get.offAllNamed(AppRoutes.splash);
       }
     } catch (e) {
-      print('Error checking user role: $e');
-      // Fallback to normal wrapper if role check fails
-      Get.offAll(() => const Wrapper());
+      print('❌ AuthController: Error checking user role - $e');
+      // Fallback to wrapper if role check fails
+      Get.offAllNamed(AppRoutes.wrapper);
     }
   }
 
-  /// Initialize controllers needed for admin interface
-  void _initializeAdminControllers() {
-    // Initialize role controller first
-    if (!Get.isRegistered<RoleController>()) {
-      Get.put(RoleController(), permanent: true);
-    }
-    
-    // Initialize all necessary controllers for admin interface
-    // Admin users need all controllers as they might access user components
-    _initializeAllControllers();
-  }
-
-  /// Initialize all necessary controllers
-  void _initializeAllControllers() {
-    // Check if controllers are already initialized to avoid duplicates
-    if (!Get.isRegistered<HomeController>()) {
-      Get.put(HomeController());
-    }
-    if (!Get.isRegistered<FavoritesController>()) {
-      Get.put(FavoritesController());
-    }
-    if (!Get.isRegistered<CartController>()) {
-      Get.put(CartController());
-    }
-    if (!Get.isRegistered<UserController>()) {
-      Get.put(UserController());
-    }
-    if (!Get.isRegistered<AddressController>()) {
-      Get.put(AddressController());
-    }
-    if (!Get.isRegistered<CardDetailsController>()) {
-      Get.put(CardDetailsController());
-    }
-  }
-
+  /// Sign up with email and password
   Future signUp(String name, String email, String password) async {
     try {
+      print('📝 AuthController: Attempting sign up...');
       final userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
+      
       if (userCredential.user != null) {
+        print('✅ AuthController: User created, saving data...');
+        
         // Create user data in Firestore
         final userData = UserData(
           name: name,
@@ -124,10 +109,13 @@ class AuthController extends GetxController {
           userCredential.user!.uid,
           email,
         );
-            
-        Get.offAll(() => const Wrapper());
+        
+        print('✅ AuthController: User data saved, navigating to onboarding');
+        // Navigate to onboarding screen for new users
+        Get.offAll(() => const UserOnboardingScreen());
       }
     } on FirebaseAuthException catch (error) {
+      print('❌ AuthController: Sign up failed - ${error.message}');
       kDefaultDialog("Error", error.message ?? 'Registration failed');
     } catch (error) {
       kDefaultDialog("Error", 'Some Unknown Error occurred');

@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timberr/role/role_service.dart';
 import 'package:timberr/role/role_model.dart';
 import 'package:timberr/role/role_access.dart';
@@ -100,6 +101,53 @@ class RoleController extends GetxController {
   /// Refresh user role and permissions
   Future<void> refreshUserRole() async {
     await _loadUserRole();
+  }
+
+  /// Set role from cached value (for fast startup)
+  /// This allows immediate UI setup while fresh data loads in background
+  Future<void> setRoleFromCache(String cachedRole) async {
+    try {
+      print('📦 Setting role from cache: $cachedRole');
+      _currentUserRole.value = cachedRole;
+      _isAdmin.value = cachedRole == DefaultRoles.adminRole;
+      
+      // Load permissions for cached role
+      final permissions = await RoleBasedAccessControl.getCurrentUserPermissions();
+      _currentUserPermissions.assignAll(permissions);
+      
+      update();
+      
+      // Always refresh from Firebase in background to ensure accuracy
+      // Don't await - let it run in background
+      Future.microtask(() => fetchUserRole());
+    } catch (e) {
+      print('⚠️ Error setting role from cache: $e');
+      // Fallback to fresh fetch
+      await fetchUserRole();
+    }
+  }
+
+  /// Fetch user role from Firebase (fresh data)
+  /// Updates cache for next app launch
+  Future<void> fetchUserRole() async {
+    try {
+      final role = await RoleBasedAccessControl.getCurrentUserRole();
+      final permissions = await RoleBasedAccessControl.getCurrentUserPermissions();
+      
+      // Update state
+      _currentUserRole.value = role;
+      _isAdmin.value = role == DefaultRoles.adminRole;
+      _currentUserPermissions.assignAll(permissions);
+      
+      // Update cache
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('cached_user_role', role);
+      
+      update();
+      print('✅ Role fetched and cached: $role');
+    } catch (e) {
+      print('⚠️ Error fetching user role: $e');
+    }
   }
 
   /// Load all users with their roles (admin only)

@@ -282,6 +282,72 @@ class RoleService {
     }
   }
 
+  /// Get all admin user IDs
+  static Future<List<String>> getAllAdminUsers() async {
+    try {
+      print('🔍 ========== FETCHING ADMIN USERS ==========');
+      final adminIds = <String>[];
+      
+      // Check user_roles collection
+      print('📂 Step 1: Checking user_roles collection...');
+      final userRolesQuery = await _firestore
+          .collection('user_roles')
+          .where('role_name', isEqualTo: DefaultRoles.adminRole)
+          .where('is_active', isEqualTo: true)
+          .get();
+
+      print('   Found ${userRolesQuery.docs.length} documents in user_roles');
+      
+      for (var doc in userRolesQuery.docs) {
+        final userId = doc.data()['user_id'] as String?;
+        if (userId != null && !adminIds.contains(userId)) {
+          adminIds.add(userId);
+          print('   ✅ Admin found: $userId (from user_roles)');
+        }
+      }
+
+      // Fallback: also check users collection for any admin roles
+      print('📂 Step 2: Checking users collection as fallback...');
+      final usersWithAdminRole = await _firestore
+          .collection('users')
+          .where('role', isEqualTo: DefaultRoles.adminRole)
+          .get();
+      
+      print('   Found ${usersWithAdminRole.docs.length} documents in users collection');
+          
+      for (var doc in usersWithAdminRole.docs) {
+        if (!adminIds.contains(doc.id)) {
+          adminIds.add(doc.id);
+          print('   ✅ Admin found: ${doc.id} (from users collection)');
+        }
+      }
+
+      print('� Summary: Found ${adminIds.length} total admin user(s)');
+      if (adminIds.isEmpty) {
+        print('⚠️  WARNING: No admin users found!');
+        print('💡 To fix this, add an admin user:');
+        print('   1. Go to Firestore Console');
+        print('   2. In "users" collection, set a user\'s "role" field to "admin"');
+        print('   OR');
+        print('   3. In "user_roles" collection, create a document with:');
+        print('      - Document ID: [user_id]');
+        print('      - role_name: "admin"');
+        print('      - is_active: true');
+      } else {
+        print('👥 Admin IDs: $adminIds');
+      }
+      print('============================================');
+      
+      return adminIds;
+    } catch (e, stackTrace) {
+      print('❌ ========== ERROR GETTING ADMIN USERS ==========');
+      print('Error: $e');
+      print('Stack trace: $stackTrace');
+      print('==================================================');
+      return [];
+    }
+  }
+
   /// Get role change history (admin only)
   static Future<List<Map<String, dynamic>>> getRoleChangeHistory({int limit = 50}) async {
     try {

@@ -808,10 +808,9 @@ class _PersonalizationResultsScreenState extends State<PersonalizationResultsScr
                   const SizedBox(height: 40),
                   
                   // Concierge Button - Only show when refined model is available
-                  GetBuilder<SofaGenerationController>(
-                    builder: (controller) {
-                      final refinedModel = controller.refinedModel.value;
-                      if (refinedModel != null && refinedModel.glbUrl != null) {
+                  Obx(() {
+                    final refinedModel = _sofaGenCtrl.refinedModel.value;
+                    if (refinedModel != null && refinedModel.glbUrl != null) {
                         return Column(
                           children: [
                             Container(
@@ -882,10 +881,9 @@ class _PersonalizationResultsScreenState extends State<PersonalizationResultsScr
                             const SizedBox(height: 20),
                           ],
                         );
-                      }
-                      return const SizedBox.shrink();
-                    },
-                  ),
+                    }
+                    return const SizedBox.shrink();
+                  }),
                   
                 ],
               ),

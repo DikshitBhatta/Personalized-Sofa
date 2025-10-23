@@ -75,9 +75,25 @@ class AddShippingScreen extends StatelessWidget {
     return (val == null) ? "Please Select the District" : null;
   }
 
-  void _uploadAddress() {
+  Future<void> _uploadAddress() async {
     if (_formKey.currentState!.validate()) {
-      _addressController.uploadAddress();
+      bool success = await _addressController.uploadAddress();
+      if (success) {
+        // Navigate back to previous screen
+        Get.back();
+        
+        // Show success message
+        Future.delayed(const Duration(milliseconds: 200), () {
+          Get.snackbar(
+            "Success",
+            "Address saved successfully!",
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: kSeaGreen.withOpacity(0.8),
+            colorText: Colors.white,
+            duration: const Duration(seconds: 2),
+          );
+        });
+      }
     }
   }
 

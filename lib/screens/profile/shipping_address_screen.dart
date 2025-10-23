@@ -6,7 +6,12 @@ import 'package:timberr/screens/input/enhanced_add_shipping_screen.dart';
 import 'package:timberr/widgets/cards/address_card.dart';
 
 class ShippingAddressScreen extends StatefulWidget {
-  const ShippingAddressScreen({super.key});
+  final bool isSelectionMode; // true when selecting for concierge, false for management
+  
+  const ShippingAddressScreen({
+    super.key,
+    this.isSelectionMode = false,
+  });
 
   @override
   State<ShippingAddressScreen> createState() => _ShippingAddressScreenState();
@@ -14,6 +19,7 @@ class ShippingAddressScreen extends StatefulWidget {
 
 class _ShippingAddressScreenState extends State<ShippingAddressScreen> {
   final AddressController _addressController = Get.find<AddressController>();
+  int? _tempSelectedIndex; // Temporary selection for concierge mode
 
   @override
   void initState() {
@@ -22,6 +28,13 @@ class _ShippingAddressScreenState extends State<ShippingAddressScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _addressController.fetchAddresses();
     });
+    
+    // If in selection mode, start with no selection
+    if (widget.isSelectionMode) {
+      _tempSelectedIndex = null;
+    } else {
+      _tempSelectedIndex = _addressController.selectedIndex;
+    }
   }
 
   void _addOnTap() async {
@@ -91,11 +104,21 @@ class _ShippingAddressScreenState extends State<ShippingAddressScreen> {
                     SizedBox(
                       height: 20,
                       child: Checkbox(
-                        value: (addressController.selectedIndex == index)
-                            ? true
-                            : false,
+                        value: widget.isSelectionMode 
+                          ? (_tempSelectedIndex == index)
+                          : (addressController.selectedIndex == index),
                         onChanged: (isSelected) {
-                          addressController.setDefaultShippingAddress(index);
+                          if (widget.isSelectionMode) {
+                            // Selection mode: update temp selection and navigate back
+                            setState(() {
+                              _tempSelectedIndex = index;
+                            });
+                            // Navigate back with the selected address
+                            Get.back(result: index);
+                          } else {
+                            // Management mode: set as default
+                            addressController.setDefaultShippingAddress(index);
+                          }
                         },
                         activeColor: kOffBlack,
                         shape: RoundedRectangleBorder(
@@ -106,7 +129,9 @@ class _ShippingAddressScreenState extends State<ShippingAddressScreen> {
                       ),
                     ),
                     Text(
-                      "Use as the shipping address",
+                      widget.isSelectionMode 
+                        ? "Use as visit location"
+                        : "Use as the shipping address",
                       style: kNunitoSans18.copyWith(
                         color: kGrey,
                       ),

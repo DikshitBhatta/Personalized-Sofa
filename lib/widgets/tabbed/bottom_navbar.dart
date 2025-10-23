@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:timberr/screens/home.dart';
-import 'package:timberr/screens/notification_screen.dart';
+import 'package:timberr/Notification/screens/notification_screen.dart';
 import 'package:timberr/screens/profile/profile_screen.dart';
-import 'package:timberr/screens/profile/orders_screen.dart';
+import 'package:timberr/screens/orders/user_orders_screen.dart';
 
 class BottomNavBar extends StatelessWidget {
   final int selectedPos;
@@ -25,14 +25,14 @@ class BottomNavBar extends StatelessWidget {
             Get.off(() => Home(), transition: Transition.fadeIn);
             break;
           case 1:
-            Get.to(() => const OrdersScreen(), transition: Transition.fadeIn);
+            Get.to(() => const UserOrdersScreen(), transition: Transition.fadeIn);
             break;
           case 2:
             Get.to(() => const NotificationScreen(),
                 transition: Transition.fadeIn);
             break;
           case 3:
-            Get.to(() => ProfileScreen(), transition: Transition.fadeIn);
+            Get.to(() => const ProfileScreen(), transition: Transition.fadeIn);
             break;
         }
       },

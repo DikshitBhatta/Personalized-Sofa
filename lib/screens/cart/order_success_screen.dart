@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:timberr/constants.dart';
-import 'package:timberr/screens/profile/orders_screen.dart';
+import 'package:timberr/screens/orders/user_orders_screen.dart';
 import 'package:timberr/widgets/buttons/custom_elevated_button.dart';
 
 class OrderSuccessScreen extends StatelessWidget {
@@ -17,7 +17,7 @@ class OrderSuccessScreen extends StatelessWidget {
     Get.back();
     Get.back();
     Get.to(
-      () => const OrdersScreen(),
+      () => const UserOrdersScreen(),
       transition: Transition.cupertino,
       duration: const Duration(milliseconds: 600),
       curve: Curves.easeOut,

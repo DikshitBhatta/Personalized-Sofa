@@ -2,15 +2,28 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
+    // Helper function to check if user is admin
+    function isAdmin(uid) {
+      return uid != null && (
+        (exists(/databases/$(database)/documents/user_roles/$(uid)) &&
+          get(/databases/$(database)/documents/user_roles/$(uid)).data.role_name == 'admin')
+        ||
+        (exists(/databases/$(database)/documents/users/$(uid)) &&
+          get(/databases/$(database)/documents/users/$(uid)).data.role == 'admin')
+      );
+    }
+    
     // Allow authenticated users to read products (public data)
     match /Products/{productId} {
       allow read: if request.auth != null;
-      allow write: if false; // Only admins should write products
+      allow write: if request.auth != null && isAdmin(request.auth.uid);
     }
     
-    // Allow users to read/write their own user data
+    // Users - users can manage their own data, admins can read all
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin(request.auth.uid));
+      allow update, delete: if request.auth != null && (request.auth.uid == userId || isAdmin(request.auth.uid));
       
       // Allow personalization sessions under user document
       match /personalization_sessions/{sessionId} {
@@ -61,11 +74,11 @@ service cloud.firestore {
     // Categories (public read access)
     match /categories/{categoryId} {
       allow read: if request.auth != null;
-      allow write: if false; // Admin only
+      allow write: if request.auth != null && isAdmin(request.auth.uid);
     }
     
     match /analytics/{analyticsId} {
-      allow read: if false; // Admin only
+      allow read: if request.auth != null && isAdmin(request.auth.uid);
       allow create: if request.auth != null;
     }
     
@@ -82,27 +95,78 @@ service cloud.firestore {
         request.resource.data.user_id == request.auth.uid;
     }
     
-    // Roles collection - allow authenticated users to read roles
+    // Roles collection - read for all authenticated, admin-only write
     match /roles/{roleId} {
       allow read: if request.auth != null;
-      allow write: if request.auth != null; // Allow system to initialize default roles
-      allow create: if request.auth != null; // Allow system to create default roles
-      allow delete: if false; // Prevent deletion of roles
+      allow create, update: if request.auth != null && isAdmin(request.auth.uid);
+      allow delete: if false; // Prevent accidental role deletion
     }
     
-    // User roles collection - allow users to manage role assignments
+    // User roles collection - users manage their own, admins manage all
     match /user_roles/{userRoleId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null && (
-        resource.data.userId == request.auth.uid ||
-        userRoleId == request.auth.uid
+      allow read: if request.auth != null &&
+        (request.auth.uid == userRoleId || isAdmin(request.auth.uid));
+      allow create, update, delete: if request.auth != null &&
+        (request.auth.uid == userRoleId || isAdmin(request.auth.uid));
+    }
+    
+    // 🔥 CONCIERGE BOOKINGS - Users create their own, admins manage all
+    match /concierge_bookings/{bookingId} {
+      allow read: if request.auth != null && (
+        resource.data.client_id == request.auth.uid || 
+        isAdmin(request.auth.uid)
       );
-      allow create: if request.auth != null && (
-        request.resource.data.userId == request.auth.uid ||
-        userRoleId == request.auth.uid
+      allow create: if request.auth != null && 
+        request.resource.data.client_id == request.auth.uid;
+      allow update: if request.auth != null && (
+        resource.data.client_id == request.auth.uid || 
+        isAdmin(request.auth.uid)
       );
-      allow delete: if request.auth != null && 
-        resource.data.userId == request.auth.uid;
+      allow delete: if request.auth != null && isAdmin(request.auth.uid);
+    }
+    
+    // 🔔 NOTIFICATIONS - Users read their own, system creates
+    match /notifications/{notificationId} {
+      allow read: if request.auth != null && (
+        resource.data.user_id == request.auth.uid ||
+        resource.data.recipient_id == request.auth.uid ||
+        isAdmin(request.auth.uid)
+      );
+      allow create: if request.auth != null;
+      allow update: if request.auth != null && (
+        resource.data.user_id == request.auth.uid ||
+        resource.data.recipient_id == request.auth.uid ||
+        isAdmin(request.auth.uid)
+      );
+      allow delete: if request.auth != null && (
+        resource.data.user_id == request.auth.uid ||
+        resource.data.recipient_id == request.auth.uid ||
+        isAdmin(request.auth.uid)
+      );
+    }
+    
+    // 🛋️ SOFA ORDERS - Users manage their own orders, admins manage all
+    match /sofa_orders/{orderId} {
+      // Users can read their own orders, admins can read all
+      allow read: if request.auth != null && (
+        resource.data.user_id == request.auth.uid || 
+        isAdmin(request.auth.uid)
+      );
+      // Users can create their own orders
+      allow create: if request.auth != null && 
+        request.resource.data.user_id == request.auth.uid;
+      // Users can update their own orders (cancel), admins can update all
+      allow update: if request.auth != null && (
+        resource.data.user_id == request.auth.uid || 
+        isAdmin(request.auth.uid)
+      );
+      // Only admins can delete orders
+      allow delete: if request.auth != null && isAdmin(request.auth.uid);
+    }
+    
+    // FCM tokens for push notifications
+    match /fcm_tokens/{tokenId} {
+      allow read, write, create, delete: if request.auth != null;
     }
   }
 }

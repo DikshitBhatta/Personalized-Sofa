@@ -18,6 +18,7 @@ class _EnhancedAddShippingScreenState extends State<EnhancedAddShippingScreen> {
   final _formKey = GlobalKey<FormState>();
   final AddressController _addressController = Get.find();
   final UserController _userController = Get.find();
+  bool _isSaving = false; // Flag to prevent rebuilds during save
   
   @override
   void initState() {
@@ -175,9 +176,53 @@ class _EnhancedAddShippingScreenState extends State<EnhancedAddShippingScreen> {
     return null;
   }
 
-  void _uploadAddress() {
+  Future<void> _uploadAddress() async {
+    print('🔵 _uploadAddress called');
+    
     if (_formKey.currentState!.validate()) {
-      _addressController.uploadAddress();
+      print('🔵 Form is valid, calling controller.uploadAddress()');
+      
+      // Set flag to prevent rebuilds
+      setState(() {
+        _isSaving = true;
+      });
+      
+      // Call the controller method and await the result
+      bool success = await _addressController.uploadAddress();
+      
+      print('🔵 uploadAddress returned: $success');
+      
+      if (success && mounted) {
+        print('🔵 Success! Navigating back...');
+        
+        // Navigate back immediately - this pops current screen from stack
+        Navigator.of(context).pop();
+        print('🔵 Navigator.pop() called - should return to shipping address screen');
+        
+        // Show success message after navigation
+        Future.delayed(const Duration(milliseconds: 200), () {
+          if (Get.isSnackbarOpen != true) {
+            Get.snackbar(
+              "Success",
+              "Address saved successfully!",
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: kSeaGreen.withOpacity(0.8),
+              colorText: Colors.white,
+              duration: const Duration(seconds: 2),
+            );
+          }
+        });
+        
+      } else {
+        print('❌ Upload failed or widget unmounted, staying on current screen');
+        if (mounted) {
+          setState(() {
+            _isSaving = false;
+          });
+        }
+      }
+    } else {
+      print('❌ Form validation failed');
     }
   }
 
@@ -224,7 +269,9 @@ class _EnhancedAddShippingScreenState extends State<EnhancedAddShippingScreen> {
           physics: const BouncingScrollPhysics(),
           child: Form(
             key: _formKey,
-            child: GetBuilder<AddressController>(
+            child: _isSaving 
+              ? const Center(child: CircularProgressIndicator()) 
+              : GetBuilder<AddressController>(
               builder: (controller) => Column(
                 children: [
                   // Location status and map picker

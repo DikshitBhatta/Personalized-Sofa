@@ -2,8 +2,17 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:get/get.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:timberr/constants.dart';
 import 'package:timberr/screens/home.dart';
+import 'package:timberr/Notification/controllers/notification_controller.dart';
+import 'package:timberr/services/order_service.dart';
+import 'package:timberr/controllers/personalization_controller.dart';
+import 'package:timberr/presentation/controllers/sofa_generation_controller.dart';
+import 'package:timberr/services/sofa_price_calculator.dart';
+import 'package:timberr/models/user_onboarding_data.dart';
+import 'package:timberr/controllers/address_controller.dart';
 
 class ConciergePaymentScreen extends StatefulWidget {
   const ConciergePaymentScreen({super.key});
@@ -20,6 +29,13 @@ class _ConciergePaymentScreenState extends State<ConciergePaymentScreen> {
   bool showQRCode = true;
   File? paymentScreenshot;
   bool screenshotUploaded = false;
+  
+  @override
+  void initState() {
+    super.initState();
+    // Initialize notification controller
+    Get.put(NotificationController());
+  }
 
   // Dummy booking summary (replace with real data)
   final String clientName = 'Ms. A. Client';
@@ -54,10 +70,184 @@ class _ConciergePaymentScreenState extends State<ConciergePaymentScreen> {
     }
 
     setState(() => showSpinner = true);
-    await Future.delayed(const Duration(seconds: 2)); // simulate processing
+    
+    try {
+      print('🔄 Starting payment processing...');
+      
+      // Check if user is authenticated
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) {
+        print('❌ No authenticated user found');
+        setState(() => showSpinner = false);
+        _toast(context, 'Please sign in to continue with payment.', isError: true);
+        return;
+      }
+      
+      print('✅ User authenticated: ${currentUser.uid}');
+      
+      // Try to get notification controller safely
+      NotificationController? notificationController;
+      try {
+        notificationController = Get.find<NotificationController>();
+        print('✅ Notification controller found');
+      } catch (e) {
+        print('⚠️ Notification controller not found, creating new one: $e');
+        notificationController = Get.put(NotificationController());
+      }
+      
+      final visitParts = visitSlot.split(' — ');
+      final visitDate = visitParts.isNotEmpty ? visitParts[0] : visitSlot;
+      final visitTime = visitParts.length > 1 ? visitParts[1] : '';
+      
+      print('📝 Saving booking to Firestore...');
+      
+      // Store booking in Firestore
+      final docRef = await FirebaseFirestore.instance.collection('concierge_bookings').add({
+        'client_id': currentUser.uid,
+        'client_name': clientName,
+        'concierge_name': conciergeName,
+        'visit_address': visitAddress,
+        'visit_date': visitDate,
+        'visit_time': visitTime,
+        'contact': contact,
+        'amount': retainerAmount,
+        'status': 'pending',
+        'payment_method': paymentMethod,
+        'transaction_id': transactionId,
+        'created_at': FieldValue.serverTimestamp(),
+        'updated_at': FieldValue.serverTimestamp(),
+      });
+      
+      print('✅ Booking saved with ID: ${docRef.id}');
+      
+      // 🛋️ CREATE SOFA ORDER
+      await _createSofaOrder(currentUser.uid);
+      
+      // Try to send notification to admin
+      if (notificationController != null) {
+        try {
+          print('🔔 Sending notification to admin...');
+          
+          // Debug: Check admin users first
+          print('🔍 Debugging admin users before sending notification...');
+          await notificationController.debugAdminUsers();
+          
+          await notificationController.sendConciergeBookingNotification(
+            clientName: clientName,
+            conciergeName: conciergeName,
+            visitDate: visitDate,
+            visitTime: visitTime,
+            amount: retainerAmount,
+            clientId: currentUser.uid,
+          );
+          print('✅ Notification sent successfully');
+        } catch (notifError) {
+          print('⚠️ Notification sending failed (but booking was saved): $notifError');
+          print('📋 Notification error details: ${notifError.toString()}');
+          // Don't fail the entire process if notification fails
+        }
+      } else {
+        print('⚠️ Notification controller is null, skipping notification');
+      }
+      
+      await Future.delayed(const Duration(seconds: 1)); // simulate processing
+      
+      print('✅ Payment processing completed successfully');
+      
+    } catch (e, stackTrace) {
+      print('❌ Error processing payment: $e');
+      print('📋 Stack trace: $stackTrace');
+      setState(() => showSpinner = false);
+      _toast(context, 'Payment processing failed: ${e.toString()}', isError: true);
+      return;
+    }
+    
     setState(() => showSpinner = false);
-
     _showPendingDialog();
+  }
+
+  Future<void> _createSofaOrder(String userId) async {
+    try {
+      print('🛋️ Starting sofa order creation...');
+      
+      // Get personalization controller
+      final personalizationController = Get.find<PersonalizationController>();
+      final sofaGenController = Get.find<SofaGenerationController>();
+      
+      // Check if we have a refined model
+      if (sofaGenController.refinedModel.value == null) {
+        print('⚠️ No refined model found, skipping order creation');
+        return;
+      }
+      
+      final refinedModel = sofaGenController.refinedModel.value!;
+      final personalizationData = personalizationController.personalizationData;
+      
+      print('✅ Got refined model: ${refinedModel.glbUrl}');
+      
+      // Get material name for sofa name
+      String materialName = 'Custom';
+      if (personalizationData.styleMaterial?.materialType != null) {
+        materialName = personalizationData.styleMaterial!.materialType.toString().split('.').last;
+        materialName = materialName[0].toUpperCase() + materialName.substring(1);
+      }
+      
+      // Calculate pricing
+      final pricing = SofaPriceCalculator.calculatePrice(personalizationData);
+      print('💰 Calculated price: ${pricing.totalPrice}');
+      
+      // Get delivery address
+      String? deliveryAddress;
+      try {
+        final addressController = Get.find<AddressController>();
+        if (addressController.addressList.isNotEmpty) {
+          final address = addressController.addressList[addressController.selectedIndex];
+          deliveryAddress = '${address.address}, ${address.district}, ${address.city}, ${address.pincode}, ${address.country}';
+        }
+      } catch (e) {
+        print('⚠️ Could not load address: $e');
+      }
+      
+      // Get onboarding data
+      UserOnboardingData? onboardingData;
+      try {
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userId)
+            .get();
+        
+        if (userDoc.exists && userDoc.data()?['onboarding_data'] != null) {
+          onboardingData = UserOnboardingData.fromJson(userDoc.data()!['onboarding_data']);
+        }
+      } catch (e) {
+        print('⚠️ Could not load onboarding data: $e');
+      }
+      
+      // Create the order
+      print('📝 Creating order in Firestore...');
+      final orderId = await OrderService.createOrder(
+        sofaName: '$materialName Sofa',
+        glbUrl: refinedModel.glbUrl ?? '',
+        thumbnailUrl: refinedModel.thumbnailUrl ?? '',
+        personalizationData: personalizationData,
+        onboardingData: onboardingData,
+        totalPrice: pricing.totalPrice,
+        basePrice: pricing.basePrice,
+        deliveryAddress: deliveryAddress,
+        notes: 'Order created via concierge payment',
+      );
+      
+      if (orderId != null) {
+        print('✅ Sofa order created successfully: $orderId');
+      } else {
+        print('❌ Failed to create sofa order');
+      }
+    } catch (e, stackTrace) {
+      print('❌ Error creating sofa order: $e');
+      print('📋 Stack trace: $stackTrace');
+      // Don't fail the entire payment process if order creation fails
+      // User can still see their concierge booking
+    }
   }
 
   void _showPendingDialog() {

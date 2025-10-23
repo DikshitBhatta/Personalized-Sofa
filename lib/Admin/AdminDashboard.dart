@@ -4,8 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:timberr/screens/authentication/onboarding_welcome.dart';
 
 import 'delivery_setup_admin.dart';
-import 'admin_order_review.dart';
+import 'package:timberr/screens/orders/admin_order_management.dart';
 import 'concierge_management.dart';
+import 'concierge_booking_management.dart';
 import 'package:timberr/role/screens/user_management_screen.dart';
 
 class ColorsScheme {
@@ -68,10 +69,17 @@ class _AdminDashboardState extends State<AdminDashboard> {
             ),
             _buildDashboardCard(
               context,
+              'Concierge Bookings',
+              Icons.event_available,
+              'Manage concierge visit bookings',
+              () => Get.to(() => const ConciergeBookingManagement()),
+            ),
+            _buildDashboardCard(
+              context,
               'Order Review',
               Icons.receipt_long,
               'Review and approve/reject orders',
-              () => Get.to(() => const AdminOrderReview()),
+              () => Get.to(() => const AdminOrderManagement()),
             ),
             _buildDashboardCard(
               context,

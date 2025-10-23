@@ -58,10 +58,11 @@ class AddressController extends GetxController {
     }, SetOptions(merge: true));
   }
 
-  Future<void> uploadAddress() async {
+  Future<bool> uploadAddress() async {
     try {
       // Check if user is authenticated
       if (_auth.currentUser == null) {
+        print('❌ ERROR: User not authenticated');
         Get.snackbar(
           "Authentication Error",
           "Please log in to save your address.",
@@ -69,19 +70,14 @@ class AddressController extends GetxController {
           backgroundColor: Colors.red.shade100,
           colorText: Colors.red.shade800,
         );
-        return;
+        return false;
       }
 
-      // Show loading indicator
-      Get.dialog(
-        const Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(kOffBlack),
-          ),
-        ),
-        barrierDismissible: false,
-      );
+      print('📍 Starting address upload...');
+      print('📍 Address: $address, City: $city, Pincode: $pincode');
 
+      // Note: Loading indicator is shown by the screen, not here
+      
       final docRef = _firestore.collection("addresses").doc();
       await docRef.set({
         'id': docRef.id,
@@ -95,11 +91,14 @@ class AddressController extends GetxController {
         'created_at': FieldValue.serverTimestamp(),
       });
 
+      print('✅ Address saved to Firestore with ID: ${docRef.id}');
+
       if (addressList.isEmpty) {
         selectedIndex = 0;
         await _firestore.collection("users").doc(_auth.currentUser!.uid).set({
           'default_shipping_id': docRef.id
         }, SetOptions(merge: true));
+        print('✅ Set as default address');
       }
 
       addressList.add(Address(
@@ -112,35 +111,22 @@ class AddressController extends GetxController {
         district: district,
       ));
       
-      // Close loading dialog
-      Get.back();
+      print('✅ Address added to local list. Total addresses: ${addressList.length}');
       
-      // Update the UI first
-      update();
+      // No need to close dialog - screen handles loading indicator
       
       // Clear the form fields for next use
       _clearFormFields();
+      print('✅ Form fields cleared');
       
-      // Show success message
-      Get.snackbar(
-        "Success",
-        "Address saved successfully!",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: kSeaGreen.withOpacity(0.8),
-        colorText: Colors.white,
-        duration: const Duration(seconds: 2),
-      );
+      print('✅ Address upload completed successfully - ready to return true');
+      return true;
       
-      // Navigate back to shipping address page
-      Get.back();
+    } catch (e, stackTrace) {
+      // No dialog to close - screen handles loading indicator
       
-    } catch (e) {
-      // Close loading dialog if it's open
-      if (Get.isDialogOpen == true) {
-        Get.back();
-      }
-      
-      print('Error uploading address: $e');
+      print('❌ ERROR uploading address: $e');
+      print('❌ Stack trace: $stackTrace');
       
       String errorMessage;
       if (e.toString().contains('permission-denied')) {
@@ -159,6 +145,8 @@ class AddressController extends GetxController {
         colorText: Colors.red.shade800,
         duration: const Duration(seconds: 5),
       );
+      
+      return false;
     }
   }
 

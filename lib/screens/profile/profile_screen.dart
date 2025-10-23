@@ -6,7 +6,6 @@ import 'package:timberr/constants.dart';
 import 'package:timberr/controllers/address_controller.dart';
 import 'package:timberr/controllers/card_details_controller.dart';
 import 'package:timberr/controllers/user_controller.dart';
-import 'package:timberr/role/role_controller.dart';
 import 'package:timberr/role/role_guard_widgets.dart';
 import 'package:timberr/role/role_navigation_service.dart';
 import 'package:timberr/screens/profile/my_reviews_screen.dart';
@@ -17,11 +16,26 @@ import 'package:timberr/widgets/tabbed/curved_bottom_navbar.dart';
 import 'package:timberr/widgets/tiles/profile_tile.dart';
 import 'package:timberr/Admin/AdminDashboard.dart';
 
-class ProfileScreen extends StatelessWidget {
-  ProfileScreen({super.key});
-  final UserController _userController = Get.find();
-  final CardDetailsController _cardDetailsController = Get.find();
-  final RoleController _roleController = Get.find();
+class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  final UserController _userController = Get.put(UserController());
+  final AddressController _addressController = Get.put(AddressController());
+  final CardDetailsController _cardDetailsController = Get.put(CardDetailsController());
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch addresses when profile screen loads
+    _addressController.fetchAddresses();
+    print('📍 Profile screen: Fetching addresses...');
+  }
+
   void _toSettingsScreen() {
     Get.to(
       () => SettingsScreen(),
@@ -60,13 +74,16 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  void _toShippingAddressScreen() {
-    Get.to(
+  void _toShippingAddressScreen() async {
+    await Get.to(
       () => const ShippingAddressScreen(),
       transition: Transition.cupertino,
       duration: const Duration(milliseconds: 600),
       curve: Curves.easeOut,
     );
+    // Refresh addresses when returning from shipping address screen
+    _addressController.fetchAddresses();
+    print('📍 Profile screen: Refreshing addresses after return...');
   }
 
 
@@ -151,6 +168,7 @@ class ProfileScreen extends StatelessWidget {
               const Spacer(flex: 2),
               // Orders removed from profile as it's available in bottom nav
               GetBuilder<AddressController>(
+                init: _addressController,
                 builder: (addressController) {
                   String addressCount =
                       addressController.addressList.length.toString();
