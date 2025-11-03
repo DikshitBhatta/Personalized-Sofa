@@ -1,6 +1,8 @@
-# �️ Me Sofa - Personalized AI Sofa Design Platform
+# 🛋️ Me Sofa - Personalized AI Sofa Design Platform
 
 **Me Sofa** is an innovative Flutter-based mobile application that revolutionizes furniture shopping by combining AI-powered personalization, 3D visualization, and professional concierge services. Built with Firebase, GetX state management, and cutting-edge 3D rendering technology, Me Sofa offers users a completely personalized sofa customization experience.
+
+> **🎨 Design Credits**: This project's initial UI design and base architecture were inspired by and forked from [Timberr - Flutter Furniture App](https://github.com/adeeteya/FlutterFurnitureApp) by [Aditya R](https://github.com/adeeteya). We extend our gratitude for the excellent foundation that made Me Sofa possible.
 
 ## 🌟 What Makes Me Sofa Special
 
