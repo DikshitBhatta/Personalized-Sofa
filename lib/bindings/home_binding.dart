@@ -5,6 +5,7 @@ import 'package:timberr/controllers/cart_controller.dart';
 import 'package:timberr/controllers/user_controller.dart';
 import 'package:timberr/controllers/address_controller.dart';
 import 'package:timberr/controllers/card_details_controller.dart';
+import 'package:timberr/controllers/personalization_controller.dart';
 import 'package:timberr/Notification/controllers/notification_controller.dart';
 
 /// Binding for Home screen and its dependencies
@@ -19,6 +20,7 @@ class HomeBinding extends Bindings {
     Get.lazyPut<UserController>(() => UserController(), fenix: true);
     Get.lazyPut<AddressController>(() => AddressController(), fenix: true);
     Get.lazyPut<CardDetailsController>(() => CardDetailsController(), fenix: true);
+    Get.lazyPut<PersonalizationController>(() => PersonalizationController(), fenix: true);
     Get.lazyPut<NotificationController>(() => NotificationController(), fenix: true);
   }
 }

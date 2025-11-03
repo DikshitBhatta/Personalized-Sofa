@@ -4,9 +4,10 @@ import 'package:timberr/constants.dart';
 import 'package:timberr/utils/image_assets.dart';
 import 'package:timberr/models/personalization_data.dart' as personalization;
 
-class ColorPicker extends StatelessWidget {
+class ColorPicker extends StatefulWidget {
   final String? selectedColorHex;
   final String? selectedPantoneCode;
+  final String? recommendedColorHex; // New: AI-recommended color
   final ValueChanged<String> onColorSelected;
   final ValueChanged<String>? onPantoneCodeChanged;
   
@@ -14,69 +15,426 @@ class ColorPicker extends StatelessWidget {
     super.key,
     required this.selectedColorHex,
     this.selectedPantoneCode,
+    this.recommendedColorHex,
     required this.onColorSelected,
     this.onPantoneCodeChanged,
   });
 
   @override
-  Widget build(BuildContext context) {
-    final presetColors = [
-     // Neutrals
-  '#2C2C2C', '#D3D3D3', '#F5F5F5', '#A0522D', '#8B4513',
+  State<ColorPicker> createState() => _ColorPickerState();
+}
 
-  // Earth Tones
-  '#CD853F', '#D2691E', '#800000', '#8B0000', '#B22222',
-
-  // Luxe Reds & Wines
-  '#DC143C', '#228B22', '#6B8E23', '#556B2F', '#191970',
-
-  // Blues
-  '#000080', '#0000CD', '#4169E1', '#9932CC', '#8A2BE2',
-
-  // Purples
-  '#4B0082', '#6A5ACD', '#7B68EE', '#B8860B', '#DAA520',
+class _ColorPickerState extends State<ColorPicker> {
+  double _lightnessValue = 0.5; // 0.0 = dark, 1.0 = light
+  String? _baseColorHex; // The base color before lightness adjustment
+  String? _lastSelectedColorHex; // Track the last selected color
+  
+  @override
+  void initState() {
+    super.initState();
+    _baseColorHex = widget.selectedColorHex;
+    _lastSelectedColorHex = widget.selectedColorHex;
+    
+    // Try to detect if the selected color is an adjusted version
+    if (widget.selectedColorHex != null) {
+      _initializeLightnessFromColor(widget.selectedColorHex!);
+    }
+  }
+  
+  @override
+  void didUpdateWidget(ColorPicker oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Only update base color if user selected a different base color (not from slider adjustment)
+    if (widget.selectedColorHex != oldWidget.selectedColorHex && 
+        widget.selectedColorHex != null &&
+        widget.selectedColorHex != _lastSelectedColorHex) {
+      // Check if this is a base color selection (from color swatches)
+      final baseColors = [
+        '#FAFAF0', '#2D2D2D', '#909090', '#D4B896', '#8B6F47',
+        '#D64545', '#E67E22', '#FFD54F', '#66BB6A', '#5DADE2', '#AB47BC'
+      ];
+      
+      if (baseColors.contains(widget.selectedColorHex)) {
+        // User selected a new base color, reset lightness
+        _baseColorHex = widget.selectedColorHex;
+        _lightnessValue = 0.5;
+      }
+      _lastSelectedColorHex = widget.selectedColorHex;
+    }
+  }
+  
+  /// Initialize lightness value from the selected color
+  void _initializeLightnessFromColor(String hexColor) {
+    try {
+      final color = Color(int.parse(hexColor.substring(1), radix: 16) + 0xFF000000);
+      final hslColor = HSLColor.fromColor(color);
+      _lightnessValue = hslColor.lightness.clamp(0.1, 0.9);
+    } catch (e) {
+      _lightnessValue = 0.5;
+    }
+  }
+  
+  /// Adjust lightness of a hex color
+  String _adjustLightness(String hexColor, double lightness) {
+    final color = Color(int.parse(hexColor.substring(1), radix: 16) + 0xFF000000);
+    final hslColor = HSLColor.fromColor(color);
+    final adjustedColor = hslColor.withLightness(lightness.clamp(0.0, 1.0)).toColor();
+    return '#${adjustedColor.value.toRadixString(16).substring(2).toUpperCase()}';
+  }
+  
+  /// Get gradient colors for the lightness slider (LIGHTER to DARKER)
+  List<Color> _getGradientColors(String hexColor) {
+    final baseColor = Color(int.parse(hexColor.substring(1), radix: 16) + 0xFF000000);
+    final hslColor = HSLColor.fromColor(baseColor);
+    
+    return [
+      hslColor.withLightness(0.9).toColor(),  // Very light (LEFT)
+      hslColor.withLightness(0.7).toColor(),  // Light
+      hslColor.withLightness(0.5).toColor(),  // Mid (base)
+      hslColor.withLightness(0.3).toColor(),  // Dark
+      hslColor.withLightness(0.1).toColor(),  // Very dark (RIGHT)
     ];
+  }
+  
+  /// Build circular color swatch
+  Widget _buildCircularColorSwatch(String colorName, String colorHex) {
+    final isSelected = widget.selectedColorHex == colorHex;
+    final isRecommended = widget.recommendedColorHex == colorHex;
+    
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _baseColorHex = colorHex;
+          _lightnessValue = 0.5; // Reset to mid-tone
+        });
+        widget.onColorSelected(colorHex);
+      },
+      child: Container(
+        width: 64,
+        height: 64,
+        decoration: BoxDecoration(
+          color: Color(int.parse(colorHex.substring(1), radix: 16) + 0xFF000000),
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: isSelected 
+                ? kOffBlack 
+                : isRecommended 
+                    ? kSeaGreen 
+                    : kChristmasSilver,
+            width: isSelected ? 3 : isRecommended ? 2.5 : 1.5,
+          ),
+          boxShadow: [
+            if (isRecommended)
+              BoxShadow(
+                color: kSeaGreen.withOpacity(0.3),
+                spreadRadius: 0,
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              spreadRadius: 0,
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            if (isSelected)
+              Center(
+                child: Icon(
+                  Icons.check_circle,
+                  color: _getContrastColor(colorHex),
+                  size: 28,
+                ),
+              ),
+            if (isRecommended && !isSelected)
+              Positioned(
+                top: 6,
+                right: 6,
+                child: Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.stars,
+                    color: kSeaGreen,
+                    size: 16,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Base hue colors (11 main colors from emotion algorithm)
+    final Map<String, Map<String, String>> baseHues = {
+      'White': {
+        'light': '#FFFFF5',
+        'mid': '#FAFAF0',
+        'dark': '#F0F0E8',
+      },
+      'Black': {
+        'light': '#4A4A4A',
+        'mid': '#2D2D2D',
+        'dark': '#1A1A1A',
+      },
+      'Gray': {
+        'light': '#D0D0D0',
+        'mid': '#909090',
+        'dark': '#505050',
+      },
+      'Beige': {
+        'light': '#F5E6D3',
+        'mid': '#D4B896',
+        'dark': '#A68A64',
+      },
+      'Brown': {
+        'light': '#D7B49E',
+        'mid': '#8B6F47',
+        'dark': '#5D4E37',
+      },
+      'Red': {
+        'light': '#FFB3B3',
+        'mid': '#D64545',
+        'dark': '#8B2F2F',
+      },
+      'Orange': {
+        'light': '#FFD4A3',
+        'mid': '#E67E22',
+        'dark': '#A85A1A',
+      },
+      'Yellow': {
+        'light': '#FFF9C4',
+        'mid': '#FFD54F',
+        'dark': '#B8941F',
+      },
+      'Green': {
+        'light': '#C8E6C9',
+        'mid': '#66BB6A',
+        'dark': '#2E7D32',
+      },
+      'Blue': {
+        'light': '#B3D9E6',
+        'mid': '#5DADE2',
+        'dark': '#2874A6',
+      },
+      'Purple': {
+        'light': '#E1BEE7',
+        'mid': '#AB47BC',
+        'dark': '#6A1B9A',
+      },
+    };
+
+    // Get mid-tone colors as the primary selector
+    final primaryColors = baseHues.map((name, tones) => MapEntry(name, tones['mid']!));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          "Choose Color",
-          style: kNunitoSansSemiBold16.copyWith(color: kOffBlack),
+        Row(
+          children: [
+            Text(
+              "Choose Color",
+              style: kNunitoSansSemiBold16.copyWith(color: kOffBlack),
+            ),
+            if (widget.recommendedColorHex != null) ...[
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [kIvoryGradientLight, kIvoryGradientDark],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: kSeaGreen, width: 1),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.stars, size: 14, color: kSeaGreen),
+                    const SizedBox(width: 4),
+                    Text(
+                      "AI Recommended",
+                      style: kNunitoSans14.copyWith(
+                        color: kOffBlack,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
         ),
         const SizedBox(height: 16),
         
-        // Preset color swatches
-        Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children: presetColors.map((colorHex) {
-            final isSelected = selectedColorHex == colorHex;
-            return GestureDetector(
-              onTap: () => onColorSelected(colorHex),
-              child: Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: Color(int.parse(colorHex.substring(1), radix: 16) + 0xFF000000),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: isSelected ? kOffBlack : kChristmasSilver,
-                    width: isSelected ? 3 : 1,
+        // Main color swatches in circular shape - 4, 4, 3 layout
+        Column(
+          children: [
+            // Row 1: First 4 colors
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: primaryColors.entries.take(4).map((entry) {
+                return _buildCircularColorSwatch(
+                  entry.key,
+                  entry.value,
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 16),
+            
+            // Row 2: Next 4 colors
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: primaryColors.entries.skip(4).take(4).map((entry) {
+                return _buildCircularColorSwatch(
+                  entry.key,
+                  entry.value,
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 16),
+            
+            // Row 3: Last 3 colors
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                const SizedBox(width: 56), // Spacer for centering
+                ...primaryColors.entries.skip(8).take(3).map((entry) {
+                  return _buildCircularColorSwatch(
+                    entry.key,
+                    entry.value,
+                  );
+                }).toList(),
+                const SizedBox(width: 56), // Spacer for centering
+              ],
+            ),
+          ],
+        ),
+        
+        // Tone/Shade Slider - only show if a color is selected
+        if (_baseColorHex != null) ...[
+          const SizedBox(height: 32),
+          
+          Text(
+            "Fine-tune Shade",
+            style: kNunitoSansSemiBold16.copyWith(color: kOffBlack),
+          ),
+          const SizedBox(height: 12),
+          
+          // Gradient preview bar
+          Container(
+            height: 50,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: _getGradientColors(_baseColorHex!),
+              ),
+              borderRadius: BorderRadius.circular(25),
+              border: Border.all(color: kChristmasSilver, width: 1),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  spreadRadius: 0,
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+          ),
+          
+          const SizedBox(height: 12),
+          
+          // Slider with smooth visual feedback
+          SliderTheme(
+            data: SliderTheme.of(context).copyWith(
+              activeTrackColor: Colors.transparent,
+              inactiveTrackColor: Colors.transparent,
+              trackHeight: 50,
+              thumbColor: kOffBlack,
+              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 14),
+              overlayColor: kOffBlack.withOpacity(0.15),
+              overlayShape: const RoundSliderOverlayShape(overlayRadius: 24),
+            ),
+            child: Slider(
+              value: 0.9 - _lightnessValue + 0.1, // Invert: left=light(0.9), right=dark(0.1)
+              min: 0.1,
+              max: 0.9,
+              // Update visual preview smoothly while sliding
+              onChanged: (value) {
+                final invertedValue = 0.9 - value + 0.1;
+                setState(() {
+                  _lightnessValue = invertedValue;
+                });
+                // Don't call widget.onColorSelected here - just update the preview!
+              },
+              // Only update the actual selected color when user finishes sliding
+              onChangeEnd: (value) {
+                final invertedValue = 0.9 - value + 0.1;
+                final adjustedColor = _adjustLightness(_baseColorHex!, invertedValue);
+                _lastSelectedColorHex = adjustedColor; // Track this adjustment
+                widget.onColorSelected(adjustedColor);
+              },
+            ),
+          ),
+          
+          // Labels
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Lighter",
+                  style: kNunitoSans14.copyWith(
+                    color: kGraniteGrey,
+                    fontSize: 12,
                   ),
                 ),
-                child: isSelected 
-                  ? const Icon(Icons.check, color: Colors.white, size: 20)
-                  : null,
-              ),
-            );
-          }).toList(),
-        ),
+                // Current color preview
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Color(int.parse(
+                      _adjustLightness(_baseColorHex!, _lightnessValue).substring(1), 
+                      radix: 16,
+                    ) + 0xFF000000),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: kChristmasSilver),
+                  ),
+                  child: Text(
+                    _adjustLightness(_baseColorHex!, _lightnessValue).substring(0, 7),
+                    style: kNunitoSans14.copyWith(
+                      color: _getContrastColor(_adjustLightness(_baseColorHex!, _lightnessValue)),
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Text(
+                  "Darker",
+                  style: kNunitoSans14.copyWith(
+                    color: kGraniteGrey,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
         
         const SizedBox(height: 24),
         
         // Custom color input
-        if (onPantoneCodeChanged != null) ...[
+        if (widget.onPantoneCodeChanged != null) ...[
           Text(
             "Custom Color (Optional)",
             style: kNunitoSansSemiBold16.copyWith(color: kOffBlack),
@@ -99,7 +457,7 @@ class ColorPicker extends StatelessWidget {
                       borderSide: const BorderSide(color: kOffBlack, width: 2),
                     ),
                   ),
-                  onChanged: onPantoneCodeChanged,
+                  onChanged: widget.onPantoneCodeChanged,
                 ),
               ),
               const SizedBox(width: 12),
@@ -119,7 +477,7 @@ class ColorPicker extends StatelessWidget {
                   ),
                   onChanged: (value) {
                     if (value.startsWith('#') && value.length == 7) {
-                      onColorSelected(value);
+                      widget.onColorSelected(value);
                     }
                   },
                   inputFormatters: [
@@ -133,6 +491,13 @@ class ColorPicker extends StatelessWidget {
         ],
       ],
     );
+  }
+  
+  /// Get contrasting color for check icon (white or black based on background)
+  Color _getContrastColor(String hexColor) {
+    final color = Color(int.parse(hexColor.substring(1), radix: 16) + 0xFF000000);
+    final luminance = color.computeLuminance();
+    return luminance > 0.5 ? Colors.black : Colors.white;
   }
 }
 

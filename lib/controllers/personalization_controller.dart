@@ -1,15 +1,41 @@
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timberr/models/personalization_data.dart';
+import 'package:timberr/models/user_onboarding_data.dart';
+import 'package:timberr/utils/emotion_color_picker.dart';
 
 
 class PersonalizationController extends GetxController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   
+  // Debug flag - set to false to disable verbose logging
+  static const bool _debugMode = false;
+  
+  // Cache keys for SharedPreferences
+  static const String _cacheKeyColorHex = 'cached_recommended_color_hex';
+  static const String _cacheKeyIsManualEdit = 'cached_is_color_manually_edited';
+  static const String _cacheKeyStyleTag1 = 'cached_style_tag_1';
+  static const String _cacheKeyStyleTag2 = 'cached_style_tag_2';
+  
   final Rx<PersonalizationData> _personalizationData = PersonalizationData().obs;
   PersonalizationData get personalizationData => _personalizationData.value;
+  
+  final RxString _recommendedColorHex = ''.obs;
+  String get recommendedColorHex => _recommendedColorHex.value;
+  
+  // Track if user manually edited the color (to prevent auto-recalculation)
+  final RxBool _isColorManuallyEdited = false.obs;
+  bool get isColorManuallyEdited => _isColorManuallyEdited.value;
+  
+  // Cached style tags from onboarding
+  final RxString _styleTag1 = 'Modern'.obs;
+  String get styleTag1 => _styleTag1.value;
+  
+  final RxString _styleTag2 = 'Comfortable'.obs;
+  String get styleTag2 => _styleTag2.value;
   
   final RxInt _currentStep = 0.obs;
   // Allow marking certain steps as manually completed (useful for optional steps)
@@ -23,6 +49,9 @@ class PersonalizationController extends GetxController {
   void onInit() {
     super.onInit();
     _initializeSession();
+    _loadCachedData(); // Load from cache first for instant UI
+    _loadRecommendedColor(); // Then fetch from Firestore in background
+    _loadOnboardingStyleTags(); // Load style tags
   }
   
   void _initializeSession() {
@@ -34,11 +63,226 @@ class PersonalizationController extends GetxController {
     );
   }
   
+  // Load cached data from SharedPreferences for instant display
+  Future<void> _loadCachedData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      
+      // Load cached color
+      final cachedColor = prefs.getString(_cacheKeyColorHex);
+      if (cachedColor != null && cachedColor.isNotEmpty) {
+        _recommendedColorHex.value = cachedColor;
+        print('✅ Loaded cached color: $cachedColor');
+      }
+      
+      // Load cached manual edit flag
+      final cachedManualEdit = prefs.getBool(_cacheKeyIsManualEdit) ?? false;
+      _isColorManuallyEdited.value = cachedManualEdit;
+      
+      // Load cached style tags
+      final cachedTag1 = prefs.getString(_cacheKeyStyleTag1);
+      if (cachedTag1 != null) {
+        _styleTag1.value = cachedTag1;
+      }
+      
+      final cachedTag2 = prefs.getString(_cacheKeyStyleTag2);
+      if (cachedTag2 != null) {
+        _styleTag2.value = cachedTag2;
+      }
+      
+      // Trigger UI update with cached data
+      update();
+    } catch (e) {
+      print('⚠️ Error loading cached data: $e');
+    }
+  }
+  
+  // Load recommended color from Firestore or calculate it
+  Future<void> _loadRecommendedColor() async {
+    try {
+      final user = _auth.currentUser;
+      if (user != null) {
+        final prefs = await SharedPreferences.getInstance();
+        final userDoc = await _firestore
+            .collection('users')
+            .doc(user.uid)
+            .get();
+
+        if (userDoc.exists) {
+          final data = userDoc.data();
+          
+          // Check if color was manually edited by user
+          if (data?['is_color_manually_edited'] == true) {
+            _isColorManuallyEdited.value = true;
+            await prefs.setBool(_cacheKeyIsManualEdit, true);
+          }
+          
+          // Check if recommended color is already saved
+          if (data?['recommended_color_hex'] != null) {
+            final firestoreColor = data!['recommended_color_hex'];
+            _recommendedColorHex.value = firestoreColor;
+            
+            // Cache it for next time
+            await prefs.setString(_cacheKeyColorHex, firestoreColor);
+            
+            print('✅ Loaded recommended color from Firestore: $firestoreColor (manually edited: $_isColorManuallyEdited)');
+            update(); // Notify UI
+          } else {
+            // Calculate it if not present
+            await _recalculateRecommendedColor();
+          }
+        }
+      }
+    } catch (e) {
+      print('⚠️ Error loading recommended color: $e');
+    }
+  }
+  
+  // Load onboarding style tags from Firestore
+  Future<void> _loadOnboardingStyleTags() async {
+    try {
+      final user = _auth.currentUser;
+      if (user != null) {
+        final prefs = await SharedPreferences.getInstance();
+        final userDoc = await _firestore
+            .collection('users')
+            .doc(user.uid)
+            .get();
+
+        if (userDoc.exists && userDoc.data()?['onboarding_data'] != null) {
+          final onboardingData = UserOnboardingData.fromJson(
+            userDoc.data()!['onboarding_data'],
+          );
+
+          // Update style tags
+          if (onboardingData.livingRoomPersonality != null) {
+            _styleTag1.value = onboardingData.livingRoomPersonality!;
+            await prefs.setString(_cacheKeyStyleTag1, _styleTag1.value);
+          }
+          
+          if (onboardingData.livingRoomFeeling != null) {
+            _styleTag2.value = onboardingData.livingRoomFeeling!;
+            await prefs.setString(_cacheKeyStyleTag2, _styleTag2.value);
+          }
+
+          print('✅ Loaded style tags from Firestore: ${_styleTag1.value} · ${_styleTag2.value}');
+          update(); // Notify UI
+        }
+      }
+    } catch (e) {
+      print('⚠️ Error loading onboarding style tags: $e');
+    }
+  }
+  
+  // Recalculate recommended color based on onboarding data and current personalization
+  // ONLY if user hasn't manually edited the color
+  Future<void> _recalculateRecommendedColor() async {
+    // Don't recalculate if user has manually edited the color
+    if (_isColorManuallyEdited.value) {
+      print('⏭️ Skipping color recalculation - user has manually edited the color');
+      return;
+    }
+    
+    try {
+      final user = _auth.currentUser;
+      if (user != null) {
+        final userDoc = await _firestore
+            .collection('users')
+            .doc(user.uid)
+            .get();
+
+        if (userDoc.exists && userDoc.data()?['onboarding_data'] != null) {
+          final onboardingData = UserOnboardingData.fromJson(
+            userDoc.data()!['onboarding_data'],
+          );
+
+          // Calculate recommended color
+          final emotionColor = EmotionColorPicker.calculateColor(
+            onboardingData: onboardingData,
+            personalizationData: _personalizationData.value,
+          );
+
+          // Convert to hex
+          final recommendedColor = EmotionColorPicker.getFlutterColor(emotionColor);
+          final hexColor = '#${recommendedColor.value.toRadixString(16).substring(2).toUpperCase()}';
+
+          _recommendedColorHex.value = hexColor;
+          
+          // Save to Firestore for future quick access
+          await _firestore
+              .collection('users')
+              .doc(user.uid)
+              .set({'recommended_color_hex': hexColor}, SetOptions(merge: true));
+
+          // Cache it locally
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString(_cacheKeyColorHex, hexColor);
+
+          print('🎨 Calculated and saved recommended color: $hexColor (${emotionColor.toString()})');
+          update();
+        }
+      }
+    } catch (e) {
+      print('⚠️ Error recalculating recommended color: $e');
+    }
+  }
+  
+  // Method to manually update recommended color (e.g., when user selects a different color)
+  void updateRecommendedColorHex(String hexColor) async {
+    _recommendedColorHex.value = hexColor;
+    _isColorManuallyEdited.value = true; // Mark as manually edited
+    
+    // Cache the updated color and manual edit flag
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_cacheKeyColorHex, hexColor);
+      await prefs.setBool(_cacheKeyIsManualEdit, true);
+    } catch (e) {
+      print('⚠️ Error caching updated color: $e');
+    }
+    
+    update(); // Notify all listeners
+    print('🎨 Manually updated recommended color to: $hexColor (manual edit flag set)');
+  }
+  
+  // Public method to reload color from Firestore (called when returning to home screen)
+  Future<void> reloadColorFromFirestore() async {
+    await _loadRecommendedColor();
+    update(); // Notify all listeners to rebuild
+  }
+  
+  // Method to reset manual edit flag and recalculate emotion color
+  Future<void> resetToEmotionColor() async {
+    _isColorManuallyEdited.value = false;
+    
+    // Update Firestore to remove manual edit flag
+    final user = _auth.currentUser;
+    if (user != null) {
+      await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .set({'is_color_manually_edited': false}, SetOptions(merge: true));
+    }
+    
+    // Clear cache
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_cacheKeyIsManualEdit, false);
+    } catch (e) {
+      print('⚠️ Error clearing manual edit cache: $e');
+    }
+    
+    // Recalculate emotion color
+    await _recalculateRecommendedColor();
+    print('🔄 Reset to emotion-based color');
+  }
+  
   // Step 1: Audience Selection
   void setAudienceType(AudienceType audienceType) {
     _personalizationData.value.audienceType = audienceType;
     _personalizationData.value.updatedAt = DateTime.now();
     _saveToFirestore();
+    _recalculateRecommendedColor(); // Update recommendation
     update();
   }
   
@@ -47,6 +291,7 @@ class PersonalizationController extends GetxController {
     _personalizationData.value.usageStyle = usageStyle;
     _personalizationData.value.updatedAt = DateTime.now();
     _saveToFirestore();
+    _recalculateRecommendedColor(); // Update recommendation
     update();
   }
   
@@ -68,6 +313,7 @@ class PersonalizationController extends GetxController {
     _personalizationData.value.usageStyle = currentUsageStyle;
     _personalizationData.value.updatedAt = DateTime.now();
     _saveToFirestore();
+    _recalculateRecommendedColor(); // Update recommendation
     update();
   }
   
@@ -89,6 +335,7 @@ class PersonalizationController extends GetxController {
     _personalizationData.value.usageStyle = currentUsageStyle;
     _personalizationData.value.updatedAt = DateTime.now();
     _saveToFirestore();
+    _recalculateRecommendedColor(); // Update recommendation
     update();
   }
   
@@ -129,6 +376,7 @@ class PersonalizationController extends GetxController {
     _personalizationData.value.styleMaterial = styleMaterial;
     _personalizationData.value.updatedAt = DateTime.now();
     _saveToFirestore();
+    _recalculateRecommendedColor(); // Update recommendation
     update();
   }
   
@@ -146,7 +394,7 @@ class PersonalizationController extends GetxController {
     final maxStep = isPet ? 8 : 7;
     if (_currentStep.value < maxStep) {
       _currentStep.value++;
-      print('PersonalizationController: nextStep called, currentStep now: ${_currentStep.value}');
+      if (_debugMode) print('PersonalizationController: nextStep called, currentStep now: ${_currentStep.value}');
       update();
     }
   }
@@ -154,7 +402,7 @@ class PersonalizationController extends GetxController {
   void previousStep() {
     if (_currentStep.value > 0) {
       _currentStep.value--;
-      print('PersonalizationController: previousStep called, currentStep now: ${_currentStep.value}');
+      if (_debugMode) print('PersonalizationController: previousStep called, currentStep now: ${_currentStep.value}');
       update();
     }
   }
@@ -171,7 +419,7 @@ class PersonalizationController extends GetxController {
   // Manually mark a step complete (useful for optional steps where completion is on Continue)
   void markStepComplete(int step) {
     _manualCompletedSteps.add(step);
-    print('PersonalizationController: markStepComplete called for step $step');
+    if (_debugMode) print('PersonalizationController: markStepComplete called for step $step');
     update();
   }
   

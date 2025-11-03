@@ -45,3 +45,50 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# ============================================
+# SECURITY: Firebase & API Configuration Files
+# ============================================
+# These files contain sensitive API keys and credentials
+# NEVER commit these to version control!
+
+# Firebase Configuration Files
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+lib/core/config/firebase_config.dart
+
+# Firebase Hosting & Functions
+.firebase/
+.firebaserc
+firebase-debug.log
+firebase-debug.*.log
+
+# Environment Variables & API Keys
+.env
+.env.*
+*.env
+**/.env
+**/.env.*
+
+# API Keys & Secrets
+**/api_keys.*
+**/secrets.*
+**/*_secret.*
+**/*-secret.*
+**/service-account*.json
+**/*credentials*.json
+
+# Server Examples (contains sensitive setup)
+server_example/
+
+# Private Keys & Certificates
+*.pem
+*.key
+*.p12
+*.keystore
+*.jks
+!android/app/debug.keystore
+
+# Local Configuration
+local.properties
+**/local.properties

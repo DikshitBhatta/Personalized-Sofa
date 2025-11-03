@@ -73,19 +73,34 @@ class RoleServiceInitializer extends GetxService {
 class NotificationServiceInitializer extends GetxService {
   late final NotificationService _notificationService;
   bool _isInitialized = false;
+  bool _isFullyInitialized = false;
 
   Future<NotificationServiceInitializer> init() async {
     try {
+      print('📱 ========== NOTIFICATION SERVICE INITIALIZER ==========');
       _notificationService = NotificationService();
       
       // Phase 0: Only check permission status (fast, non-blocking)
-      // Full initialization (token fetch, etc.) happens in background
+      print('   ⚡ Phase 0: Quick permission check...');
       final hasPermission = await _notificationService.checkPermissionStatus();
       
       _isInitialized = true;
-      print('✅ Notification Service initialized (permission: $hasPermission)');
-    } catch (e) {
+      print('   ✅ Phase 0 complete (permission: $hasPermission)');
+      
+      // If user is already logged in, complete initialization immediately
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser != null) {
+        print('   👤 User already logged in: ${currentUser.email}');
+        print('   🚀 Starting full initialization in background...');
+        completeInitialization();
+      } else {
+        print('   ℹ️  No user logged in yet, will complete initialization after login');
+      }
+      
+      print('========================================================');
+    } catch (e, stackTrace) {
       print('⚠️ Notification Service initialization failed: $e');
+      print('Stack trace: $stackTrace');
       _isInitialized = true;
     }
     return this;
@@ -93,14 +108,24 @@ class NotificationServiceInitializer extends GetxService {
 
   NotificationService get service => _notificationService;
   bool get isInitialized => _isInitialized;
+  bool get isFullyInitialized => _isFullyInitialized;
   
   /// Complete full initialization in background (token fetch, etc.)
   Future<void> completeInitialization() async {
+    if (_isFullyInitialized) {
+      print('   ℹ️  Notification service already fully initialized');
+      return;
+    }
+    
     try {
+      print('🔔 ========== COMPLETING NOTIFICATION INITIALIZATION ==========');
       await _notificationService.initialize();
+      _isFullyInitialized = true;
       print('✅ Notification Service fully initialized');
-    } catch (e) {
+      print('===============================================================');
+    } catch (e, stackTrace) {
       print('⚠️ Notification Service full initialization failed: $e');
+      print('Stack trace: $stackTrace');
     }
   }
 }

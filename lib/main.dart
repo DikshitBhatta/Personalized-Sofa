@@ -12,7 +12,26 @@ import 'package:timberr/bindings/initial_binding.dart';
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  print('📱 Background message received: ${message.messageId}');
+  print('� ========== BACKGROUND MESSAGE RECEIVED ==========');
+  print('   Message ID: ${message.messageId}');
+  print('   Sent Time: ${message.sentTime}');
+  
+  if (message.notification != null) {
+    print('   ✅ Has notification payload:');
+    print('      Title: ${message.notification!.title}');
+    print('      Body: ${message.notification!.body}');
+  } else {
+    print('   ⚠️  NO notification payload');
+  }
+  
+  if (message.data.isNotEmpty) {
+    print('   ✅ Has data payload: ${message.data}');
+  } else {
+    print('   ⚠️  NO data payload');
+  }
+  
+  print('   ℹ️  Background messages are handled by system notification tray');
+  print('===================================================');
 }
 
 void main() async {

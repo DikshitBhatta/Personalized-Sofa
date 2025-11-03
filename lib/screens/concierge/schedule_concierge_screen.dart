@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:timberr/constants.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:timberr/controllers/address_controller.dart';
 import 'package:timberr/screens/profile/shipping_address_screen.dart';
@@ -22,6 +23,63 @@ class _ScheduleConciergeScreenState extends State<ScheduleConciergeScreen> {
   final List<String> _contactPreferences = ['Phone', 'Email', 'Line', 'WhatsApp'];
   final AddressController _addressController = Get.find();
   final TextEditingController _contactController = TextEditingController();
+  
+  // Concierge data
+  Map<String, dynamic>? _conciergeData;
+  bool _loadingConcierge = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDefaultConcierge();
+  }
+
+  Future<void> _loadDefaultConcierge() async {
+    try {
+      // Try to get default concierge
+      final defaultQuery = await FirebaseFirestore.instance
+          .collection('concierges')
+          .where('is_default', isEqualTo: true)
+          .where('available', isEqualTo: true)
+          .limit(1)
+          .get();
+      
+      if (defaultQuery.docs.isNotEmpty) {
+        setState(() {
+          _conciergeData = defaultQuery.docs.first.data();
+          _loadingConcierge = false;
+        });
+        return;
+      }
+      
+      // If no default, get the first available concierge
+      final anyQuery = await FirebaseFirestore.instance
+          .collection('concierges')
+          .where('available', isEqualTo: true)
+          .limit(1)
+          .get();
+      
+      if (anyQuery.docs.isNotEmpty) {
+        setState(() {
+          _conciergeData = anyQuery.docs.first.data();
+          _loadingConcierge = false;
+        });
+        return;
+      }
+      
+      // No concierge found, use fallback
+      setState(() {
+        _conciergeData = null;
+        _loadingConcierge = false;
+      });
+    } catch (e) {
+      print('Error loading concierge: $e');
+      setState(() {
+        _conciergeData = null;
+        _loadingConcierge = false;
+      });
+    }
+  }
 
   Future<void> _selectDate() async {
     final DateTime? picked = await showDatePicker(
@@ -284,110 +342,119 @@ class _ScheduleConciergeScreenState extends State<ScheduleConciergeScreen> {
             ),
             const SizedBox(height: 24),
             
-            // Concierge Introduction - More Professional
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: kChristmasSilver.withOpacity(0.3)),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x08000000),
-                    offset: Offset(0, 4),
-                    blurRadius: 16,
-                    spreadRadius: 0,
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  Container(
+            // Concierge Introduction - Dynamic Data
+            _loadingConcierge
+                ? const Center(child: CircularProgressIndicator())
+                : Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: kSeaGreen.withOpacity(0.2), width: 3),
-                    ),
-                    child: const CircleAvatar(
-                      radius: 50,
-                      backgroundImage: AssetImage('assets/SJ.jpeg'),
-                      backgroundColor: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    "Sarah Johnson",
-                    style: kNunitoSansSemiBold18.copyWith(
-                      color: kOffBlack,
-                      fontSize: 20,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    "Senior Furniture Design Specialist",
-                    style: kNunitoSans14.copyWith(
-                      color: kTinGrey,
-                      letterSpacing: 0.3,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Flexible(
-                        child: _buildInfoChip(
-                          icon: Icons.star_rounded,
-                          text: "4.9 Rating",
-                          color: kSeaGreen,
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: kChristmasSilver.withOpacity(0.3)),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x08000000),
+                          offset: Offset(0, 4),
+                          blurRadius: 16,
+                          spreadRadius: 0,
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Flexible(
-                        child: _buildInfoChip(
-                          icon: Icons.verified_rounded,
-                          text: "127 Visits",
-                          color: kOffBlack,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: kBackgroundBeige,
-                      borderRadius: BorderRadius.circular(10),
+                      ],
                     ),
-                    child: Row(
+                    child: Column(
                       children: [
-                        Icon(
-                          Icons.lightbulb_outline_rounded,
-                          color: kSeaGreen,
-                          size: 20,
+                        Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: kSeaGreen.withOpacity(0.2), width: 3),
+                          ),
+                          child: CircleAvatar(
+                            radius: 50,
+                            backgroundImage: _conciergeData?['photo_url'] != null
+                                ? NetworkImage(_conciergeData!['photo_url'])
+                                : const AssetImage('assets/SJ.jpeg') as ImageProvider,
+                            backgroundColor: Colors.white,
+                            onBackgroundImageError: _conciergeData?['photo_url'] != null
+                                ? (exception, stackTrace) {
+                                    // Fallback handled by conditional above
+                                  }
+                                : null,
+                          ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            "Expert in custom sofa design, measurements, and material selection",
-                            style: kNunitoSans14.copyWith(
-                              color: kOffBlack,
-                              height: 1.4,
+                        const SizedBox(height: 20),
+                        Text(
+                          _conciergeData?['name'] ?? "Sarah Johnson",
+                          style: kNunitoSansSemiBold18.copyWith(
+                            color: kOffBlack,
+                            fontSize: 20,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          _conciergeData?['specialty'] ?? "Senior Furniture Design Specialist",
+                          style: kNunitoSans14.copyWith(
+                            color: kTinGrey,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Flexible(
+                              child: _buildInfoChip(
+                                icon: Icons.star_rounded,
+                                text: "${_conciergeData?['rating'] ?? 4.9} Rating",
+                                color: kSeaGreen,
+                              ),
                             ),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: _buildInfoChip(
+                                icon: Icons.verified_rounded,
+                                text: "${_conciergeData?['visits'] ?? 127} Visits",
+                                color: kOffBlack,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: kBackgroundBeige,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.lightbulb_outline_rounded,
+                                color: kSeaGreen,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  _conciergeData?['specialty'] ?? "Expert in custom sofa design, measurements, and material selection",
+                                  style: kNunitoSans14.copyWith(
+                                    color: kOffBlack,
+                                    height: 1.4,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
                   ),
-                ],
-              ),
-            ),
             
             const SizedBox(height: 32),
             
             // Location Section
             _buildSectionHeader(
               title: "Visit Location",
-              subtitle: "Where should Sarah meet you?",
+              subtitle: "Where should ${_conciergeData?['name']?.split(' ').first ?? 'our concierge'} meet you?",
               icon: Icons.location_on_rounded,
             ),
             const SizedBox(height: 16),
@@ -699,15 +766,28 @@ class _ScheduleConciergeScreenState extends State<ScheduleConciergeScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                // onPressed: _isFormValid()
-                //     ? () {
-                //         // Navigate to payment screen with current summary
-                //         Get.to(() => const ConciergePaymentScreen(), transition: Transition.cupertino);
-                //       }
-                //     : null,
-                onPressed: () {
-                  Get.to(() => const ConciergePaymentScreen(), transition: Transition.cupertino);
-                },
+                onPressed: _isFormValid()
+                    ? () {
+                        // Navigate to payment screen with all selected data
+                        Get.to(
+                          () => ConciergePaymentScreen(
+                            conciergeName: _conciergeData?['name'],
+                            conciergeSpecialty: _conciergeData?['specialty'],
+                            conciergePhotoUrl: _conciergeData?['photo_url'],
+                            conciergeRating: _conciergeData?['rating']?.toDouble(),
+                            conciergeVisits: _conciergeData?['visits'],
+                            conciergePhone: _conciergeData?['phone'],
+                            conciergeEmail: _conciergeData?['email'],
+                            selectedDate: _selectedDate,
+                            selectedTime: _selectedTime,
+                            selectedLocation: _selectedLocation,
+                            contactPreference: _selectedContactPreference,
+                            contactValue: _contactController.text.trim(),
+                          ),
+                          transition: Transition.cupertino,
+                        );
+                      }
+                    : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _isFormValid() ? kOffBlack : kGrey.withOpacity(0.5),
                   elevation: _isFormValid() ? 2 : 0,

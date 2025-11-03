@@ -5,7 +5,6 @@ import 'package:timberr/controllers/personalization_controller.dart';
 import 'package:timberr/models/personalization_data.dart' as personalization;
 import 'package:timberr/widgets/input/color_pattern_selector.dart';
 import 'package:timberr/widgets/progress/personalization_progress_bar.dart';
-// removed unused import
 import 'package:timberr/screens/personalization/personalization_step5.dart';
 
 class PersonalizationStep4Screen extends StatefulWidget {
@@ -38,6 +37,13 @@ class _PersonalizationStep4ScreenState extends State<PersonalizationStep4Screen>
       _selectedPattern = details.patternType;
       _selectedStitching = details.stitchingType;
       _selectedLeg = details.legType;
+    }
+    
+    // Auto-select recommended color if user hasn't selected one yet
+    if (_selectedColorHex == null && _controller.recommendedColorHex.isNotEmpty) {
+      setState(() {
+        _selectedColorHex = _controller.recommendedColorHex;
+      });
     }
   }
 
@@ -125,6 +131,7 @@ class _PersonalizationStep4ScreenState extends State<PersonalizationStep4Screen>
                       ColorPicker(
                         selectedColorHex: _selectedColorHex,
                         selectedPantoneCode: _selectedPantoneCode,
+                        recommendedColorHex: _controller.recommendedColorHex,
                         onColorSelected: (colorHex) {
                           setState(() {
                             _selectedColorHex = colorHex;

@@ -199,11 +199,12 @@ class SplashController extends GetxController {
       try {
         final addressController = Get.find<AddressController>();
         final cardDetailsController = Get.find<CardDetailsController>();
-        final notificationService = Get.find<NotificationServiceInitializer>();
-        final roleController = Get.find<RoleController>();
+        final roleController = Get.isRegistered<RoleController>()
+            ? Get.find<RoleController>()
+            : Get.put(RoleController(), permanent: true);
         
-        // Load secondary data
-        await Future.wait([
+        // Load secondary data - with optional notification service
+        final tasks = [
           addressController.getDefaultShippingAddress().catchError((e) {
             print('⚠️ Background: Error loading address: $e');
             return;
@@ -212,15 +213,24 @@ class SplashController extends GetxController {
             print('⚠️ Background: Error loading card details: $e');
             return;
           }),
-          notificationService.completeInitialization().catchError((e) {
-            print('⚠️ Background: Error completing notification setup: $e');
-            return;
-          }),
           roleController.fetchUserRole().catchError((e) {
             print('⚠️ Background: Error refreshing role: $e');
             return;
           }),
-        ]);
+        ];
+        
+        // Add notification task only if service is available
+        if (Get.isRegistered<NotificationServiceInitializer>()) {
+          final notificationService = Get.find<NotificationServiceInitializer>();
+          tasks.add(
+            notificationService.completeInitialization().catchError((e) {
+              print('⚠️ Background: Error completing notification setup: $e');
+              return;
+            }),
+          );
+        }
+        
+        await Future.wait(tasks);
         
         print('✅ Background tasks complete');
       } catch (e) {

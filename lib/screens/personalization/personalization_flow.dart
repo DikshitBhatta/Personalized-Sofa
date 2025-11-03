@@ -28,8 +28,11 @@ class _PersonalizationFlowScreenState extends State<PersonalizationFlowScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Initialize the controller when starting the flow
-    Get.put(PersonalizationController());
+    // Use the existing controller from HomeBinding instead of creating a new one
+    // This ensures color changes persist across navigation
+    if (!Get.isRegistered<PersonalizationController>()) {
+      Get.put(PersonalizationController());
+    }
     
     // Navigate to step 1
     return PersonalizationStep1Screen();

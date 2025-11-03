@@ -46,9 +46,9 @@ class AdminOrderManagement extends StatelessWidget {
           centerTitle: true,
           elevation: 0,
           bottom: TabBar(
-            labelColor: kOffBlack,
+            labelColor: Colors.white,
             labelStyle: kNunitoSansBold16,
-            unselectedLabelColor: kTinGrey,
+            unselectedLabelColor: kOffBlack,
             unselectedLabelStyle: kNunitoSans14,
             indicator: BoxDecoration(
               color: kOffBlack,

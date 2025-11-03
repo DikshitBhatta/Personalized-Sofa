@@ -6,7 +6,8 @@ import 'package:timberr/screens/authentication/onboarding_welcome.dart';
 import 'delivery_setup_admin.dart';
 import 'package:timberr/screens/orders/admin_order_management.dart';
 import 'concierge_management.dart';
-import 'concierge_booking_management.dart';
+import 'screens/admin_concierge_support_screen.dart';
+import 'package:timberr/concierge_chat/services/concierge_chat_service.dart';
 import 'package:timberr/role/screens/user_management_screen.dart';
 
 class ColorsScheme {
@@ -69,10 +70,16 @@ class _AdminDashboardState extends State<AdminDashboard> {
             ),
             _buildDashboardCard(
               context,
-              'Concierge Bookings',
-              Icons.event_available,
-              'Manage concierge visit bookings',
-              () => Get.to(() => const ConciergeBookingManagement()),
+              'Concierge Support',
+              Icons.support,
+              'Real-time customer support chat',
+              () {
+                // Ensure service is initialized before opening
+                if (!Get.isRegistered<ConciergeChatService>()) {
+                  Get.put(ConciergeChatService(), permanent: true);
+                }
+                Get.to(() => const AdminConciergeSupportScreen());
+              },
             ),
             _buildDashboardCard(
               context,
@@ -92,15 +99,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
               context,
               'User Management',
               Icons.people,
-              'Manage users and roles',
-              () => Get.to(() => const UserManagementScreen()),
-            ),
-            // Add a new card for Role Management
-            _buildDashboardCard(
-              context,
-              'Role Management',
-              Icons.admin_panel_settings,
-              'Assign and manage user roles',
+              'Manage users and assign roles',
               () => Get.to(() => const UserManagementScreen()),
             ),
             // _buildDashboardCard(

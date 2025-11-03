@@ -1,6 +1,9 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -15,7 +18,34 @@ import 'package:timberr/models/user_onboarding_data.dart';
 import 'package:timberr/controllers/address_controller.dart';
 
 class ConciergePaymentScreen extends StatefulWidget {
-  const ConciergePaymentScreen({super.key});
+  final String? conciergeName;
+  final String? conciergeSpecialty;
+  final String? conciergePhotoUrl;
+  final double? conciergeRating;
+  final int? conciergeVisits;
+  final String? conciergePhone;
+  final String? conciergeEmail;
+  final DateTime? selectedDate;
+  final TimeOfDay? selectedTime;
+  final String? selectedLocation;
+  final String? contactPreference;
+  final String? contactValue; // The actual phone/email/line/whatsapp value
+
+  const ConciergePaymentScreen({
+    super.key,
+    this.conciergeName,
+    this.conciergeSpecialty,
+    this.conciergePhotoUrl,
+    this.conciergeRating,
+    this.conciergeVisits,
+    this.conciergePhone,
+    this.conciergeEmail,
+    this.selectedDate,
+    this.selectedTime,
+    this.selectedLocation,
+    this.contactPreference,
+    this.contactValue,
+  });
 
   @override
   State<ConciergePaymentScreen> createState() => _ConciergePaymentScreenState();
@@ -37,14 +67,78 @@ class _ConciergePaymentScreenState extends State<ConciergePaymentScreen> {
     Get.put(NotificationController());
   }
 
-  // Dummy booking summary (replace with real data)
-  final String clientName = 'Ms. A. Client';
-  final String conciergeName = 'P. Somchai';
-  final String visitAddress = '88 Wireless Rd, Lumphini, Pathum Wan, Bangkok';
-  final String visitSlot = 'Tue, 24 Sep 2025 — 10:30–11:30';
-  final String contact = '+66 8x xxx xxxx';
+  // Booking summary - use passed data or fallback
+  String get clientName {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    return currentUser?.displayName ?? 'Ms. A. Client';
+  }
+  
+  String get conciergeName => widget.conciergeName ?? 'P. Somchai';
+  String get visitAddress => widget.selectedLocation ?? '88 Wireless Rd, Lumphini, Pathum Wan, Bangkok';
+  
+  String get visitSlot {
+    if (widget.selectedDate != null && widget.selectedTime != null) {
+      final date = widget.selectedDate!;
+      final time = widget.selectedTime!;
+      final formattedDate = '${_getWeekday(date.weekday)}, ${date.day} ${_getMonth(date.month)} ${date.year}';
+      final formattedTime = '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+      return '$formattedDate — $formattedTime';
+    }
+    return 'Tue, 24 Sep 2025 — 10:30–11:30';
+  }
+  
+  String get contact => widget.contactPreference ?? '+66 8x xxx xxxx';
   final double retainerAmount = 5000.00; // ฿5,000 concierge retainer
   final String transactionId = 'SOFA-${DateTime.now().millisecondsSinceEpoch}';
+
+  String _getWeekday(int weekday) {
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return days[weekday - 1];
+  }
+
+  String _getMonth(int month) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return months[month - 1];
+  }
+
+  // Compress image if size > 1MB
+  Future<File> _compressImage(File file) async {
+    print('🗜️ Compressing image...');
+    
+    // Get file size
+    final fileSize = await file.length();
+    print('📏 Original file size: ${(fileSize / 1024 / 1024).toStringAsFixed(2)} MB');
+    
+    // If file is less than 1MB, return as is
+    if (fileSize < 1024 * 1024) {
+      print('✅ File is already < 1MB, no compression needed');
+      return file;
+    }
+    
+    // Compress the image
+    final targetPath = file.path.replaceAll('.jpg', '_compressed.jpg')
+                                .replaceAll('.png', '_compressed.jpg')
+                                .replaceAll('.jpeg', '_compressed.jpg');
+    
+    final result = await FlutterImageCompress.compressAndGetFile(
+      file.absolute.path,
+      targetPath,
+      quality: 70, // Lower quality for smaller size
+      minWidth: 1024,
+      minHeight: 1024,
+    );
+    
+    if (result == null) {
+      print('⚠️ Compression failed, using original file');
+      return file;
+    }
+    
+    final compressedFile = File(result.path);
+    final compressedSize = await compressedFile.length();
+    print('✅ Compressed file size: ${(compressedSize / 1024 / 1024).toStringAsFixed(2)} MB');
+    
+    return compressedFile;
+  }
 
   Future<void> _pickPaymentScreenshot() async {
     final picker = ImagePicker();
@@ -101,6 +195,63 @@ class _ConciergePaymentScreenState extends State<ConciergePaymentScreen> {
       
       print('📝 Saving booking to Firestore...');
       
+      // Convert payment screenshot to base64 for Firestore storage
+      String? paymentProofBase64;
+      if (paymentMethod == 'qr' && paymentScreenshot != null) {
+        try {
+          print('📤 Converting payment screenshot to base64...');
+          print('🗜️ Compressing image...');
+          
+          // Compress image first to ensure it's under 1MB
+          final compressedFile = await _compressImage(paymentScreenshot!);
+          final fileSize = await compressedFile.length();
+          print('📏 Compressed file size: ${(fileSize / 1024 / 1024).toStringAsFixed(2)} MB');
+          
+          // Check if file is under 1MB (Firestore limit for base64 in documents)
+          if (fileSize > 1024 * 1024) {
+            // If still over 1MB, compress more aggressively
+            print('⚠️ File still over 1MB, compressing more...');
+            final tempDir = await getTemporaryDirectory();
+            final targetPath = '${tempDir.path}/payment_${DateTime.now().millisecondsSinceEpoch}_extra_compressed.jpg';
+            
+            final result = await FlutterImageCompress.compressAndGetFile(
+              compressedFile.absolute.path,
+              targetPath,
+              quality: 40, // More aggressive compression
+              minWidth: 800,
+              minHeight: 800,
+            );
+            
+            if (result != null) {
+              final extraCompressedFile = File(result.path);
+              final extraCompressedSize = await extraCompressedFile.length();
+              print('✅ Extra compressed file size: ${(extraCompressedSize / 1024 / 1024).toStringAsFixed(2)} MB');
+              
+              if (extraCompressedSize < 1024 * 1024) {
+                final bytes = await extraCompressedFile.readAsBytes();
+                paymentProofBase64 = base64Encode(bytes);
+                print('✅ Payment screenshot converted to base64 (${paymentProofBase64.length} chars)');
+              } else {
+                print('❌ Cannot compress image under 1MB for Firestore');
+                _toast(context, 'Image too large. Please choose a smaller image.', isError: true);
+                setState(() => showSpinner = false);
+                return;
+              }
+            }
+          } else {
+            // File is under 1MB, convert to base64
+            final bytes = await compressedFile.readAsBytes();
+            paymentProofBase64 = base64Encode(bytes);
+            print('✅ Payment screenshot converted to base64 (${paymentProofBase64.length} chars)');
+          }
+        } catch (e) {
+          print('❌ Error converting payment screenshot: $e');
+          _toast(context, 'Failed to process payment screenshot', isError: true);
+          setState(() => showSpinner = false);
+          return;
+        }
+      }
+      
       // Store booking in Firestore
       final docRef = await FirebaseFirestore.instance.collection('concierge_bookings').add({
         'client_id': currentUser.uid,
@@ -109,10 +260,12 @@ class _ConciergePaymentScreenState extends State<ConciergePaymentScreen> {
         'visit_address': visitAddress,
         'visit_date': visitDate,
         'visit_time': visitTime,
-        'contact': contact,
+        'contact_method': widget.contactPreference ?? 'Phone', // METHOD: "Phone", "Email", "Line", "WhatsApp"
+        'contact': widget.contactValue ?? '', // ACTUAL VALUE: phone number, email, Line ID, WhatsApp number
         'amount': retainerAmount,
         'status': 'pending',
         'payment_method': paymentMethod,
+        'payment_proof_base64': paymentProofBase64, // QR code payment screenshot as base64
         'transaction_id': transactionId,
         'created_at': FieldValue.serverTimestamp(),
         'updated_at': FieldValue.serverTimestamp(),
@@ -223,6 +376,12 @@ class _ConciergePaymentScreenState extends State<ConciergePaymentScreen> {
         print('⚠️ Could not load onboarding data: $e');
       }
       
+      // Get user's change preferences note from personalization data
+      final userNote = personalizationData.finalPreferences?.changePreferencesNote;
+      final orderNote = userNote != null && userNote.isNotEmpty 
+          ? 'Concierge order. User note: $userNote'
+          : 'Order created via concierge payment';
+      
       // Create the order
       print('📝 Creating order in Firestore...');
       final orderId = await OrderService.createOrder(
@@ -234,7 +393,7 @@ class _ConciergePaymentScreenState extends State<ConciergePaymentScreen> {
         totalPrice: pricing.totalPrice,
         basePrice: pricing.basePrice,
         deliveryAddress: deliveryAddress,
-        notes: 'Order created via concierge payment',
+        notes: orderNote,
       );
       
       if (orderId != null) {
@@ -335,10 +494,14 @@ class _ConciergePaymentScreenState extends State<ConciergePaymentScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _KV(label: 'Client', value: clientName),
-                      _KV(label: 'Concierge', value: conciergeName),
-                      _KV(label: 'Preferred Slot', value: visitSlot),
-                      _KV(label: 'Address', value: visitAddress),
-                      _KV(label: 'Contact', value: contact),
+                      if (widget.conciergeName != null)
+                        _KV(label: 'Concierge', value: conciergeName),
+                      if (widget.selectedDate != null || widget.selectedTime != null)
+                        _KV(label: 'Preferred Slot', value: visitSlot),
+                      if (widget.selectedLocation != null)
+                        _KV(label: 'Address', value: visitAddress),
+                      if (widget.contactPreference != null)
+                        _KV(label: 'Contact', value: contact),
                       const Divider(height: 28),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,

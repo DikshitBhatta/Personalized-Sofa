@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:timberr/models/sofa_order.dart';
 import 'package:timberr/models/personalization_data.dart';
 import 'package:timberr/models/user_onboarding_data.dart';
+import 'package:timberr/Notification/services/notification_service.dart';
+import 'package:timberr/Notification/models/notification_model.dart';
 
 class OrderService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -58,6 +60,30 @@ class OrderService {
           .add(order.toFirestore());
 
       print('✅ Order created successfully with ID: ${docRef.id}');
+      
+      // Send notification to admins about new order
+      print('🔔 Sending new order notification to admins...');
+      try {
+        final notificationService = NotificationService();
+        await notificationService.sendToAdmins(
+          title: 'New Sofa Order Received! 🛋️',
+          body: '$userName ordered a $sofaName for \$${totalPrice.toStringAsFixed(2)}',
+          type: NotificationType.orderUpdate,
+          data: {
+            'order_id': docRef.id,
+            'customer_name': userName,
+            'customer_email': currentUser.email ?? '',
+            'sofa_name': sofaName,
+            'total_price': totalPrice.toString(),
+            'status': 'pending',
+          },
+        );
+        print('✅ Admin notification sent for new order');
+      } catch (notifError) {
+        print('⚠️ Admin notification failed (order created anyway): $notifError');
+        // Don't fail order creation if notification fails
+      }
+      
       return docRef.id;
     } catch (e) {
       print('❌ Error creating order: $e');
@@ -112,6 +138,29 @@ class OrderService {
     String? rejectionReason,
   }) async {
     try {
+      print('📦 ========== UPDATING ORDER STATUS ==========');
+      print('   Order ID: $orderId');
+      print('   New Status: ${_statusToString(status)}');
+      
+      // Get order details first to send notification
+      print('🔍 Step 1: Fetching order details...');
+      final orderDoc = await _firestore
+          .collection('sofa_orders')
+          .doc(orderId)
+          .get();
+      
+      if (!orderDoc.exists) {
+        print('❌ Order not found: $orderId');
+        return false;
+      }
+      
+      final order = SofaOrder.fromFirestore(orderDoc);
+      print('✅ Order found for user: ${order.userId}');
+      print('   User Email: ${order.userEmail}');
+      print('   Sofa: ${order.sofaName}');
+      
+      // Update order status in Firestore
+      print('💾 Step 2: Updating order in Firestore...');
       final updateData = <String, dynamic>{
         'status': _statusToString(status),
         'updated_at': FieldValue.serverTimestamp(),
@@ -130,11 +179,55 @@ class OrderService {
           .doc(orderId)
           .update(updateData);
 
-      print('✅ Order status updated successfully');
+      print('✅ Order status updated in Firestore');
+      
+      // Send notification to user about order status change
+      print('🔔 Step 3: Sending notification to user...');
+      try {
+        final notificationService = NotificationService();
+        final statusMessage = _getStatusMessage(status, order.sofaName, rejectionReason);
+        
+        print('   📧 Sending to user: ${order.userId}');
+        print('   📝 Message: $statusMessage');
+        
+        await notificationService.sendOrderUpdateNotification(
+          userId: order.userId,
+          orderId: orderId,
+          status: _statusToString(status),
+          message: statusMessage,
+        );
+        
+        print('✅ Notification sent successfully');
+      } catch (notifError) {
+        print('⚠️  Notification sending failed (order updated anyway): $notifError');
+        // Don't fail the entire operation if notification fails
+      }
+      
+      print('✅ ========== ORDER STATUS UPDATE COMPLETE ==========');
       return true;
-    } catch (e) {
-      print('❌ Error updating order status: $e');
+    } catch (e, stackTrace) {
+      print('❌ ========== ERROR UPDATING ORDER STATUS ==========');
+      print('Error: $e');
+      print('Stack trace: $stackTrace');
+      print('====================================================');
       return false;
+    }
+  }
+  
+  /// Get user-friendly status message
+  static String _getStatusMessage(OrderStatus status, String sofaName, String? rejectionReason) {
+    switch (status) {
+      case OrderStatus.pending:
+        return 'Your order for $sofaName is now pending review.';
+      case OrderStatus.processing:
+        return 'Great news! Your order for $sofaName is now being processed. 🎉';
+      case OrderStatus.delivered:
+        return 'Your $sofaName has been delivered! We hope you love it. ❤️';
+      case OrderStatus.cancelled:
+        if (rejectionReason != null && rejectionReason.isNotEmpty) {
+          return 'Your order for $sofaName has been cancelled. Reason: $rejectionReason';
+        }
+        return 'Your order for $sofaName has been cancelled.';
     }
   }
 

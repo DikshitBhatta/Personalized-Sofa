@@ -205,16 +205,77 @@ class NotificationController extends GetxController {
   /// Debug method to test admin user fetching
   Future<void> debugAdminUsers() async {
     try {
+      print('🔍 ========== DEBUGGING ADMIN NOTIFICATION SETUP ==========');
+      
+      // 1. Check admin users
+      print('📋 Step 1: Getting admin users...');
       final adminUsers = await RoleService.getAllAdminUsers();
-      print('🔍 Debug - Found admin users: $adminUsers');
+      print('   Found ${adminUsers.length} admin user(s)');
       
       if (adminUsers.isEmpty) {
-        print('⚠️ No admin users found! Make sure you have admin users in your database.');
-        print('💡 Tip: Check user_roles collection or users collection for role=admin');
+        print('   ❌ NO ADMIN USERS FOUND!');
+        print('   💡 To fix: Add an admin user in Firestore');
+        print('   1. Go to Firestore Console');
+        print('   2. In "users" collection, find a user document');
+        print('   3. Add/update field: role = "admin"');
+        return;
       }
       
-    } catch (e) {
-      print('❌ Debug admin users error: $e');
+      // 2. Check FCM tokens for each admin
+      print('📋 Step 2: Checking FCM tokens for admin users...');
+      for (final adminId in adminUsers) {
+        print('   👤 Admin: $adminId');
+        
+        // Check if token exists
+        final tokenDoc = await _firestore.collection('fcm_tokens').doc(adminId).get();
+        
+        if (tokenDoc.exists) {
+          final tokenData = tokenDoc.data()!;
+          final token = tokenData['token'] as String?;
+          final platform = tokenData['platform'] as String?;
+          final updatedAt = (tokenData['updated_at'] as Timestamp?)?.toDate();
+          
+          if (token != null) {
+            print('      ✅ FCM Token: ${token.substring(0, 30)}...');
+            print('      📱 Platform: $platform');
+            print('      🕐 Updated: $updatedAt');
+          } else {
+            print('      ⚠️  Token document exists but token is null');
+          }
+        } else {
+          print('      ❌ No FCM token found');
+          print('      💡 Admin needs to login and grant notification permissions');
+        }
+      }
+      
+      // 3. Check current user
+      final currentUser = _auth.currentUser;
+      if (currentUser != null) {
+        print('📋 Step 3: Checking current user...');
+        print('   👤 Current User ID: ${currentUser.uid}');
+        print('   📧 Email: ${currentUser.email}');
+        
+        final currentUserRole = await RoleService.getUserRole(currentUser.uid);
+        print('   🎭 Role: $currentUserRole');
+        
+        final currentUserToken = await _firestore.collection('fcm_tokens').doc(currentUser.uid).get();
+        if (currentUserToken.exists) {
+          final token = currentUserToken.data()!['token'] as String?;
+          print('   ✅ Current user has FCM token: ${token != null ? "${token.substring(0, 30)}..." : "null"}');
+        } else {
+          print('   ⚠️  Current user has no FCM token');
+        }
+      } else {
+        print('📋 Step 3: No user currently logged in');
+      }
+      
+      print('============================================================');
+      
+    } catch (e, stackTrace) {
+      print('❌ ========== ERROR DEBUGGING ADMIN USERS ==========');
+      print('Error: $e');
+      print('Stack trace: $stackTrace');
+      print('=====================================================');
     }
   }
 }

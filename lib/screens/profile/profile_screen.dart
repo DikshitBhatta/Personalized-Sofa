@@ -8,7 +8,7 @@ import 'package:timberr/controllers/card_details_controller.dart';
 import 'package:timberr/controllers/user_controller.dart';
 import 'package:timberr/role/role_guard_widgets.dart';
 import 'package:timberr/role/role_navigation_service.dart';
-import 'package:timberr/screens/profile/my_reviews_screen.dart';
+import 'package:timberr/screens/profile/concierge_visits_screen.dart';
 import 'package:timberr/screens/profile/payment_methods_screen.dart';
 import 'package:timberr/screens/profile/settings_screen.dart';
 import 'package:timberr/screens/profile/shipping_address_screen.dart';
@@ -31,9 +31,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    // Fetch addresses when profile screen loads
+    // Fetch user data and addresses when profile screen loads
+    _userController.fetchUserData();
     _addressController.fetchAddresses();
-    print('📍 Profile screen: Fetching addresses...');
+    print('📍 Profile screen: Fetching user data and addresses...');
   }
 
   void _toSettingsScreen() {
@@ -56,9 +57,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
 
 
-  void _toReviewScreen() {
+  void _toConciergeVisitsScreen() {
     Get.to(
-      () => const MyReviewsScreen(),
+      () => const ConciergeVisitsScreen(),
       transition: Transition.cupertino,
       duration: const Duration(milliseconds: 600),
       curve: Curves.easeOut,
@@ -193,9 +194,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               }),
               const Spacer(),
               ProfileTile(
-                name: "My Reviews",
-                description: "Reviews for 5 items",
-                onTap: _toReviewScreen,
+                name: "Concierge Visits",
+                description: "View your scheduled visits",
+                onTap: _toConciergeVisitsScreen,
               ),
               const Spacer(),
               // Show admin options only for admin users

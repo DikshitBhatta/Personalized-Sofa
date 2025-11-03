@@ -270,11 +270,23 @@ class _PersonalizationStep8ScreenState extends State<PersonalizationStep8Screen>
 
                       const SizedBox(height: 24),
                       
-                      // Compact pricing display
+                      // Total price label
+                      Text(
+                        'Total price',
+                        style: kNunitoSansSemiBold16.copyWith(
+                          color: kOffBlack,
+                          fontSize: 16,
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 12),
+                      
                       // Compact pricing display
                       const CompactPriceTag(
                         showBreakdown: false,
-                      ),                      const SizedBox(height: 24),
+                      ),
+                      
+                      const SizedBox(height: 24),
                     ],
                   ),
                 ),

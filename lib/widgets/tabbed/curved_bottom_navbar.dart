@@ -7,6 +7,7 @@ import 'package:timberr/Notification/screens/notification_screen.dart';
 import 'package:timberr/screens/profile/profile_screen.dart';
 import 'package:timberr/screens/orders/user_orders_screen.dart';
 import 'package:timberr/screens/personalization/personalization_launch.dart';
+import 'package:timberr/Notification/controllers/notification_controller.dart';
 
 class CurvedDockItem {
   final dynamic icon; // Can be IconData or String (SVG path)
@@ -14,6 +15,8 @@ class CurvedDockItem {
   final String? label;
   final VoidCallback onTap;
   final bool active;
+  final bool showBadge;
+  final int badgeCount;
 
   const CurvedDockItem({
     required this.icon,
@@ -21,6 +24,8 @@ class CurvedDockItem {
     this.activeIcon,
     this.label,
     this.active = false,
+    this.showBadge = false,
+    this.badgeCount = 0,
   });
 }
 
@@ -151,14 +156,15 @@ class _IconsRow extends StatelessWidget {
   Widget _buildIcon(CurvedDockItem item) {
     final iconToShow = item.active && item.activeIcon != null ? item.activeIcon : item.icon;
 
+    Widget iconWidget;
     if (iconToShow is IconData) {
-      return Icon(
+      iconWidget = Icon(
         iconToShow,
         size: 26,
         color: item.active ? activeIconColor : iconColor,
       );
     } else if (iconToShow is String) {
-      return SvgPicture.asset(
+      iconWidget = SvgPicture.asset(
         iconToShow,
         width: 26,
         height: 26,
@@ -167,8 +173,45 @@ class _IconsRow extends StatelessWidget {
           BlendMode.srcIn,
         ),
       );
+    } else {
+      iconWidget = const SizedBox.shrink();
     }
-    return const SizedBox.shrink();
+
+    // Wrap icon with badge if needed
+    if (item.showBadge && item.badgeCount > 0) {
+      return Stack(
+        clipBehavior: Clip.none,
+        children: [
+          iconWidget,
+          Positioned(
+            right: -8,
+            top: -4,
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: const BoxDecoration(
+                color: kFireOpal,
+                shape: BoxShape.circle,
+              ),
+              constraints: const BoxConstraints(
+                minWidth: 18,
+                minHeight: 18,
+              ),
+              child: Text(
+                item.badgeCount > 99 ? '99+' : '${item.badgeCount}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return iconWidget;
   }
 
   @override
@@ -304,120 +347,133 @@ class CurvedBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        // Curved dock background
-        CurvedDock(
-          color: kNavBarBlack,
-          iconColor: kSilverGrey,
-          activeIconColor: Colors.white,
-          leftItems: [
-            CurvedDockItem(
-              icon: 'assets/icons/home_icon.svg',
-              activeIcon: 'assets/icons/home_selected_icon.svg',
-              onTap: () {
-                if (selectedPos != 0) {
-                  Get.off(() => Home(), transition: Transition.fadeIn);
-                }
-              },
-              active: selectedPos == 0,
-            ),
-            CurvedDockItem(
-              icon: 'assets/icons/shopping_bag_icon.svg',
-              activeIcon: 'assets/icons/shopping_bag_icon_black.svg',
-              onTap: () {
-                if (selectedPos != 1) {
-                  // Replace current stack with UserOrdersScreen so it behaves like a tab (no back button)
-                  Get.offAll(() => const UserOrdersScreen(), predicate: (route) => route.settings.name == null, transition: Transition.fadeIn);
-                }
-              },
-              active: selectedPos == 1,
-            ),
-          ],
-          rightItems: [
-            CurvedDockItem(
-              icon: 'assets/icons/notification_icon.svg',
-              activeIcon: 'assets/icons/notification_selected_icon.svg',
-              onTap: () {
-                if (selectedPos != 2) {
-                  Get.to(() => const NotificationScreen(), transition: Transition.fadeIn);
-                }
-              },
-              active: selectedPos == 2,
-            ),
-            CurvedDockItem(
-              icon: 'assets/icons/person_icon.svg',
-              activeIcon: 'assets/icons/person_selected_icon.svg',
-              onTap: () {
-                if (selectedPos != 3) {
-                  Get.to(() => const ProfileScreen(), transition: Transition.fadeIn);
-                }
-              },
-              active: selectedPos == 3,
-            ),
-          ],
-        ),
+    // Initialize NotificationController if not already initialized
+    if (!Get.isRegistered<NotificationController>()) {
+      Get.put(NotificationController());
+    }
 
-        // Floating Action Button in the center
-        Positioned(
-          bottom: 45,
-          left: MediaQuery.of(context).size.width / 2 - 28,
-          child: Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: const LinearGradient(
-                colors: [Colors.black87, Colors.black],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.white.withOpacity(0.4),
-                  spreadRadius: 0,
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
+    return GetBuilder<NotificationController>(
+      builder: (notificationController) {
+        final unreadCount = notificationController.unreadCount;
+
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // Curved dock background
+            CurvedDock(
+              color: kNavBarBlack,
+              iconColor: kSilverGrey,
+              activeIconColor: Colors.white,
+              leftItems: [
+                CurvedDockItem(
+                  icon: 'assets/icons/home_icon.svg',
+                  activeIcon: 'assets/icons/home_selected_icon.svg',
+                  onTap: () {
+                    if (selectedPos != 0) {
+                      Get.off(() => Home(), transition: Transition.fadeIn);
+                    }
+                  },
+                  active: selectedPos == 0,
                 ),
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.15),
-                  spreadRadius: 0,
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
+                CurvedDockItem(
+                  icon: 'assets/icons/shopping_bag_icon.svg',
+                  activeIcon: 'assets/icons/shopping_bag_icon_black.svg',
+                  onTap: () {
+                    if (selectedPos != 1) {
+                      // Replace current stack with UserOrdersScreen so it behaves like a tab (no back button)
+                      Get.offAll(() => const UserOrdersScreen(), predicate: (route) => route.settings.name == null, transition: Transition.fadeIn);
+                    }
+                  },
+                  active: selectedPos == 1,
+                ),
+              ],
+              rightItems: [
+                CurvedDockItem(
+                  icon: 'assets/icons/notification_icon.svg',
+                  activeIcon: 'assets/icons/notification_selected_icon.svg',
+                  onTap: () {
+                    if (selectedPos != 2) {
+                      Get.to(() => const NotificationScreen(), transition: Transition.fadeIn);
+                    }
+                  },
+                  active: selectedPos == 2,
+                  showBadge: true,
+                  badgeCount: unreadCount,
+                ),
+                CurvedDockItem(
+                  icon: 'assets/icons/person_icon.svg',
+                  activeIcon: 'assets/icons/person_selected_icon.svg',
+                  onTap: () {
+                    if (selectedPos != 3) {
+                      Get.to(() => const ProfileScreen(), transition: Transition.fadeIn);
+                    }
+                  },
+                  active: selectedPos == 3,
                 ),
               ],
             ),
-            child: FloatingActionButton(
-              onPressed: () {
-                // Launch personalization flow
-                Get.to(
-                  () => const PersonalizationLaunchScreen(),
-                  transition: Transition.fade,
-                );
-              },
-              backgroundColor: Colors.transparent,
-              elevation: 0,
+
+            // Floating Action Button in the center
+            Positioned(
+              bottom: 45,
+              left: MediaQuery.of(context).size.width / 2 - 28,
               child: Container(
-                decoration: const BoxDecoration(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  // gradient: LinearGradient(
-                  //   colors: [Color(0xFF8B5CF6), Color(0xFF3B82F6)],
-                  //   begin: Alignment.topLeft,
-                  //   end: Alignment.bottomRight,
-                  // ),
+                  gradient: const LinearGradient(
+                    colors: [Colors.black87, Colors.black],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.white.withOpacity(0.4),
+                      spreadRadius: 0,
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.15),
+                      spreadRadius: 0,
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
-                child: SvgPicture.asset(
-                  "assets/icons/armchair_icon.svg",
-                  width: 22,
-                  height: 22,
-                  colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                child: FloatingActionButton(
+                  onPressed: () {
+                    // Launch personalization flow
+                    Get.to(
+                      () => const PersonalizationLaunchScreen(),
+                      transition: Transition.fade,
+                    );
+                  },
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      // gradient: LinearGradient(
+                      //   colors: [Color(0xFF8B5CF6), Color(0xFF3B82F6)],
+                      //   begin: Alignment.topLeft,
+                      //   end: Alignment.bottomRight,
+                      // ),
+                    ),
+                    child: SvgPicture.asset(
+                      "assets/icons/armchair_icon.svg",
+                      width: 22,
+                      height: 22,
+                      colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
 }

@@ -131,6 +131,12 @@ class PaymentController extends GetxController {
       // Calculate pricing
       final pricing = SofaPriceCalculator.calculatePrice(_currentSofa!.personalizationData);
       
+      // Get user's change preferences note from personalization data
+      final userNote = _currentSofa!.personalizationData.finalPreferences?.changePreferencesNote;
+      final orderNote = userNote != null && userNote.isNotEmpty 
+          ? 'User note: $userNote'
+          : 'Order placed via app';
+      
       // Create the order
       final orderId = await OrderService.createOrder(
         sofaName: _currentSofa!.name,
@@ -141,7 +147,7 @@ class PaymentController extends GetxController {
         totalPrice: pricing.totalPrice,
         basePrice: pricing.basePrice,
         deliveryAddress: deliveryAddress,
-        notes: 'Order placed via app',
+        notes: orderNote,
       );
       
       if (orderId != null) {

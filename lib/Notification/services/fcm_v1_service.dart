@@ -28,82 +28,151 @@ class FCMv1Service {
   /// Initialize the FCM service
   Future<void> initialize() async {
     try {
-      print('🚀 Initializing FCM v1 Service...');
+      print('🚀 ========== INITIALIZING FCM v1 SERVICE ==========');
+      print('📱 Platform: ${Platform.isIOS ? "iOS" : "Android"}');
       
       // Initialize local notifications
+      print('🔔 Step 1: Initializing local notifications...');
       await _initializeLocalNotifications();
+      print('✅ Local notifications initialized');
       
       // Request permissions
+      print('🔑 Step 2: Requesting notification permissions...');
       await _requestPermissions();
       
       // Get and store FCM token
+      print('🎫 Step 3: Getting FCM token...');
       await _handleTokenRefresh();
       
       // Set up token refresh listener
+      print('🔄 Step 4: Setting up token refresh listener...');
       _messaging.onTokenRefresh.listen(_onTokenRefresh);
+      print('✅ Token refresh listener set up');
       
       // Handle foreground messages
+      print('📥 Step 5: Setting up foreground message handler...');
       FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
+      print('✅ Foreground message handler set up');
       
       // Handle background message taps
+      print('👆 Step 6: Setting up background message tap handler...');
       FirebaseMessaging.onMessageOpenedApp.listen(_handleMessageTap);
+      print('✅ Background message tap handler set up');
       
       // Handle app launch from terminated state
+      print('🚀 Step 7: Checking for initial message...');
       _messaging.getInitialMessage().then((message) {
         if (message != null) {
+          print('📬 App launched from notification: ${message.messageId}');
           _handleMessageTap(message);
+        } else {
+          print('ℹ️  App launched normally (not from notification)');
         }
       });
       
-      print('✅ FCM v1 Service initialized successfully');
+      print('✅ ========== FCM v1 SERVICE INITIALIZED SUCCESSFULLY ==========');
       
-    } catch (e) {
-      print('❌ FCM v1 Service initialization failed: $e');
+    } catch (e, stackTrace) {
+      print('❌ ========== FCM v1 SERVICE INITIALIZATION FAILED ==========');
+      print('Error: $e');
+      print('Stack trace: $stackTrace');
+      print('=============================================================');
     }
   }
 
   /// Initialize local notifications
   Future<void> _initializeLocalNotifications() async {
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const iosSettings = DarwinInitializationSettings(
-      requestSoundPermission: true,
-      requestBadgePermission: true,
-      requestAlertPermission: true,
-    );
-    
-    const initSettings = InitializationSettings(
-      android: androidSettings,
-      iOS: iosSettings,
-    );
-    
-    await _localNotifications.initialize(
-      initSettings,
-      onDidReceiveNotificationResponse: _onLocalNotificationTap,
-    );
+    try {
+      print('   📱 Setting up Android notification settings...');
+      const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+      
+      print('   🍎 Setting up iOS notification settings...');
+      const iosSettings = DarwinInitializationSettings(
+        requestSoundPermission: true,
+        requestBadgePermission: true,
+        requestAlertPermission: true,
+      );
+      
+      const initSettings = InitializationSettings(
+        android: androidSettings,
+        iOS: iosSettings,
+      );
+      
+      print('   🔧 Initializing flutter_local_notifications...');
+      final initialized = await _localNotifications.initialize(
+        initSettings,
+        onDidReceiveNotificationResponse: _onLocalNotificationTap,
+      );
+      
+      if (initialized == true) {
+        print('   ✅ flutter_local_notifications initialized successfully');
+      } else {
+        print('   ⚠️  flutter_local_notifications initialization returned: $initialized');
+      }
 
-    // Create Android notification channel
-    const androidChannel = AndroidNotificationChannel(
-      'timberr_notifications',
-      'Timberr Notifications',
-      description: 'Notifications for Timberr app',
-      importance: Importance.high,
-    );
+      // Create Android notification channel
+      print('   📢 Creating Android notification channel...');
+      const androidChannel = AndroidNotificationChannel(
+        'timberr_notifications',
+        'Timberr Notifications',
+        description: 'Notifications for Timberr app',
+        importance: Importance.high,
+        playSound: true,
+        enableVibration: true,
+        showBadge: true,
+      );
 
-    await _localNotifications
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(androidChannel);
+      final androidPlugin = _localNotifications
+          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+      
+      if (androidPlugin != null) {
+        await androidPlugin.createNotificationChannel(androidChannel);
+        print('   ✅ Android notification channel created: timberr_notifications');
+      } else {
+        print('   ⚠️  Could not create Android notification channel (not Android platform?)');
+      }
+    } catch (e, stackTrace) {
+      print('   ❌ Error initializing local notifications: $e');
+      print('   Stack trace: $stackTrace');
+      rethrow;
+    }
   }
 
   /// Request FCM permissions
   Future<void> _requestPermissions() async {
-    final settings = await _messaging.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-      provisional: false,
-    );
-    
-    print('📱 FCM Permission status: ${settings.authorizationStatus}');
+    try {
+      print('   🔐 Requesting notification permissions...');
+      final settings = await _messaging.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+        provisional: false,
+        announcement: false,
+        carPlay: false,
+        criticalAlert: false,
+      );
+      
+      print('   � Permission status: ${settings.authorizationStatus.name}');
+      
+      if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+        print('   ✅ User granted notification permissions');
+      } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
+        print('   📝 User granted provisional notification permissions');
+      } else if (settings.authorizationStatus == AuthorizationStatus.denied) {
+        print('   ❌ User denied notification permissions');
+        print('   💡 To enable: Go to Settings > Apps > me sofa > Notifications');
+      } else {
+        print('   ⚠️  Notification permission status: ${settings.authorizationStatus.name}');
+      }
+      
+      print('   🔔 Alert: ${settings.alert.name}');
+      print('   🔊 Sound: ${settings.sound.name}');
+      print('   🔴 Badge: ${settings.badge.name}');
+    } catch (e, stackTrace) {
+      print('   ❌ Error requesting permissions: $e');
+      print('   Stack trace: $stackTrace');
+      rethrow;
+    }
   }
 
   /// Get current notification settings (for permission status check)
@@ -134,7 +203,8 @@ class FCMv1Service {
       
       print('📧 Service Account Email: ${accountCredentials.email}');
       
-      final scopes = ['https://www.googleapis.com/auth/cloud-platform'];
+      // ✅ FIXED: Use correct FCM v1 API scope
+      final scopes = ['https://www.googleapis.com/auth/firebase.messaging'];
       
       print('🌐 Requesting OAuth2 token with scopes: $scopes');
       _credentials = await obtainAccessCredentialsViaServiceAccount(
@@ -143,11 +213,17 @@ class FCMv1Service {
         Client(),
       );
       
-      _tokenExpiry = DateTime.now().add(
-        Duration(seconds: _credentials!.accessToken.expiry.millisecondsSinceEpoch)
-      );
+      // Calculate correct token expiry
+      // OAuth2 tokens typically expire in 1 hour (3600 seconds)
+      _tokenExpiry = _credentials!.accessToken.expiry;
       
-      print('✅ New credentials obtained (expires: $_tokenExpiry)');
+      print('✅ New credentials obtained');
+      print('   Access Token: ${_credentials!.accessToken.data.substring(0, 30)}...');
+      print('   Expires: $_tokenExpiry');
+      if (_tokenExpiry != null) {
+        print('   Time until expiry: ${_tokenExpiry!.difference(DateTime.now()).inMinutes} minutes');
+      }
+      
       return _credentials!;
       
     } catch (e, stackTrace) {
@@ -172,6 +248,13 @@ class FCMv1Service {
       print('📋 Title: $title');
       print('📋 Body: $body');
       print('📋 Type: ${type.name}');
+      print('📋 Additional Data: ${data ?? "none"}');
+      
+      // Check if sending to current user
+      final currentUser = _auth.currentUser;
+      final isCurrentUser = currentUser != null && currentUser.uid == targetUserId;
+      print('👤 Current User: ${currentUser?.uid ?? "not logged in"}');
+      print('🎯 Is Target Current User: $isCurrentUser');
       
       // Get user's FCM token
       print('🔍 Step 1: Fetching FCM token from fcm_tokens collection...');
@@ -200,6 +283,16 @@ class FCMv1Service {
       
       final fcmToken = tokenDoc.data()!['token'] as String;
       print('✅ FCM token found: ${fcmToken.substring(0, 20)}...');
+      print('   Platform: ${tokenDoc.data()!['platform'] ?? "unknown"}');
+      print('   Last Updated: ${tokenDoc.data()!['updated_at'] ?? "unknown"}');
+      print('   Token Length: ${fcmToken.length} characters');
+      
+      // Validate token format
+      if (fcmToken.isEmpty || fcmToken.length < 100) {
+        print('⚠️  WARNING: FCM token seems invalid (too short: ${fcmToken.length} chars)');
+        print('   Expected length: ~152+ characters');
+        print('   This token may be expired or corrupted');
+      }
       
       // Try to send FCM notification
       print('📱 Step 2: Sending push notification via FCM...');
@@ -207,12 +300,13 @@ class FCMv1Service {
       try {
         fcmSent = await _sendFCMMessage(fcmToken, title, body, type, data ?? {});
         if (fcmSent) {
-          print('✅ Push notification sent successfully!');
+          print('✅ ✅ ✅ Push notification sent successfully via FCM!');
         } else {
-          print('❌ Push notification failed to send');
+          print('❌ ❌ ❌ Push notification failed to send via FCM');
         }
       } catch (e) {
         print('⚠️  FCM sending error: $e');
+        print('   This means the notification was NOT delivered to the device');
       }
       
       // Always store notification in Firestore for persistence
@@ -224,25 +318,32 @@ class FCMv1Service {
         type: type,
         data: data ?? {},
       );
-      print('✅ Notification stored in Firestore');
+      print('✅ Notification stored in Firestore (will appear in notification list)');
       
-      // For development: Send local notification if user is current user
-      final currentUser = _auth.currentUser;
-      if (currentUser != null && currentUser.uid == targetUserId) {
-        print('🔔 Step 4: Showing local notification (user is current user)...');
-        await _showLocalNotification(RemoteMessage(
-          notification: RemoteNotification(title: title, body: body),
-          data: {
-            'type': type.name,
-            'user_id': targetUserId,
-            ...?data,
-          },
-        ));
-        print('✅ Local notification shown');
+      // For current user: Show local notification immediately
+      if (isCurrentUser) {
+        print('🔔 Step 4: Target is current user - showing local notification NOW...');
+        try {
+          await _showLocalNotification(RemoteMessage(
+            notification: RemoteNotification(title: title, body: body),
+            data: {
+              'type': type.name,
+              'user_id': targetUserId,
+              ...?data,
+            },
+          ));
+          print('✅ Local notification shown to current user');
+        } catch (e, stackTrace) {
+          print('❌ Failed to show local notification: $e');
+          print('   Stack trace: $stackTrace');
+        }
+      } else {
+        print('ℹ️  Step 4: Skipped - Target user is not current user');
+        print('   Notification will be delivered via FCM push to their device');
       }
       
-      print('📊 Summary: FCM Push: $fcmSent, Firestore: true, Local: ${currentUser?.uid == targetUserId}');
-      print('✅ ========== NOTIFICATION COMPLETE ==========');
+      print('📊 Summary: FCM Push: $fcmSent, Firestore: ✅, Local: ${isCurrentUser ? "✅" : "N/A"}');
+      print('✅ ========== NOTIFICATION PROCESS COMPLETE ==========');
       return true;
       
     } catch (e, stackTrace) {
@@ -291,9 +392,9 @@ class FCMv1Service {
             ...data.map((key, value) => MapEntry(key, value.toString())),
           },
           'android': {
+            'priority': 'high', // ✅ FIXED: Moved priority to android level (not notification level)
             'notification': {
               'channel_id': 'timberr_notifications',
-              'priority': 'high',
               'sound': 'default',
             },
           },
@@ -313,29 +414,60 @@ class FCMv1Service {
       };
       
       print('✅ Message prepared');
-      print('📡 FCM Endpoint: ${FirebaseConfig.fcmEndpoint}');
+      print('� Message Preview:');
+      print('   Token: ${token.substring(0, 30)}...');
+      print('   Title: $title');
+      print('   Body: $body');
+      print('   Data keys: ${data.keys.join(", ")}');
+      print('�📡 FCM Endpoint: ${FirebaseConfig.fcmEndpoint}');
 
       print('🚀 Step C: Sending to FCM API...');
       // Send the notification using FCM v1 API
-      final response = await Dio().post(
-        FirebaseConfig.fcmEndpoint,
-        data: jsonEncode(message),
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer ${credentials.accessToken.data}',
-            'Content-Type': 'application/json; UTF-8',
-          },
-        ),
-      );
+      try {
+        final response = await Dio().post(
+          FirebaseConfig.fcmEndpoint,
+          data: jsonEncode(message),
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer ${credentials.accessToken.data}',
+              'Content-Type': 'application/json; UTF-8',
+            },
+            validateStatus: (status) => true, // Don't throw on any status code
+          ),
+        );
 
-      print('📥 Response Status: ${response.statusCode}');
-      if (response.statusCode == 200) {
-        print('✅ FCM notification sent successfully');
-        print('📋 Response: ${response.data}');
-        return true;
-      } else {
-        print('❌ FCM failed with status: ${response.statusCode}');
-        print('📋 Response: ${response.data}');
+        print('📥 Response Status: ${response.statusCode}');
+        
+        if (response.statusCode == 200) {
+          print('✅ FCM notification sent successfully');
+          print('📋 Response: ${response.data}');
+          return true;
+        } else {
+          print('❌ FCM failed with status: ${response.statusCode}');
+          print('📋 Error Response: ${response.data}');
+          print('📋 Full Response Body: ${jsonEncode(response.data)}');
+          
+          // Parse error details if available
+          if (response.data is Map && response.data['error'] != null) {
+            final error = response.data['error'];
+            print('🔴 FCM Error Details:');
+            print('   Code: ${error['code']}');
+            print('   Message: ${error['message']}');
+            print('   Status: ${error['status']}');
+            if (error['details'] != null) {
+              print('   Details: ${error['details']}');
+            }
+          }
+          
+          return false;
+        }
+      } on DioException catch (e) {
+        print('❌ DioException sending to FCM: ${e.type}');
+        print('📋 Error Message: ${e.message}');
+        if (e.response != null) {
+          print('📋 Response Status: ${e.response!.statusCode}');
+          print('📋 Response Data: ${e.response!.data}');
+        }
         return false;
       }
 
@@ -389,12 +521,23 @@ class FCMv1Service {
   /// Handle FCM token refresh
   Future<void> _handleTokenRefresh() async {
     try {
+      print('   🎫 Getting FCM token...');
       final token = await _messaging.getToken();
+      
       if (token != null) {
+        print('   ✅ FCM Token obtained: ${token.substring(0, 50)}...');
+        print('   📏 Token length: ${token.length} characters');
         await _saveTokenToFirestore(token);
+      } else {
+        print('   ❌ Failed to get FCM token (returned null)');
+        print('   💡 This might happen if:');
+        print('      1. App doesn\'t have notification permissions');
+        print('      2. Google Play Services is not available');
+        print('      3. Device is not connected to internet');
       }
-    } catch (e) {
-      print('❌ Error handling token refresh: $e');
+    } catch (e, stackTrace) {
+      print('   ❌ Error handling token refresh: $e');
+      print('   Stack trace: $stackTrace');
     }
   }
 
@@ -402,7 +545,14 @@ class FCMv1Service {
   Future<void> _saveTokenToFirestore(String token) async {
     try {
       final user = _auth.currentUser;
-      if (user == null) return;
+      if (user == null) {
+        print('   ⚠️  Cannot save FCM token: No user logged in');
+        return;
+      }
+      
+      print('   💾 Saving FCM token to Firestore...');
+      print('   👤 User ID: ${user.uid}');
+      print('   📧 User Email: ${user.email}');
       
       final tokenModel = FCMTokenModel(
         userId: user.uid,
@@ -414,65 +564,133 @@ class FCMv1Service {
       await _firestore
           .collection('fcm_tokens')
           .doc(user.uid)
-          .set(tokenModel.toJson());
-          
-      print('✅ FCM token saved to Firestore');
+          .set(tokenModel.toJson(), SetOptions(merge: true));
       
-    } catch (e) {
-      print('❌ Error saving FCM token: $e');
+      print('   ✅ FCM token saved to Firestore successfully');
+      print('   📍 Location: fcm_tokens/${user.uid}');
+      
+      // Verify the token was saved
+      final savedDoc = await _firestore.collection('fcm_tokens').doc(user.uid).get();
+      if (savedDoc.exists) {
+        print('   ✅ Verified: Token document exists in Firestore');
+      } else {
+        print('   ⚠️  Warning: Could not verify token was saved');
+      }
+      
+    } catch (e, stackTrace) {
+      print('   ❌ Error saving FCM token to Firestore: $e');
+      print('   Stack trace: $stackTrace');
+      print('   💡 Check Firestore security rules and permissions');
     }
   }
 
   /// Handle token refresh events
   void _onTokenRefresh(String token) {
+    print('🔄 FCM Token refreshed');
+    print('   New token: ${token.substring(0, 50)}...');
     _saveTokenToFirestore(token);
   }
 
   /// Handle foreground messages
-  void _handleForegroundMessage(RemoteMessage message) {
-    print('📱 Received foreground message: ${message.messageId}');
+  void _handleForegroundMessage(RemoteMessage message) async {
+    print('📱 ========== FOREGROUND MESSAGE RECEIVED ==========');
+    print('   Message ID: ${message.messageId}');
+    print('   Sent time: ${message.sentTime}');
     
-    // Show local notification
-    _showLocalNotification(message);
+    if (message.notification != null) {
+      print('   ✅ Has notification payload:');
+      print('      Title: ${message.notification!.title}');
+      print('      Body: ${message.notification!.body}');
+    } else {
+      print('   ⚠️  NO notification payload (data-only message)');
+    }
+    
+    if (message.data.isNotEmpty) {
+      print('   ✅ Has data payload: ${message.data}');
+    } else {
+      print('   ⚠️  NO data payload');
+    }
+    
+    print('   📢 Attempting to show local notification...');
+    try {
+      await _showLocalNotification(message);
+      print('   ✅ Local notification shown successfully');
+    } catch (e, stackTrace) {
+      print('   ❌ Failed to show local notification: $e');
+      print('   Stack trace: $stackTrace');
+    }
+    print('===================================================');
   }
 
   /// Handle message tap events
   void _handleMessageTap(RemoteMessage message) {
-    print('👆 Message tapped: ${message.messageId}');
+    print('👆 ========== NOTIFICATION TAPPED ==========');
+    print('   Message ID: ${message.messageId}');
     
-    // Navigate based on notification type
+    if (message.notification != null) {
+      print('   Title: ${message.notification!.title}');
+      print('   Body: ${message.notification!.body}');
+    }
+    
+    if (message.data.isNotEmpty) {
+      print('   Data: ${message.data}');
+    }
+    
+    print('   🚀 Navigating based on notification type...');
     _handleNotificationNavigation(message.data);
+    print('============================================');
   }
 
   /// Show local notification
   Future<void> _showLocalNotification(RemoteMessage message) async {
-    const androidDetails = AndroidNotificationDetails(
-      'timberr_notifications',
-      'Timberr Notifications',
-      channelDescription: 'Notifications for Timberr app',
-      importance: Importance.high,
-      priority: Priority.high,
-      showWhen: true,
-    );
-    
-    const iosDetails = DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    );
-    
-    const details = NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
-    
-    await _localNotifications.show(
-      message.hashCode,
-      message.notification?.title ?? 'Timberr',
-      message.notification?.body ?? 'You have a new notification',
-      details,
-      payload: jsonEncode(message.data),
-    );
+    try {
+      print('      🔔 Preparing local notification...');
+      
+      const androidDetails = AndroidNotificationDetails(
+        'timberr_notifications',
+        'Timberr Notifications',
+        channelDescription: 'Notifications for Timberr app',
+        importance: Importance.high,
+        priority: Priority.high,
+        showWhen: true,
+      );
+      
+      const iosDetails = DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      );
+      
+      const details = NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      );
+      
+      final title = message.notification?.title ?? 'Timberr';
+      final body = message.notification?.body ?? 'You have a new notification';
+      final id = message.hashCode;
+      
+      print('      📋 Notification details:');
+      print('         ID: $id');
+      print('         Title: $title');
+      print('         Body: $body');
+      print('         Channel: timberr_notifications');
+      
+      await _localNotifications.show(
+        id,
+        title,
+        body,
+        details,
+        payload: jsonEncode(message.data),
+      );
+      
+      print('      ✅ Local notification displayed successfully');
+      
+    } catch (e, stackTrace) {
+      print('      ❌ Error showing local notification: $e');
+      print('      Stack trace: $stackTrace');
+      throw e; // Re-throw to be caught by caller
+    }
   }
 
   /// Handle local notification tap
@@ -485,22 +703,53 @@ class FCMv1Service {
 
   /// Handle navigation based on notification data
   void _handleNotificationNavigation(Map<String, dynamic> data) {
+    print('🧭 Navigation Handler - Data: $data');
+    
     // Implement navigation logic based on notification type
     final type = data['type'] as String?;
+    print('🧭 Notification Type: $type');
     
     switch (type) {
+      case 'conciergeMessage':
+        // Handle concierge chat message navigation
+        final chatId = data['chat_id'] as String?;
+        print('💬 Concierge message notification - Chat ID: $chatId');
+        
+        if (chatId != null && chatId.isNotEmpty) {
+          print('🚀 Navigating to concierge chat screen...');
+          // Import the screen at the top if needed
+          // Navigate to user concierge chat screen
+          try {
+            Get.toNamed('/concierge-chat', arguments: {'chatId': chatId});
+            print('✅ Navigation to concierge chat successful');
+          } catch (e) {
+            print('⚠️  Navigation failed, trying direct import: $e');
+            // Fallback to notification screen if route doesn't exist
+            Get.toNamed('/notifications');
+          }
+        } else {
+          print('⚠️  No chat ID provided, navigating to notifications');
+          Get.toNamed('/notifications');
+        }
+        break;
+        
       case 'conciergeBooking':
       case 'conciergeConfirmation':
       case 'conciergeRejection':
         // Navigate to concierge management or booking details
+        print('🏠 Concierge booking notification, navigating to notifications');
         Get.toNamed('/notifications');
         break;
+        
       case 'orderUpdate':
         // Navigate to order details
+        print('📦 Order update notification, navigating to orders');
         Get.toNamed('/orders');
         break;
+        
       default:
         // Navigate to notification screen
+        print('📢 Default notification, navigating to notifications');
         Get.toNamed('/notifications');
         break;
     }

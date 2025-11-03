@@ -146,6 +146,12 @@ class _GlbViewerState extends State<GlbViewer> with TickerProviderStateMixin {
         borderRadius: BorderRadius.circular(12),
         child: Stack(
           children: [
+            // White background to prevent black flash during model load
+            Container(
+              width: double.infinity,
+              height: double.infinity,
+              color: Colors.white,
+            ),
             // Try to load 3D Model Viewer first (render slightly smaller to avoid overflow)
             if (!_hasError)
               Center(
@@ -176,6 +182,28 @@ class _GlbViewerState extends State<GlbViewer> with TickerProviderStateMixin {
                         _isLoading = false;
                       });
                     },
+                  ),
+                ),
+              ),
+            // Loading overlay with white background
+            if (_isLoading && !_hasError)
+              Container(
+                width: double.infinity,
+                height: double.infinity,
+                color: Colors.white,
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(kSeaGreen),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Loading 3D Model...',
+                        style: kNunitoSans14.copyWith(color: kGrey),
+                      ),
+                    ],
                   ),
                 ),
               ),

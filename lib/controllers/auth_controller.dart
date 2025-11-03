@@ -50,8 +50,11 @@ class AuthController extends GetxController {
         return;
       }
 
-      print('� AuthController: Checking user role...');
-      final roleController = Get.find<RoleController>();
+      print('🎭 AuthController: Checking user role...');
+      // Ensure RoleController exists (it should from InitialBinding, but just in case)
+      final roleController = Get.isRegistered<RoleController>() 
+          ? Get.find<RoleController>() 
+          : Get.put(RoleController(), permanent: true);
       await roleController.refreshUserRole();
       
       final isAdmin = roleController.isAdmin;

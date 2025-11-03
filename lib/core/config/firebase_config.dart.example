@@ -1,0 +1,38 @@
+// Firebase Configuration for Development
+// IMPORTANT: Only use this for development/testing!
+// For production, use a backend server instead.
+
+import 'package:firebase_auth/firebase_auth.dart';
+
+class FirebaseConfig {
+  // Service account credentials from your Firebase project
+  // Get this from Firebase Console > Project Settings > Service Accounts
+  static const Map<String, dynamic> serviceAccountKey = {
+    "type": "service_account",
+    "project_id": "YOUR_PROJECT_ID",
+    "private_key_id": "YOUR_PRIVATE_KEY_ID",
+    "private_key": "YOUR_PRIVATE_KEY",
+    "client_email": "YOUR_CLIENT_EMAIL",
+    "client_id": "YOUR_CLIENT_ID",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_x509_cert_url": "YOUR_CLIENT_X509_CERT_URL",
+    "universe_domain": "googleapis.com"
+  };
+  
+  // FCM API endpoint
+  static String get fcmEndpoint => 'https://fcm.googleapis.com/v1/projects/YOUR_PROJECT_ID/messages:send';
+  
+  /// Get current authenticated user ID
+  static String? getCurrentUserId() {
+    return FirebaseAuth.instance.currentUser?.uid;
+  }
+}
+
+// SECURITY WARNING:
+// 1. Never commit the actual service account credentials to version control!
+// 2. Copy this file to firebase_config.dart and replace with your actual credentials
+// 3. Make sure firebase_config.dart is in .gitignore
+// 4. Use environment variables or secure storage for production apps.
+// 5. Consider using a backend server to handle FCM messages instead.
