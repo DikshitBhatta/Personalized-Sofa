@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Personalized Sofa — Delete Account or Data</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex,follow" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#f5f7fb;--card:#fff;--text:#1f2937;--muted:#6b7280;
+      --border:#e5e7eb;--brand:#0b57d0;--shadow:0 10px 30px rgba(17,24,39,.08);
+      --radius:14px;--max:840px
+    }
+    @media (prefers-color-scheme: dark){
+      :root{
+        --bg:#0b0f14;--card:#111827;--text:#e5e7eb;--muted:#9ca3af;
+        --border:#1f2937;--brand:#69a1ff;--shadow:0 10px 30px rgba(0,0,0,.4)
+      }
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      line-height:1.7
+    }
+    .wrap{max-width:var(--max);margin:64px auto;padding:0 20px}
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:28px
+    }
+    h1{margin:0 0 6px;font-size:clamp(24px,3.2vw,34px);letter-spacing:-.02em}
+    .muted{color:var(--muted)}
+    h2{margin:26px 0 8px;font-size:20px;border-top:2px solid var(--border);padding-top:10px}
+    ul{margin:8px 0 16px 22px}
+    a{color:var(--brand);text-decoration:none}
+    a:hover{text-decoration:underline}
+    .cta{
+      display:inline-block;
+      background:var(--brand);
+      color:#fff;
+      padding:10px 14px;
+      border-radius:10px;
+      text-decoration:none;
+      margin-top:10px
+    }
+    .note{border:1px dashed var(--border);padding:12px;border-radius:10px;background:rgba(11,87,208,.04)}
+    footer{margin-top:22px;font-size:14px;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="card">
+      <h1>Delete Your Personalized Sofa Data</h1>
+      <p class="muted">Developer/App name: <strong>Personalized Sofa</strong></p>
+      <p>You can request either a <strong>full account deletion</strong> or <strong>selective data deletion</strong>. Please follow the instructions below.</p>
+
+      <!-- Full account deletion -->
+      <h2>Option 1 — Delete Your Account (All Data)</h2>
+      <p>Use this option to permanently delete your account and <strong>all associated data</strong> from Personalized Sofa.</p>
+      <ol>
+        <li>Email us from the address linked to your Personalized Sofa account.</li>
+        <li>Use subject line: <em>“Delete My Personalized Sofa Account”</em>.</li>
+        <li>If emailing from a different address, include your account email in the message body.</li>
+      </ol>
+      <p><a class="cta" href="mailto:Yummin.shin@gmail.com?subject=Delete%20My%20Personalized%20Sofa%20Account&body=Please%20delete%20my%20Personalized%20Sofa%20account%20and%20all%20associated%20data.%20My%20account%20email%20is:%20">Request Account Deletion</a></p>
+
+      <h3>Data deleted in this process</h3>
+      <ul>
+        <li>User account information (name, email, password hash)</li>
+        <li>Personalization preferences (sofa style, materials, color, etc.)</li>
+        <li>AI model generation history</li>
+        <li>Concierge chat history</li>
+        <li>Session tokens and authentication records</li>
+      </ul>
+
+      <p><strong>Retention:</strong> All data is permanently deleted within <strong>7 business days</strong>, including backups.</p>
+
+      <!-- Partial data deletion -->
+      <h2>Option 2 — Delete Specific Data (Keep Account)</h2>
+      <p>Use this option if you wish to keep your account active but delete certain data categories.</p>
+      <ol>
+        <li>Email us from your registered account email.</li>
+        <li>Use subject line: <em>“Personalized Sofa Data Deletion Request (Keep Account)”</em>.</li>
+        <li>In the message, list which data you want deleted (see examples below).</li>
+      </ol>
+      <p><a class="cta" href="mailto:Yummin.shin@gmail.com?subject=Personalized%20Sofa%20Data%20Deletion%20Request%20(Keep%20Account)&body=Please%20delete%20the%20following%20data%20while%20keeping%20my%20Personalized%20Sofa%20account%20active.%0A%0AAccount%20email:%20%0A%0ASelect%20one%20or%20more:%0A-%20AI%20model%20history%0A-%20Chatbot%20and%20concierge%20interactions%0A-%20Saved%20designs%20and%20preferences%0A-%20Device%20session%20data%0A-%20Other%20(please%20specify)%3A%20">Request Data Deletion</a></p>
+
+      <h3>Data you may request deleted</h3>
+      <ul>
+        <li>AI model generation history</li>
+        <li>Chatbot or concierge messages</li>
+        <li>Saved designs, 3D render references, and preferences</li>
+        <li>Device session or configuration data</li>
+      </ul>
+
+      <h3>Data retained if you keep your account</h3>
+      <ul>
+        <li>Login credentials (email + hashed password)</li>
+        <li>Basic account identifiers needed for authentication</li>
+      </ul>
+
+      <p><strong>Retention:</strong> Selected data will be permanently deleted within <strong>7 business days</strong>. Legal logs may be retained only as required by regulation.</p>
+
+      <!-- Help -->
+      <h2>Need Help?</h2>
+      <p>Email <a href="mailto:Yummin.shin@gmail.com">Yummin.shin@gmail.com</a> with any questions. You can also review our <a href="index.html">Privacy Policy</a> for more details.</p>
+
+      <footer>© 2025 Personalized Sofa. All rights reserved.</footer>
+    </section>
+  </main>
+</body>
+</html>
