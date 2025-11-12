@@ -870,36 +870,18 @@ class _MethodSelector extends StatelessWidget {
           BoxDecoration(color: kLynxWhite, borderRadius: BorderRadius.circular(12), boxShadow: [
         BoxShadow(color: kOffBlack.withOpacity(0.05), blurRadius: 12, offset: const Offset(0, 6)),
       ]),
-      child: Column(
-        children: [
-          RadioListTile<String>(
-            title: Row(
-              children: [
-                Icon(Icons.qr_code, color: kOffBlack),
-                const SizedBox(width: 8),
-                const Text('QR Code Payment'),
-              ],
-            ),
-            subtitle: const Text('Scan to pay with mobile banking / PromptPay'),
-            value: 'qr',
-            groupValue: value,
-            onChanged: (v) => onChanged(v!),
-          ),
-          const Divider(height: 1),
-          RadioListTile<String>(
-            title: Row(
-              children: [
-                Icon(Icons.payment, color: kOffBlack),
-                const SizedBox(width: 8),
-                const Text('LINE Pay'),
-              ],
-            ),
-            subtitle: const Text('Pay through LINE application'),
-            value: 'line',
-            groupValue: value,
-            onChanged: (v) => onChanged(v!),
-          ),
-        ],
+      child: RadioListTile<String>(
+        title: Row(
+          children: [
+            Icon(Icons.qr_code, color: kOffBlack),
+            const SizedBox(width: 8),
+            const Text('QR Code Payment'),
+          ],
+        ),
+        subtitle: const Text('Scan to pay with mobile banking / PromptPay'),
+        value: 'qr',
+        groupValue: value,
+        onChanged: (v) => onChanged(v!),
       ),
     );
   }

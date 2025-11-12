@@ -4,8 +4,9 @@ import 'package:get/get.dart';
 import 'package:timberr/constants.dart';
 import 'package:timberr/controllers/home_controller.dart';
 import 'package:timberr/controllers/personalization_controller.dart';
-import 'package:timberr/screens/cart/cart_screen.dart';
-import 'package:timberr/screens/search_delegate/product_search_delegate.dart';
+import 'package:timberr/screens/orders/user_orders_screen.dart';
+import 'package:timberr/services/saved_models_service.dart';
+import 'package:timberr/screens/search_delegate/catalogue_search_delegate.dart';
 import 'package:timberr/widgets/tabbed/curved_bottom_navbar.dart';
 import 'package:timberr/widgets/tiles/product_grid_tile.dart';
 import 'package:timberr/widgets/sections/renovate_interior_section.dart';
@@ -51,8 +52,19 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
   
   void _onCartTap() {
     Get.to(
-            () => CartScreen(),
+      () => const UserOrdersScreen(),
       transition: Transition.fade,
+    );
+  }
+
+  void _onSearchTap() async {
+    // Load saved models and show search
+    final models = await SavedModelsService.getSavedModels();
+    if (!mounted) return;
+    
+    showSearch(
+      context: context,
+      delegate: CatalogueSearchDelegate(models),
     );
   }
 
@@ -74,10 +86,7 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin {
               slivers: [
                 SliverAppBar(
                   leading: IconButton(
-                    onPressed: () {
-                      showSearch(
-                          context: context, delegate: ProductSearchDelegate());
-                    },
+                    onPressed: _onSearchTap,
                     icon: SvgPicture.asset(
                       'assets/icons/search_icon_grey.svg',
                     ),

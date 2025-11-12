@@ -48,9 +48,20 @@ void main() async {
   // This ensures services are ready before any widget builds - eliminates race conditions
   await initServices();
   
-  // Set system UI overlay style
+  // Hide system navigation bar with immersive sticky mode
+  // This auto-hides the nav bar quickly after user swipes to show it
+  // Status bar remains visible
+  SystemChrome.setEnabledSystemUIMode(
+    SystemUiMode.immersiveSticky,
+    overlays: [SystemUiOverlay.top], // Keep status bar visible
+  );
+  
+  // Set system UI overlay style for transparent status bar
   SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark, // Dark icons for light backgrounds
+    ),
   );
   
   runApp(const TimberrApp());

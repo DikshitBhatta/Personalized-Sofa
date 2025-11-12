@@ -5,7 +5,7 @@ import 'package:timberr/constants.dart';
 import 'package:timberr/models/generated_sofa_model.dart';
 import 'package:timberr/services/saved_models_service.dart';
 import 'package:timberr/widgets/glb_viewer.dart';
-import 'package:timberr/screens/glb_debug_screen.dart';
+import 'package:timberr/screens/search_delegate/catalogue_search_delegate.dart';
 
 class CatalogueScreen extends StatefulWidget {
   const CatalogueScreen({super.key});
@@ -97,15 +97,13 @@ class _CatalogueScreenState extends State<CatalogueScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
-          // Debug button (visible in debug mode)
+          // Search button for catalogue
           IconButton(
-            icon: const Icon(Icons.bug_report, color: kOffBlack),
+            icon: const Icon(Icons.search, color: kOffBlack),
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const GlbDebugScreen(),
-                ),
+              showSearch(
+                context: context,
+                delegate: CatalogueSearchDelegate(_savedModels),
               );
             },
           ),
